@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSU Degree Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>OSU Degree Planner</h1>
+        <div class = "header-buttons">
+            <button onclick="logout()"><span>Logout</span></button>
+            <button onclick="saveSchedule()"><span>Save Schedule</span></button>
+            <button onclick="newSchedule()"><span>New Schedule</span></button>
+
+        </div>
+    </header>
+    <main>
+        <section id="semester-planner">
+            <h2>Semester Planner</h2>
+            <div id="semester-rows">
+                <!-- Semester rows will be added dynamically here -->
+            </div>
+            <button onclick="addSemester()">Add Semester</button>
+        </section>
+
+        <section id="degree-requirements-container">
+            <h2>Degree Requirements</h2>
+            <div id="degree-requirements">
+                <!-- Degree requirements will be displayed here by JavaScript -->
+            </div>
+        </section>
+
+    </main>
+
+    <input type="hidden" id="schedule-id" value="{{ schedule_id }}">
+
+    <script src="static/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Major</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Select Major</h1>
+        <div class = "header-buttons">
+            <button onclick="logout()"><span>Logout</span></button>
+        </div>
+    </header>
+    <main>
+        <section id = "major-selection">
+
+            <form method="POST" action="{{ url_for('select_major') }}">
+                <h2>Select Major:</h2>
+                <select id="major" name="major">
+                    <option value="CSE">Computer Science and Engineering</option>
+                    <option value="ECE">Electrical and Computer Engineering</option>
+                    <!-- Add more majors as needed -->
+                </select>
+                <button type="submit">
+                    <span>Submit</span> 
+                </button>
+            </form>
+
+        </section>
+
+        <section id = "saved-schedules">
+            <h2> Your Saved Schedules </h2>
+
+            <div id="schedule-container">
+                <!-- Schedules will be displayed here dynamically -->
+            </div>
+
+        </section>
+
+
+    </main>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            fetchSchedules();
+        });
+
+        async function fetchSchedules() {
+            try {
+                const response = await fetch('/api/get_schedules');
+                const schedules = await response.json();
+                displaySchedules(schedules);
+            } catch (e) {
+                console.error('Error fetching schedules:', e);
+            }
+        }
+
+        function displaySchedules(schedules) {
+            const scheduleContainer = document.getElementById('schedule-container');
+            scheduleContainer.innerHTML = '';  // Clear any existing content
+
+            for (const [scheduleId, schedule] of Object.entries(schedules)) {
+                const scheduleDiv = document.createElement('div');
+                scheduleDiv.className = 'schedule';
+                scheduleDiv.id = `schedule-${scheduleId}`;
+
+                const header = document.createElement('h4');
+                header.textContent = schedule.schedule_name;
+                scheduleDiv.appendChild(header);
+
+                const buttonDiv = document.createElement('div');
+
+                const loadButton = document.createElement('button');
+                const loadSpan = document.createElement('span');
+                loadSpan.textContent = 'Load Schedule';
+                loadButton.appendChild(loadSpan);
+                loadButton.onclick = () => loadSchedule(scheduleId);
+                buttonDiv.appendChild(loadButton);
+
+                const deleteButton = document.createElement('button');
+                const deleteSpan = document.createElement('span');
+                deleteSpan.textContent = 'Delete Schedule';
+                deleteButton.appendChild(deleteSpan);
+                deleteButton.onclick = () => deleteSchedule(scheduleId);
+                buttonDiv.appendChild(deleteButton);
+                
+                scheduleDiv.appendChild(buttonDiv);
+                scheduleContainer.appendChild(scheduleDiv);
+            }
+        }
+
+        function loadSchedule(scheduleId) {
+            window.location.href = `/load_schedule/${scheduleId}`;
+        }
+
+        function deleteSchedule(scheduleId){
+            window.location.href = `/api/delete_schedule/${scheduleId}`;
+        }
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+
+    </script>
+</body>
+</html>

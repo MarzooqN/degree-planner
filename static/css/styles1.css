@@ -1,0 +1,114 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #ba0c2f;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+select, button {
+    font-size: 16px;
+    padding: 8px;
+}
+
+footer {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* styles.css */
+/* Styles for semester planner */
+.semester-row {
+    margin-bottom: 20px;
+}
+
+.semester {
+    display: flex;
+}
+
+.semester h3 {
+    margin-right: 10px;
+}
+
+.add-course {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-align:center;
+}
+
+.remove-course {
+    width: 180px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Styles for course boxes */
+.course-box {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    padding: 10px
+}
+
+
+select {
+    width: 200px;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+}
+
+
+#content {
+    width: 70%;
+}
+
+#degree-requirements-container {
+    width: 25%;
+    border-left: 2px solid #ccc;
+    padding-left: 20px;
+}
+
+#degree-requirements h2 {
+    margin-top: 0;
+}
+
+.requirement {
+    margin-bottom: 15px;
+}
+
+.requirement ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.requirement.fulfilled {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 5px;
+}
