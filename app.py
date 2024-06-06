@@ -10,13 +10,14 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-
+#Class for User
 class User(UserMixin):
     def __init__(self, id, username, password):
         self.id = id
         self.username = username
         self.password = password
 
+#Loading in the user/creating user object from database
 @login_manager.user_loader
 def load_user(user_id):
     connection = get_db_connection('users')
@@ -29,6 +30,7 @@ def load_user(user_id):
         return User(id = user_data['userID'], username=user_data['username'], password=user_data['password'])
     return None
 
+#Database connection function 
 def get_db_connection(database):
     connection = mysql.connector.connect(
         host="34.162.95.182",
@@ -38,6 +40,7 @@ def get_db_connection(database):
     )
     return connection
 
+#Route for registering user into database
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -53,6 +56,7 @@ def register():
     return render_template('register.html')
 
 
+#Route for logging in user
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -75,12 +79,15 @@ def login():
     return render_template('login.html')
 
 
+#Route for logging out
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
+#Route for when they select only major
 @app.route('/select_major', methods=['GET', 'POST'])
 @login_required
 def select_major():
@@ -91,6 +98,7 @@ def select_major():
         return redirect(url_for('index'))
     return render_template('select_major.html')
 
+#Route for getting major (probably should name it something else)
 @app.route('/load_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def load_schedule(schedule_id):
@@ -109,6 +117,7 @@ def load_schedule(schedule_id):
         return 'Schedule not found', 404
     
 
+#Route for getting courses and their prerequisties 
 @app.route('/api/courses', methods=['GET'])
 @login_required
 def get_courses():
@@ -142,6 +151,8 @@ def get_courses():
 
     return jsonify(list(course_dict.values()))
 
+
+#Route for getting degree requirements 
 @app.route('/api/requirements', methods=['GET'])
 @login_required
 def get_requirements():
@@ -164,6 +175,8 @@ def get_requirements():
     connection.close()
     return jsonify(requirements)
 
+
+#Route for getting course from selected courses database (probably doesnt need to be inputted into database)
 @app.route('/api/selected_course', methods=['POST', 'GET'])
 @login_required
 def get_selected_course():
@@ -181,6 +194,8 @@ def get_selected_course():
     
     return jsonify(course)
 
+
+#Route for getting all completed courses by the user
 @app.route('/api/completed_courses', methods=['GET'])
 @login_required
 def get_completed_courses():
@@ -196,6 +211,7 @@ def get_completed_courses():
 
     return jsonify(courses)
 
+#Route for adding a coure into selected courses table
 @app.route('/api/add_course', methods=['POST'])
 @login_required
 def add_course():
@@ -225,7 +241,8 @@ def add_course():
     connection.close()
 
     return jsonify({"success": True}), 201
-    
+
+#Route for removing course from selected courses table
 @app.route('/api/remove_course', methods=['POST'])
 @login_required
 def remove_course():
@@ -246,6 +263,7 @@ def remove_course():
     return jsonify({"success": True}), 201
 
 
+#Route for saving schdule 
 @app.route('/api/save_schedule', methods=['POST'])
 @login_required
 def save_schedule():
@@ -276,6 +294,8 @@ def save_schedule():
     connection.close()
     return jsonify({"success": True}), 201
 
+
+#Route for getting all the schedules and their courses (could improve logic)
 @app.route('/api/get_schedules', methods=['GET'])
 @login_required
 def get_schedules():
@@ -308,6 +328,8 @@ def get_schedules():
     return jsonify(schedules_dict)
 
 
+
+#Route for getting specifc schedule
 @app.route('/api/get_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def get_schedule(schedule_id):
@@ -347,6 +369,8 @@ def get_schedule(schedule_id):
 
     return jsonify(schedule_data)
 
+
+#Route for deleting schedule
 @app.route('/api/delete_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def delete_schedule(schedule_id):
@@ -367,6 +391,8 @@ def delete_schedule(schedule_id):
     connection.close()
     return render_template('select_major.html')
 
+
+#Route for updating a schedule
 @app.route('/api/update_schedule/<int:schedule_id>', methods=['POST'])
 @login_required
 def update_schedule(schedule_id):
@@ -397,9 +423,7 @@ def update_schedule(schedule_id):
     return jsonify({"success": True}), 200
 
 
-
-
-
+#Main route/page
 @app.route('/', methods=['POST', 'GET'])
 @login_required
 def index():
