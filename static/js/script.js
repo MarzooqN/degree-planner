@@ -49,10 +49,21 @@ async function populateSchedule(schedule) {
         semestersNeeded.add(`${semester}-${year}`);
     }
 
-    for(let i = 0; i < semestersNeeded.size; i++){
-        addSemester();
-    }
+    // Sorts semesters needed by their comparable values and creates the necessary semesters 
+    const sortedSemesters = Array.from(semestersNeeded).sort((a, b) => {
+        const [semA, yearA] = a.split('-');
+        const [semB, yearB] = b.split('-');
+        const valueA = convertToComparableValue(semA, parseInt(yearA));
+        const valueB = convertToComparableValue(semB, parseInt(yearB));
+        return valueA - valueB;
+    });
 
+    sortedSemesters.forEach(semYear => {
+        const [semester, year] = semYear.split('-');
+        addSemester(semester, parseInt(year));
+    });
+
+    //Adds courses and their specified semesters
     for (const course of schedule.courses) {
         const { course_id, semester, year } = course;
         await addCourseBox(semester, year, course_id);
@@ -156,8 +167,14 @@ function updateRequirementFulfillment() {
 /*
 Function to add semester row
 */
-function addSemester() {
+function addSemester(term = null, year = null) {
+    
+    //Declares costants
     const semesters = ['AU', 'SP', 'SU'];
+    const semesterTerm = term || semesters[semesterCount];
+    const semesterYear = year || semesterNum;
+    
+    //Gets div that houses all semesters
     const semesterRows = document.getElementById('semester-rows');
 
     // Creates semester row divider 
@@ -166,25 +183,40 @@ function addSemester() {
 
     // Creates header for semester row 
     const header = document.createElement('h3');
-    header.id = `${semesters[semesterCount]} ${semesterNum}`
-    header.textContent = `${semesters[semesterCount]} ${semesterNum}: 0 Credit Hours`;
+    header.id = `${semesterTerm} ${semesterYear}`
+    header.textContent = `${semesterTerm} ${semesterYear}: 0 Credit Hours`;
     header.dataset.credits = 0;
     semesterRow.appendChild(header);
 
     // Creates semester divider
     const semester = document.createElement('div');
     semester.classList.add('semester');
-    semester.id = `${semesters[semesterCount]}-${semesterNum}`
+    semester.id = `${semesterTerm}-${semesterYear}`
     
     //Creates button to add courses
     const addCourseButton = document.createElement('div');
     addCourseButton.classList.add('add-course');
-    addCourseButton.setAttribute('onclick', `addCourseBox('${semesters[semesterCount]}', ${semesterNum})`);
+    addCourseButton.setAttribute('onclick', `addCourseBox('${semesterTerm}', ${semesterYear})`);
     addCourseButton.textContent = '+';
     semester.appendChild(addCourseButton);
     
     semesterRow.appendChild(semester);
     semesterRows.appendChild(semesterRow);
+    
+    
+    const skipButton = document.getElementById('skip-button');
+    if(semesterTerm === 'SP' && !term ){
+        const semesterdiv = document.getElementById('add-semester-div');
+        const skipSummerButton = document.createElement('button');
+        skipSummerButton.onclick = () => skipSummer();
+        skipSummerButton.textContent = 'Skip Summer';
+        skipSummerButton.id = 'skip-button'
+        semesterdiv.appendChild(skipSummerButton);
+
+    } else if (skipButton && !term){
+        const semesterdiv = document.getElementById('add-semester-div');
+        semesterdiv.removeChild(skipButton);
+    }
     
 
     if(semesterCount == 0){
@@ -197,6 +229,12 @@ function addSemester() {
     }
 
 }
+
+function skipSummer(){
+    semesterCount = 0;
+    addSemester();
+}
+
 
 /*
 Function to create course list/box
