@@ -13,9 +13,24 @@
             <button onclick="logout()"><span>Logout</span></button>
             <button onclick="saveSchedule()"><span>Save Schedule</span></button>
             <button onclick="newSchedule()"><span>New Schedule</span></button>
+            <button id="lookupPrereqBtn">Lookup Class Prerequisite</button>
 
         </div>
     </header>
+    <div id="prerequisiteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Lookup Class Prerequisite</h2>
+            <input type="text" id="courseIDInput" placeholder="Enter Course ID">
+            <button id="lookupPrereqSubmit">Submit</button>
+            <div id="prerequisiteResult"></div>
+
+
+        </div>
+    </div>
+
+
+    
     <main>
         <section id="semester-planner">
             <h2>Semester Planner</h2>
@@ -25,8 +40,6 @@
 
             <div id = 'add-semester-div'>
                 <button id='add-semester-button' onclick="addSemester()">Add Semester</button>
-
-
             </div>
         </section>
 

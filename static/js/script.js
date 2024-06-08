@@ -12,6 +12,7 @@ When page is loaded get course data based on specified major and user data
 */
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchAllData();
+    modalFunctionality();
 });
 
 async function fetchAllData() {
@@ -23,6 +24,87 @@ async function fetchAllData() {
 
     if (scheduleId > 0){
         loadSavedSchedule(scheduleId);
+    }
+}
+
+function modalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('prerequisiteModal');
+    const lookupPrereqBtn = document.getElementById('lookupPrereqBtn');
+    const span = document.getElementsByClassName('close')[0];
+    const submitBtn = document.getElementById('lookupPrereqSubmit');
+
+    //When the look up prereq button is clicked modal becomes visible
+    lookupPrereqBtn.onclick = function() {
+        modal.style.display = 'block';
+    }
+
+    //When the x is clicked the modal goes away
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    //If you click outside of the modal the modal will go away
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    //When course id is inputted it will make sure there is a course id present and display the prerequistes
+    submitBtn.onclick = function() {
+        const courseId = document.getElementById('courseIDInput').value;
+        if (courseId) {
+            displayPrerequisites(courseId);
+        } else {
+            alert('Please enter a course ID.');
+        }
+    }
+
+}
+
+/*
+Function to display prerequisites for a given course
+*/
+function displayPrerequisites(courseId) {
+    const course = courseData.find(course => course.CourseID === courseId);
+    const resultDiv = document.getElementById('prerequisiteResult');
+    resultDiv.innerHTML = '';  // Clear previous results
+
+    if (course) {
+        const courseNameElem = document.createElement('h3');
+        courseNameElem.textContent = `${course.CourseID} - ${course.CourseName}`;
+        resultDiv.appendChild(courseNameElem);
+
+        const prerequisitesElemHeader = document.createElement('h4');
+        prerequisitesElemHeader.textContent = `Prerequisites - Select 1 from each group:`;
+        resultDiv.appendChild(prerequisitesElemHeader);
+
+        
+
+        // Gets only Prerequisites from list of requirements in course object
+        const prerequisites = course.prerequisites.filter(req => req.type === 'prerequisite');
+
+        // Check prerequisite groups, for each requirement in prerequisites it checks if that requirement's group is in the groups dictionary if not then adds it 
+        // in the end pushing the requirement to its specific group 
+        const groups = {};
+        prerequisites.forEach(req => {
+            if (!groups[req.group]) {
+                groups[req.group] = [];
+            }
+            groups[req.group].push(req.prerequisiteID);
+        });
+
+        for(const group in groups){
+            const groupElem = document.createElement('p');
+            const groupPrereqs = groups[group];
+            groupElem.textContent = `Group ${group}: ${groupPrereqs.join(', ')}`;
+            resultDiv.appendChild(groupElem);
+        }
+        
+    } else {
+        resultDiv.textContent = 'Course not found.';
     }
 }
 
