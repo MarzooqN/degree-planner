@@ -205,7 +205,7 @@ function addSemester(term = null, year = null) {
     
     
     const skipButton = document.getElementById('skip-button');
-    if(semesterTerm === 'SP' && !term ){
+    if(semesterTerm === 'SP'){
         const semesterdiv = document.getElementById('add-semester-div');
         const skipSummerButton = document.createElement('button');
         skipSummerButton.onclick = () => skipSummer();
@@ -213,7 +213,7 @@ function addSemester(term = null, year = null) {
         skipSummerButton.id = 'skip-button'
         semesterdiv.appendChild(skipSummerButton);
 
-    } else if (skipButton && !term){
+    } else if (skipButton){
         const semesterdiv = document.getElementById('add-semester-div');
         semesterdiv.removeChild(skipButton);
     }
