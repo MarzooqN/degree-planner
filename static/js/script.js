@@ -203,8 +203,9 @@ function addSemester(term = null, year = null) {
     semesterRow.appendChild(semester);
     semesterRows.appendChild(semesterRow);
     
-    
+
     const skipButton = document.getElementById('skip-button');
+
     if(semesterTerm === 'SP'){
         const semesterdiv = document.getElementById('add-semester-div');
         const skipSummerButton = document.createElement('button');
@@ -218,9 +219,12 @@ function addSemester(term = null, year = null) {
         semesterdiv.removeChild(skipButton);
     }
     
-
     if(semesterCount == 0){
         semesterNum++;
+    }
+
+    if (year){
+        semesterNum = year;
     }
 
     semesterCount++;
