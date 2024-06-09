@@ -479,23 +479,6 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
         }
     }
 
-    // Check corequisites
-    /*
-    TODO: Fix coreq logic
-
-    const allCorequisitesSatisfied = corequisites.every(coreq => 
-        completedCourses.some(course => course.courseID === coreq.prerequisiteID) ||
-        selectedCourses.some(course => course.CourseID === coreq.prerequisiteID && convertToComparableValue(course.semester, course.year) <= currentSemesterValue)
-    );
-
-    if (!allCorequisitesSatisfied) {
-        alert('You have not met the corequisites for this course.');
-        selectElement.value = "Click to Select Course"; // Reset selection
-        return;
-    }
-
-    */
-
     //Creates course object to send to database
     const courseSelected = {
         course_box_id: courseBoxID,
