@@ -114,8 +114,6 @@ function newScheduleModalFunctionality(){
     }
 }
 
-
-
 function prereqModalFunctionality(){
 
     //Declare needed elements
@@ -562,7 +560,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
         if (!groupSatisfied) {
             allGroupsSatisfied = false;
-            alert(`You have not met the prerequisites for this course.`);
+            alert(`You have not met the prerequisites for ${selectedCourseID}.`);
             selectElement.value = "Click to Select Course"; // Reset selection
             return;
         }
