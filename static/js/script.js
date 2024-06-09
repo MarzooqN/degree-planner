@@ -47,7 +47,7 @@ function saveScheduleModalFunctionality(){
         modal.style.display = 'none';
     }
 
-    //When course id is inputted it will make sure there is a course id present and display the prerequistes
+    //When schedule name is inputed create new schedule
     submitBtn.onclick = function() {
         const scheduleName = document.getElementById('scheduleNameInput').value;
         if (scheduleName) {
@@ -73,13 +73,13 @@ function loadedScheduleModalFunctionality(){
         modal.style.display = 'none';
     }
 
-    //When the x is clicked the modal goes away
+    //When update button clicked schedule is updated
     updateBtn.onclick = function() {
         updateSchedule(scheduleId);
         modal.style.display = 'none';
     }
 
-    //When the x is clicked the modal goes away
+    //When new button is clicked new schedule is created
     newBtn.onclick = function() {
         const saveScheduleModal = document.getElementById('saveScheduleModal');
         openModal(saveScheduleModal);
@@ -96,18 +96,18 @@ function newScheduleModalFunctionality(){
     const noBtn = document.getElementById('newScheduleNo');
     const yesBtn = document.getElementById('newScheduleYes');
 
-    //When the look up prereq button is clicked modal becomes visible
+    //When the new schdule button is clicked modal becomes visible
     newScheduleBtn.onclick = function() {
         modal.style.display = 'block';
     }
 
-    //When the x is clicked the modal goes away
+    //When no button is clicked modal goes away and user is redirected to select major page
     noBtn.onclick = function() {
         modal.style.display = 'none';
         window.location.href = `/select_major`;
     }
 
-    //When the x is clicked the modal goes away
+    //When yes is clicked schedule is saved
     yesBtn.onclick = function() {
         modal.style.display = 'none';
         saveSchedule();
