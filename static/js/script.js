@@ -5,6 +5,7 @@ let selectedCourses = [];
 let courseData = [];
 let completedCourses = [];
 let requirementsData = {};
+const scheduleId = parseInt(document.getElementById('schedule-id').value);
 
 
 /*
@@ -12,7 +13,10 @@ When page is loaded get course data based on specified major and user data
 */
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchAllData();
-    modalFunctionality();
+    saveScheduleModalFunctionality();
+    loadedScheduleModalFunctionality();
+    newScheduleModalFunctionality();
+    prereqModalFunctionality();
 });
 
 async function fetchAllData() {
@@ -27,7 +31,92 @@ async function fetchAllData() {
     }
 }
 
-function modalFunctionality(){
+function openModal(modal){
+    modal.style.display = 'block';
+}
+
+function saveScheduleModalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('saveScheduleModal');
+    const span = document.getElementsByClassName('close')[2];
+    const submitBtn = document.getElementById('schdeuleNameSubmit');
+
+    //When the x is clicked the modal goes away
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    //When course id is inputted it will make sure there is a course id present and display the prerequistes
+    submitBtn.onclick = function() {
+        const scheduleName = document.getElementById('scheduleNameInput').value;
+        if (scheduleName) {
+            createNewSchedule(scheduleName);
+            modal.style.display = 'none';
+        } else {
+            alert('Please enter a Schedule Name - Schedule name cannot be empty');
+        }
+    }
+
+}
+
+function loadedScheduleModalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('loadedScheduleModal');
+    const span = document.getElementsByClassName('close')[1];
+    const updateBtn = document.getElementById('loadedScheduleUpdate');
+    const newBtn = document.getElementById('loadedScheduleNew');
+
+    //When the x is clicked the modal goes away
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    //When the x is clicked the modal goes away
+    updateBtn.onclick = function() {
+        updateSchedule(scheduleId);
+        modal.style.display = 'none';
+    }
+
+    //When the x is clicked the modal goes away
+    newBtn.onclick = function() {
+        const saveScheduleModal = document.getElementById('saveScheduleModal');
+        openModal(saveScheduleModal);
+        modal.style.display = 'none';
+
+    }
+}
+
+function newScheduleModalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('newScheduleModal');
+    const newScheduleBtn = document.getElementById('newScheduleBtn');
+    const noBtn = document.getElementById('newScheduleNo');
+    const yesBtn = document.getElementById('newScheduleYes');
+
+    //When the look up prereq button is clicked modal becomes visible
+    newScheduleBtn.onclick = function() {
+        modal.style.display = 'block';
+    }
+
+    //When the x is clicked the modal goes away
+    noBtn.onclick = function() {
+        modal.style.display = 'none';
+        window.location.href = `/select_major`;
+    }
+
+    //When the x is clicked the modal goes away
+    yesBtn.onclick = function() {
+        modal.style.display = 'none';
+        saveSchedule();
+    }
+}
+
+
+
+function prereqModalFunctionality(){
 
     //Declare needed elements
     const modal = document.getElementById('prerequisiteModal');
@@ -615,20 +704,12 @@ function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
 Function to save the current schedule
 */
 async function saveSchedule() {
-    const scheduleId = parseInt(document.getElementById('schedule-id').value);
-
     if (scheduleId > 0) {
-        const action = prompt("Do you want to update the current schedule or create a new one? Type 'update' to update or 'new' to create a new schedule:").toLowerCase();
-
-        if (action === 'update') {
-            updateSchedule(scheduleId);
-        } else if (action === 'new') {
-            createNewSchedule();
-        } else {
-            alert("Invalid action. Please type 'update' or 'new'.");
-        }
+        loadedScheduleModal = document.getElementById('loadedScheduleModal');
+        openModal(loadedScheduleModal);
     } else {
-        createNewSchedule();
+        saveScheduleModal = document.getElementById('saveScheduleModal');
+        openModal(saveScheduleModal);
     }
 }
 
@@ -664,13 +745,7 @@ async function updateSchedule(scheduleId) {
     }
 }
 
-async function createNewSchedule() {
-    const scheduleName = prompt("Enter a name for your schedule:");
-
-    if (!scheduleName) {
-        alert("Schedule name cannot be empty.");
-        return;
-    }
+async function createNewSchedule(scheduleName) {
 
     const courses = selectedCourses.map(course => ({
         course_id: course.CourseID,
@@ -703,19 +778,6 @@ async function createNewSchedule() {
     }
 }
 
-
-
-/*
-Function to redirect user to loading/making new schedule
-*/
-function newSchedule() {
-    
-    if(confirm('Save this schedule?')){
-        saveSchedule();
-    }
-    
-    window.location.href = `/select_major`;
-}
 
 /*
 Function to log out the user

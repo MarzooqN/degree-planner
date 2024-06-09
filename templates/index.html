@@ -12,8 +12,8 @@
         <div class = "header-buttons">
             <button onclick="logout()"><span>Logout</span></button>
             <button onclick="saveSchedule()"><span>Save Schedule</span></button>
-            <button onclick="newSchedule()"><span>New Schedule</span></button>
-            <button id="lookupPrereqBtn">Lookup Class Prerequisite</button>
+            <button id ="newScheduleBtn"><span>New Schedule</span></button>
+            <button id="lookupPrereqBtn"><span>Lookup Class Prerequisite</span></button>
 
         </div>
     </header>
@@ -24,8 +24,32 @@
             <input type="text" id="courseIDInput" placeholder="Enter Course ID">
             <button id="lookupPrereqSubmit">Submit</button>
             <div id="prerequisiteResult"></div>
+        </div>
+    </div>
 
+    <div id="newScheduleModal" class="modal">
+        <div class="modal-content">
+            <h2>Do You Want To Save This Schedule?</h2>
+            <button id="newScheduleYes">Yes</button>
+            <button id="newScheduleNo">No</button>
+        </div>
+    </div>
 
+    <div id="loadedScheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Do You Want To Update The Current Schedule Or Create A New One?</h2>
+            <button id="loadedScheduleUpdate">Update</button>
+            <button id="loadedScheduleNew">Create New</button>
+        </div>
+    </div>
+
+    <div id="saveScheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter A Name For Your Schedule:</h2>
+            <input type="text" id="scheduleNameInput" placeholder="Enter Schedule Name">
+            <button id="schdeuleNameSubmit">Submit</button>
         </div>
     </div>
 
