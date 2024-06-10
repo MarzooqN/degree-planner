@@ -286,10 +286,27 @@ async function fetchRequirementsData() {
     }
 }
 
+
+/*
+Function to get courses between a certain range
+*/
+async function fetchCoursesInRange(prefix, min, max) {
+    try {
+        const response = await fetch(`/api/courses_in_range?prefix=${prefix}&min=${min}&max=${max}`);
+        const courses = await response.json();
+        return courses;
+    } catch (e) {
+        console.error('Error fetching courses in range:', e);
+        return [];
+    }
+}
+
+
+
 /*
 Function to create requirements section 
 */
-function displayRequirements() {
+async function displayRequirements() {
     const requirementsDiv = document.getElementById('degree-requirements');
     requirementsDiv.innerHTML = '';  // Clear any existing content
 
@@ -304,7 +321,7 @@ function displayRequirements() {
         if (reqData.type === 'some_courses') {
             for (const [group, courses] of Object.entries(reqData.groups)) {
                 const groupHeader = document.createElement('h5');
-                groupHeader.textContent = `Group ${group} - Complete 1 from this group`;
+                groupHeader.textContent = `Group ${group} - Select 1 from this group`;
                 reqDiv.appendChild(groupHeader);
 
                 const ul = document.createElement('ul');
@@ -315,6 +332,24 @@ function displayRequirements() {
                 });
                 reqDiv.appendChild(ul);
             }
+        } else if (reqData.type === 'credit_hours' && reqData.course_prefix && reqData.min_course_number && reqData.max_course_number) {
+            const courses = await fetchCoursesInRange(reqData.course_prefix, reqData.min_course_number, reqData.max_course_number);
+            reqData.courses = courses
+            header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
+            const dynamicCoursesBtn = document.createElement('button');
+            dynamicCoursesBtn.textContent = 'View Eligible Courses';
+            dynamicCoursesBtn.onclick = async () => {
+                //TODO: Change this to modal 
+                const ul = document.createElement('ul');
+                courses.forEach(course => {
+                    const li = document.createElement('li');
+                    li.textContent = `${course.CourseID} - ${course.CourseName}`;
+                    ul.appendChild(li);
+                });
+                reqDiv.appendChild(ul);
+                
+            };
+            reqDiv.appendChild(dynamicCoursesBtn);
         } else {
             const ul = document.createElement('ul');
             reqData.courses.forEach(course => {
@@ -327,6 +362,7 @@ function displayRequirements() {
         requirementsDiv.appendChild(reqDiv);
     }
 }
+
 
 
 /*
@@ -346,6 +382,7 @@ function updateRequirementFulfillment() {
             const totalCredits = reqData.courses.reduce((sum, course) => {
                 if (completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
                     selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)) {
+                    console.log(sum + course.Credits)
                     return sum + course.Credits;
                 }
                 return sum;
@@ -704,7 +741,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         //If the response was okay removes course from selectedCourses list using the courseID
         if (response.ok) {
             selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
-            
+
             header = document.getElementById(`${semesterTerm} ${semesterNum}`);
             header.dataset.credits = parseInt(header.dataset.credits) - credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;

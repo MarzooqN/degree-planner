@@ -93,6 +93,20 @@ input[type=text], input[type=password] {
 .requirement ul {
     list-style-type: none;
     padding: 0;
+    margin-top: 2px;
+}
+
+.requirement h4 {
+    margin-top: 1px;
+    margin-bottom: 2px;
+}
+
+.requirement h5{
+    margin: 2px;
+}
+
+.requirement button {
+    margin-top: 4px;
 }
 
 .requirement.fulfilled {

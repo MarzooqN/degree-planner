@@ -160,7 +160,7 @@ def get_requirements():
     connection = get_db_connection(major)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
+        SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
         FROM Requirements r
         LEFT JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
         LEFT JOIN courses c ON rc.CourseID = c.CourseID
@@ -173,6 +173,9 @@ def get_requirements():
             requirements[req_name] = {
                 'type': row['RequirementType'],
                 'required_credits': row['RequiredCredits'],
+                'course_prefix': row['CoursePrefix'],
+                'min_course_number': row['MinCourseNumber'],
+                'max_course_number': row['MaxCourseNumber'],
                 'groups': {}
             }
         if row['RequirementType'] == 'some_courses':
@@ -194,6 +197,25 @@ def get_requirements():
             })
     connection.close()
     return jsonify(requirements)
+
+
+#Route for getting courses between a certain range
+@app.route('/api/courses_in_range', methods=['GET'])
+@login_required
+def get_courses_in_range():
+    prefix = request.args.get('prefix')
+    min_number = int(request.args.get('min'))
+    max_number = int(request.args.get('max'))
+    connection = get_db_connection(prefix)
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('''
+        SELECT CourseID, CourseName, Credits
+        FROM courses
+        WHERE CourseID LIKE %s AND CAST(SUBSTR(CourseID, LENGTH(%s) + 1) AS UNSIGNED) BETWEEN %s AND %s
+    ''', (f"{prefix}%", prefix, min_number, max_number))
+    courses = cursor.fetchall()
+    connection.close()
+    return jsonify(courses)
 
 
 #Route for getting course from selected courses database (probably doesnt need to be inputted into database)
