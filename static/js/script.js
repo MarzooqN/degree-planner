@@ -230,6 +230,7 @@ async function populateSchedule(schedule) {
     sortedSemesters.forEach(semYear => {
         const [semester, year] = semYear.split('-');
         addSemester(semester, parseInt(year));
+        deleteSemester();
     });
 
     //Adds courses and their specified semesters
