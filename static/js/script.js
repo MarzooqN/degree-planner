@@ -279,6 +279,7 @@ async function fetchRequirementsData() {
         const response = await fetch(`/api/requirements`);
         const requirements = await response.json();
         requirementsData = requirements;
+        console.log(requirementsData)
         displayRequirements();
     } catch (e) {
         console.error('Error fetching requirements data:', e);
@@ -292,7 +293,7 @@ function displayRequirements() {
     const requirementsDiv = document.getElementById('degree-requirements');
     requirementsDiv.innerHTML = '';  // Clear any existing content
 
-    for (const [reqName, courses] of Object.entries(requirementsData)) {
+    for (const [reqName, reqData] of Object.entries(requirementsData)) {
         const reqDiv = document.createElement('div');
         reqDiv.className = 'requirement';
         reqDiv.id = `requirement-${reqName.replace(/ /g, '-')}`;
@@ -300,28 +301,62 @@ function displayRequirements() {
         header.textContent = reqName;
         reqDiv.appendChild(header);
 
-        const ul = document.createElement('ul');
-        courses.forEach(course => {
-            const li = document.createElement('li');
-            li.textContent = `${course.CourseID} - ${course.CourseName}`;
-            ul.appendChild(li);
-        });
-        reqDiv.appendChild(ul);
+        if (reqData.type === 'some_courses') {
+            for (const [group, courses] of Object.entries(reqData.groups)) {
+                const groupHeader = document.createElement('h5');
+                groupHeader.textContent = `Group ${group} - Complete 1 from this group`;
+                reqDiv.appendChild(groupHeader);
+
+                const ul = document.createElement('ul');
+                courses.forEach(course => {
+                    const li = document.createElement('li');
+                    li.textContent = `${course.CourseID} - ${course.CourseName}`;
+                    ul.appendChild(li);
+                });
+                reqDiv.appendChild(ul);
+            }
+        } else {
+            const ul = document.createElement('ul');
+            reqData.courses.forEach(course => {
+                const li = document.createElement('li');
+                li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
+                ul.appendChild(li);
+            });
+            reqDiv.appendChild(ul);
+        }
         requirementsDiv.appendChild(reqDiv);
     }
 }
+
 
 /*
 Function to update requirements section 
 */
 function updateRequirementFulfillment() {
-    for (const [reqName, courses] of Object.entries(requirementsData)) {
+    for (const [reqName, reqData] of Object.entries(requirementsData)) {
         const reqDiv = document.getElementById(`requirement-${reqName.replace(/ /g, '-')}`);
-        let coursesFulfilled = courses.every(course =>completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID));
-        
-        if(!coursesFulfilled){
-            coursesFulfilled = courses.every(course =>
+        let coursesFulfilled = false;
+
+        if (reqData.type === 'all_courses') {
+            coursesFulfilled = reqData.courses.every(course =>
+                completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
                 selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)
+            );
+        } else if (reqData.type === 'credit_hours') {
+            const totalCredits = reqData.courses.reduce((sum, course) => {
+                if (completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
+                    selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)) {
+                    return sum + course.Credits;
+                }
+                return sum;
+            }, 0);
+            coursesFulfilled = totalCredits >= reqData.required_credits;
+        } else if (reqData.type === 'some_courses') {
+            coursesFulfilled = Object.values(reqData.groups).every(group => 
+                group.some(course => 
+                    completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
+                    selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)
+                )
             );
         }
 
@@ -332,6 +367,7 @@ function updateRequirementFulfillment() {
         }
     }
 }
+
 
 /*
 Function to add semester row
@@ -467,6 +503,7 @@ async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxI
     if (selectElement.value == "Click to Select Course"){
         await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
     } else {
+        await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
         await checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID);
     }
 }
@@ -625,7 +662,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
     } 
 
     //Gets courseID of what to remove 
-    let courseID;
+    let courseID = 'CSE XXXX';
     let credits;
     try {
         const response = await fetch('/api/selected_course', {
@@ -638,8 +675,10 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         });
 
         const course = await response.json();
-        courseID = course[0].courseID; 
-        credits = course[0].credits;
+        if(course[0]){
+            courseID = course[0].courseID; 
+            credits = course[0].credits;
+        }
 
     } catch (e) {
         console.error('Error getting courseID: ', e);
@@ -647,6 +686,10 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         return;
     }
 
+    if(courseID === 'CSE XXXX'){
+        console.log('No Course Found')
+        return;
+    }
     //Removes course from database
     try {
         const response = await fetch('/api/remove_course', {

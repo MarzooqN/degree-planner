@@ -160,18 +160,38 @@ def get_requirements():
     connection = get_db_connection(major)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT r.RequirementName, rc.CourseID, c.CourseName
+        SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
         FROM Requirements r
-        JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
-        JOIN courses c ON rc.CourseID = c.CourseID
+        LEFT JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
+        LEFT JOIN courses c ON rc.CourseID = c.CourseID
         ORDER BY r.RequirementName
     ''')
     requirements = {}
     for row in cursor:
         req_name = row['RequirementName']
         if req_name not in requirements:
-            requirements[req_name] = []
-        requirements[req_name].append({'CourseID': row['CourseID'], 'CourseName': row['CourseName']})
+            requirements[req_name] = {
+                'type': row['RequirementType'],
+                'required_credits': row['RequiredCredits'],
+                'groups': {}
+            }
+        if row['RequirementType'] == 'some_courses':
+            group = row['CourseGroup']
+            if group not in requirements[req_name]['groups']:
+                requirements[req_name]['groups'][group] = []
+            requirements[req_name]['groups'][group].append({
+                'CourseID': row['CourseID'],
+                'CourseName': row['CourseName'],
+                'Credits': row['Credits']
+            })
+        else:
+            if 'courses' not in requirements[req_name]:
+                requirements[req_name]['courses'] = []
+            requirements[req_name]['courses'].append({
+                'CourseID': row['CourseID'],
+                'CourseName': row['CourseName'],
+                'Credits': row['Credits']
+            })
     connection.close()
     return jsonify(requirements)
 
