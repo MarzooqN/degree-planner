@@ -403,6 +403,56 @@ function addSemester(term = null, year = null) {
 
 }
 
+/*
+Function to delete semester row
+*/
+function deleteSemester() {
+    const semesterRows = document.getElementById('semester-rows');
+    
+    // Check if there are any semester rows to remove
+    if (semesterRows.children.length === 0) {
+        alert("No semesters to remove.");
+        return;
+    }
+
+    // Remove the last semester row
+    const lastSemesterRow = semesterRows.lastElementChild;
+    semesterRows.removeChild(lastSemesterRow);
+
+    // Decrement the semesterCount and semesterNum appropriately
+    if (semesterCount === 0) {
+        semesterCount = 2;
+        semesterNum--;
+    } else {
+        semesterCount--;
+    }
+
+    // Check if the most recent semester is SP (Spring)
+    const skipButton = document.getElementById('skip-button');
+    if (semesterRows.children.length > 0) {
+        const lastSemesterHeader = semesterRows.lastElementChild.querySelector('h3');
+        const [lastSemesterTerm] = lastSemesterHeader.id.split(' ');
+
+        if (lastSemesterTerm === 'SP' && !skipButton) {
+            // Add the skip summer button if it doesn't exist
+            const semesterdiv = document.getElementById('add-semester-div');
+            const skipSummerButton = document.createElement('button');
+            skipSummerButton.onclick = () => skipSummer();
+            skipSummerButton.textContent = 'Skip Summer';
+            skipSummerButton.id = 'skip-button';
+            semesterdiv.appendChild(skipSummerButton);
+        } else if (skipButton) {
+            // Remove the skip summer button if it exists and the last term is not SP
+            const semesterdiv = document.getElementById('add-semester-div');
+            semesterdiv.removeChild(skipButton);
+        }
+    } else if (skipButton) {
+        // Remove the skip summer button if it exists and there are no semesters left
+        const semesterdiv = document.getElementById('add-semester-div');
+        semesterdiv.removeChild(skipButton);
+    }
+}
+
 function skipSummer(){
     semesterCount = 0;
     addSemester();
