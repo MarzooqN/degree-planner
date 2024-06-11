@@ -443,29 +443,7 @@ function removeSemester() {
     */
     
     const lastSemesterRow = semesterRows.lastElementChild;
-    if (!lastSemesterRow) {
-        alert("No last semester row found.");
-        return;
-    }
-
     const lastSemester = lastSemesterRow.querySelector('.semester');
-    if (!lastSemester) {
-        alert("No last semester found.");
-        return;
-    }
-    
-    // Remove course boxes inside the semester 
-    const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
-    courseBoxes.forEach(courseBox => { 
-        const semesterId = lastSemester.id;
-        const semesterTerm = semesterId.slice(0, 2); 
-        // Get the first 2 characters 
-        const semesterYear = semesterId.slice(-2);    
-        // Get the last 2 characters 
-        const courseBoxId = courseBox.id; 
-        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
-    });
-
      
     semesterRows.removeChild(lastSemesterRow);
 
