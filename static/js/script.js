@@ -705,8 +705,8 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         courseID = course[0].courseID; 
         credits = course[0].credits;
 
-    } catch (e) {
-        console.error('Error getting courseID: ', e);
+    } catch (error1) {
+        console.error('Error getting courseID: ', error1);
         alert('Error removing course. Please try again.');
         return;
     }
@@ -732,13 +732,13 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 
             updateRequirementFulfillment();
         } else {
-            const error = await response.json();
-            console.error('Error removing course 1:', error);
+            const error2 = await response.json();
+            console.error('Error removing course 1:', error2);
             alert('Error removing course. Please try again.');
         }
 
-    } catch (e) {
-        console.error('Error removing course 2: ', e);
+    } catch (error3) {
+        console.error('Error removing course 2: ', error3);
         alert('Error removing course. Please try again.');
     }
 
