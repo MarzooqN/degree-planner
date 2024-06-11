@@ -343,6 +343,7 @@ function addSemester(term = null, year = null) {
     const semesters = ['AU', 'SP', 'SU'];
     const semesterTerm = term || semesters[semesterCount];
     const semesterYear = year || semesterNum;
+    console.log(semesterCount);
     
     //Gets div that houses all semesters
     const semesterRows = document.getElementById('semester-rows');
@@ -350,6 +351,7 @@ function addSemester(term = null, year = null) {
     // Creates semester row divider 
     const semesterRow = document.createElement('div');
     semesterRow.classList.add('semester-row');
+    semesterRow.id = `${semesterTerm}-${semesterYear}-row`
 
     // Creates header for semester row 
     const header = document.createElement('h3');
@@ -407,11 +409,7 @@ function addSemester(term = null, year = null) {
 /*
 Function to delete semester row
 */
-function deleteSemester() {
-    //Declares costants
-    const semesters = ['AU', 'SP', 'SU'];
-    const semesterTerm = term || semesters[semesterCount];
-    const semesterYear = year || semesterNum;
+function removeSemester() {
     
     const semesterRows = document.getElementById('semester-rows');
     
@@ -422,17 +420,40 @@ function deleteSemester() {
     }
 
     // Remove the last semester row
-    const lastSemesterRow = semesterRows.lastElementChild;
-    semesterRows.removeChild(lastSemesterRow);
-
-    // Decrement the semesterCount and semesterNum appropriately
-    if (semesterCount == 0) {
-        semesterCount = 2;
+    let lastSemesterRow = semesterRows.lastElementChild;
+    if(lastSemesterRow.id.indexOf('SP') != -1){
+        const skipButton = document.getElementById('skip-button');
+        const semesterdiv = document.getElementById('add-semester-div');
+        semesterdiv.removeChild(skipButton);
+        semesterCount = 1;
+    } else if (lastSemesterRow.id.indexOf('AU') != -1){
         semesterNum--;
+        semesterCount = 0;
     } else {
-        semesterCount--;
+        semesterCount = 2;
     }
 
+    /*
+    TODO add logic to take out courseboxes. First get the semester div (should be last child), then loop 
+    through each course box and call 'removeCourseBox' with the proper variables. Should be able to get all needed variables from
+    header or semester id by doing some sort of string manipulation. For example semester id is 'AU-24' so to get the 
+    semesterTerm get the first 2 characters and to get semester year get the last 2 characters. Then courseBoxID you should have 
+    since ur looping through each course box and semesterID you should also have since thats the semester your looping
+    inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
+    */
+   
+    semesterRows.removeChild(lastSemesterRow);
+
+    lastSemesterRow = semesterRows.lastElementChild;
+    if(lastSemesterRow.id.indexOf('SP') != -1){
+        const semesterdiv = document.getElementById('add-semester-div');
+        const skipSummerButton = document.createElement('button');
+        skipSummerButton.onclick = () => skipSummer();
+        skipSummerButton.textContent = 'Skip Summer';
+        skipSummerButton.id = 'skip-button'
+        semesterdiv.appendChild(skipSummerButton);
+    }
+    
 }
 
 function skipSummer(){
