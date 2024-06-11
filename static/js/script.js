@@ -442,8 +442,6 @@ function removeSemester() {
     inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
     */
     
-    let lastSemesterRow = semesterRows.lastElementChild;
-    let lastSemester = lastSemesterRow.querySelector('.semester');
 
     // Remove course boxes inside the semester 
     const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
