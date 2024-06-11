@@ -383,7 +383,6 @@ function updateRequirementFulfillment() {
             const totalCredits = reqData.courses.reduce((sum, course) => {
                 if (completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
                     selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)) {
-                    console.log(sum + course.Credits)
                     return sum + course.Credits;
                 }
                 return sum;
@@ -451,16 +450,9 @@ function addSemester(term = null, year = null) {
     const skipButton = document.getElementById('skip-button');
 
     if(semesterTerm === 'SP'){
-        const semesterdiv = document.getElementById('add-semester-div');
-        const skipSummerButton = document.createElement('button');
-        skipSummerButton.onclick = () => skipSummer();
-        skipSummerButton.textContent = 'Skip Summer';
-        skipSummerButton.id = 'skip-button'
-        semesterdiv.appendChild(skipSummerButton);
-
+        addSpringButtons();
     } else if (skipButton){
-        const semesterdiv = document.getElementById('add-semester-div');
-        semesterdiv.removeChild(skipButton);
+        removeSpringButtons();
     }
     
     if(semesterCount == 0){
@@ -476,6 +468,35 @@ function addSemester(term = null, year = null) {
         semesterCount = 0;
     }
 
+}
+
+function addSpringButtons(){
+    const semesterBtnDiv = document.getElementById('add-semester-div');
+    const skipSummerButton = document.createElement('button');
+    skipSummerButton.onclick = () => skipSummer();
+    skipSummerButton.textContent = 'Skip Summer';
+    skipSummerButton.id = 'skip-button'
+    semesterBtnDiv.appendChild(skipSummerButton);
+
+    const internShipBtn = document.createElement('button');
+    internShipBtn.onclick = () => addInternship();
+    internShipBtn.textContent = 'Summer Internship';
+    internShipBtn.id = 'internship-button'
+    semesterBtnDiv.appendChild(internShipBtn);
+
+}
+
+function removeSpringButtons(){
+    const skipButton = document.getElementById('skip-button');
+    const internshipButton = document.getElementById('internship-button');
+    const semesterBtnDiv = document.getElementById('add-semester-div');
+    semesterBtnDiv.removeChild(skipButton);
+    semesterBtnDiv.removeChild(internshipButton)
+}
+
+
+function addInternship(){
+    console.log('add internship')
 }
 
 /*
@@ -494,9 +515,7 @@ function removeSemester() {
     // Remove the last semester row
     let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
-        const skipButton = document.getElementById('skip-button');
-        const semesterdiv = document.getElementById('add-semester-div');
-        semesterdiv.removeChild(skipButton);
+        removeSpringButtons();
         semesterCount = 1;
     } else if (lastSemesterRow.id.indexOf('AU') != -1){
         semesterNum--;
@@ -522,12 +541,7 @@ function removeSemester() {
     lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow){
         if(lastSemesterRow.id.indexOf('SP') != -1){
-            const semesterdiv = document.getElementById('add-semester-div');
-            const skipSummerButton = document.createElement('button');
-            skipSummerButton.onclick = () => skipSummer();
-            skipSummerButton.textContent = 'Skip Summer';
-            skipSummerButton.id = 'skip-button'
-            semesterdiv.appendChild(skipSummerButton);
+            addSpringButtons();
         }
     }
     
