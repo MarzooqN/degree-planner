@@ -418,8 +418,7 @@ function removeSemester() {
         alert("No semesters to remove.");
         return;
     }
-    
-    
+        
     // Remove the last semester row
     let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
