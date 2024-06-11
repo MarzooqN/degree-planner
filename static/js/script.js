@@ -741,10 +741,13 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         //If the response was okay removes course from selectedCourses list using the courseID
         if (response.ok) {
             selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
+            const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
 
-            header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseInt(header.dataset.credits) - credits;
-            header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            // Null check before accessing header's properties
+            if (header) {
+                header.dataset.credits = parseInt(header.dataset.credits) - credits;
+                header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            }
 
             updateRequirementFulfillment();
         } else {
