@@ -418,7 +418,8 @@ function removeSemester() {
         alert("No semesters to remove.");
         return;
     }
-
+    
+    
     // Remove the last semester row
     let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
@@ -441,6 +442,34 @@ function removeSemester() {
     since ur looping through each course box and semesterID you should also have since thats the semester your looping
     inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
     */
+
+    const lastSemesterRow = semesterRows.lastElementChild;
+    const lastSemester = lastSemesterRow.querySelector('.semester');
+
+    // Remove course boxes inside the semester
+    const courseBoxes = lastSemester.querySelectorAll('.course-box');
+    courseBoxes.forEach(courseBox => {
+        const semesterId = lastSemester.id;
+        const semesterTerm = semesterId.slice(0, 2);  // Get the first 2 characters
+        const semesterYear = semesterId.slice(-2);    // Get the last 2 characters
+        const courseBoxId = courseBox.id;
+
+        // Call removeCourseBox with the appropriate parameters
+        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear);
+    });     
+
+
+    if (lastSemesterRow.id.indexOf('SP') !== -1) {
+        const skipButton = document.getElementById('skip-button');
+        const semesterDiv = document.getElementById('add-semester-div');
+        semesterDiv.removeChild(skipButton);
+        semesterCount = 1;
+    } else if (lastSemesterRow.id.indexOf('AU') !== -1) {
+        semesterNum--;
+        semesterCount = 0;
+    } else {
+        semesterCount = 2;
+    }
    
     semesterRows.removeChild(lastSemesterRow);
 
