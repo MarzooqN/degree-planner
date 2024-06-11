@@ -445,7 +445,7 @@ function removeSemester() {
 
     semesterRows.removeChild(lastSemesterRow);
 
-    let lastSemesterRow = semesterRows.lastElementChild;
+    lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
         const semesterdiv = document.getElementById('add-semester-div');
         const skipSummerButton = document.createElement('button');
