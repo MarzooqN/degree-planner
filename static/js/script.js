@@ -343,7 +343,6 @@ function addSemester(term = null, year = null) {
     const semesters = ['AU', 'SP', 'SU'];
     const semesterTerm = term || semesters[semesterCount];
     const semesterYear = year || semesterNum;
-    console.log(semesterCount);
     
     //Gets div that houses all semesters
     const semesterRows = document.getElementById('semester-rows');
@@ -433,14 +432,6 @@ function removeSemester() {
         semesterCount = 2;
     }
     
-    /*
-    TODO add logic to take out courseboxes. First get the semester div (should be last child), then loop 
-    through each course box and call 'removeCourseBox' with the proper variables. Should be able to get all needed variables from
-    header or semester id by doing some sort of string manipulation. For example semester id is 'AU-24' so to get the 
-    semesterTerm get the first 2 characters and to get semester year get the last 2 characters. Then courseBoxID you should have 
-    since ur looping through each course box and semesterID you should also have since thats the semester your looping
-    inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
-    */
     let lastSemester = lastSemesterRow.querySelector('.semester');
     
     // Remove course boxes inside the semester 
@@ -456,13 +447,15 @@ function removeSemester() {
     semesterRows.removeChild(lastSemesterRow);
 
     lastSemesterRow = semesterRows.lastElementChild;
-    if(lastSemesterRow.id.indexOf('SP') != -1){
-        const semesterdiv = document.getElementById('add-semester-div');
-        const skipSummerButton = document.createElement('button');
-        skipSummerButton.onclick = () => skipSummer();
-        skipSummerButton.textContent = 'Skip Summer';
-        skipSummerButton.id = 'skip-button'
-        semesterdiv.appendChild(skipSummerButton);
+    if(lastSemesterRow){
+        if(lastSemesterRow.id.indexOf('SP') != -1){
+            const semesterdiv = document.getElementById('add-semester-div');
+            const skipSummerButton = document.createElement('button');
+            skipSummerButton.onclick = () => skipSummer();
+            skipSummerButton.textContent = 'Skip Summer';
+            skipSummerButton.id = 'skip-button'
+            semesterdiv.appendChild(skipSummerButton);
+        }
     }
     
 }
