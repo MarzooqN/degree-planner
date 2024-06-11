@@ -419,31 +419,7 @@ function removeSemester() {
         return;
     }
 
-    /*
-    TODO add logic to take out courseboxes. First get the semester div (should be last child), then loop 
-    through each course box and call 'removeCourseBox' with the proper variables. Should be able to get all needed variables from
-    header or semester id by doing some sort of string manipulation. For example semester id is 'AU-24' so to get the 
-    semesterTerm get the first 2 characters and to get semester year get the last 2 characters. Then courseBoxID you should have 
-    since ur looping through each course box and semesterID you should also have since thats the semester your looping
-    inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
-    */
-    
-    const lastSemesterRow = semesterRows.lastElementChild; 
-    const lastSemester = lastSemesterRow.querySelector('.semester'); 
-    
-    // Remove course boxes inside the semester 
-    const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
-    courseBoxes.forEach(courseBox => { 
-        const semesterId = lastSemester.id;
-        const semesterTerm = semesterId.slice(0, 2); 
-        // Get the first 2 characters 
-        const semesterYear = semesterId.slice(-2);    
-        // Get the last 2 characters 
-        const courseBoxId = courseBox.id; 
-        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
-    });
-
-     // Remove the last semester row
+    // Remove the last semester row
     let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
         const skipButton = document.getElementById('skip-button');
@@ -457,6 +433,40 @@ function removeSemester() {
         semesterCount = 2;
     }
     
+    /*
+    TODO add logic to take out courseboxes. First get the semester div (should be last child), then loop 
+    through each course box and call 'removeCourseBox' with the proper variables. Should be able to get all needed variables from
+    header or semester id by doing some sort of string manipulation. For example semester id is 'AU-24' so to get the 
+    semesterTerm get the first 2 characters and to get semester year get the last 2 characters. Then courseBoxID you should have 
+    since ur looping through each course box and semesterID you should also have since thats the semester your looping
+    inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
+    */
+    
+    const lastSemesterRow = semesterRows.lastElementChild;
+    if (!lastSemesterRow) {
+        alert("No last semester row found.");
+        return;
+    }
+
+    const lastSemester = lastSemesterRow.querySelector('.semester');
+    if (!lastSemester) {
+        alert("No last semester found.");
+        return;
+    }
+    
+    // Remove course boxes inside the semester 
+    const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
+    courseBoxes.forEach(courseBox => { 
+        const semesterId = lastSemester.id;
+        const semesterTerm = semesterId.slice(0, 2); 
+        // Get the first 2 characters 
+        const semesterYear = semesterId.slice(-2);    
+        // Get the last 2 characters 
+        const courseBoxId = courseBox.id; 
+        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
+    });
+
+     
     semesterRows.removeChild(lastSemesterRow);
 
     let lastSemesterRow = semesterRows.lastElementChild;
