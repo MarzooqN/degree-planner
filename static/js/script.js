@@ -441,8 +441,18 @@ function removeSemester() {
     since ur looping through each course box and semesterID you should also have since thats the semester your looping
     inside of. Make sure to use SEMESTER id not semesterROW id. They are different.
     */
-
-
+    let lastSemester = lastSemesterRow.querySelector('.semester');
+    
+    // Remove course boxes inside the semester 
+    const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
+    courseBoxes.forEach(courseBox => { 
+        const semesterId = lastSemester.id;
+        const semesterTerm = semesterId.slice(0, 2); 
+        const semesterYear = semesterId.slice(-2);    
+        const courseBoxId = courseBox.id; 
+        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
+    });
+    
     semesterRows.removeChild(lastSemesterRow);
 
     lastSemesterRow = semesterRows.lastElementChild;
