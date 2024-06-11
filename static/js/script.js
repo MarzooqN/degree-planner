@@ -453,23 +453,9 @@ function removeSemester() {
         const semesterTerm = semesterId.slice(0, 2);  // Get the first 2 characters
         const semesterYear = semesterId.slice(-2);    // Get the last 2 characters
         const courseBoxId = courseBox.id;
-
-        // Call removeCourseBox with the appropriate parameters
+        
         removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear);
     });     
-
-
-    if (lastSemesterRow.id.indexOf('SP') !== -1) {
-        const skipButton = document.getElementById('skip-button');
-        const semesterDiv = document.getElementById('add-semester-div');
-        semesterDiv.removeChild(skipButton);
-        semesterCount = 1;
-    } else if (lastSemesterRow.id.indexOf('AU') !== -1) {
-        semesterNum--;
-        semesterCount = 0;
-    } else {
-        semesterCount = 2;
-    }
    
     semesterRows.removeChild(lastSemesterRow);
 
