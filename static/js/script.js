@@ -230,6 +230,7 @@ async function populateSchedule(schedule) {
     sortedSemesters.forEach(semYear => {
         const [semester, year] = semYear.split('-');
         addSemester(semester, parseInt(year));
+    
     });
 
     //Adds courses and their specified semesters
@@ -349,6 +350,7 @@ function addSemester(term = null, year = null) {
     // Creates semester row divider 
     const semesterRow = document.createElement('div');
     semesterRow.classList.add('semester-row');
+    semesterRow.id = `${semesterTerm}-${semesterYear}-row`
 
     // Creates header for semester row 
     const header = document.createElement('h3');
@@ -401,6 +403,61 @@ function addSemester(term = null, year = null) {
         semesterCount = 0;
     }
 
+}
+
+/*
+Function to delete semester row
+*/
+function removeSemester() {
+    
+    const semesterRows = document.getElementById('semester-rows');
+    
+    // Check if there are any semester rows to remove
+    if (semesterRows.children.length === 0) {
+        alert("No semesters to remove.");
+        return;
+    }
+
+    // Remove the last semester row
+    let lastSemesterRow = semesterRows.lastElementChild;
+    if(lastSemesterRow.id.indexOf('SP') != -1){
+        const skipButton = document.getElementById('skip-button');
+        const semesterdiv = document.getElementById('add-semester-div');
+        semesterdiv.removeChild(skipButton);
+        semesterCount = 1;
+    } else if (lastSemesterRow.id.indexOf('AU') != -1){
+        semesterNum--;
+        semesterCount = 0;
+    } else {
+        semesterCount = 2;
+    }
+    
+    let lastSemester = lastSemesterRow.querySelector('.semester');
+    
+    // Remove course boxes inside the semester 
+    const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
+    courseBoxes.forEach(courseBox => { 
+        const semesterId = lastSemester.id;
+        const semesterTerm = semesterId.slice(0, 2); 
+        const semesterYear = semesterId.slice(-2);    
+        const courseBoxId = courseBox.id; 
+        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
+    });
+    
+    semesterRows.removeChild(lastSemesterRow);
+
+    lastSemesterRow = semesterRows.lastElementChild;
+    if(lastSemesterRow){
+        if(lastSemesterRow.id.indexOf('SP') != -1){
+            const semesterdiv = document.getElementById('add-semester-div');
+            const skipSummerButton = document.createElement('button');
+            skipSummerButton.onclick = () => skipSummer();
+            skipSummerButton.textContent = 'Skip Summer';
+            skipSummerButton.id = 'skip-button'
+            semesterdiv.appendChild(skipSummerButton);
+        }
+    }
+    
 }
 
 function skipSummer(){
@@ -661,15 +718,18 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         //If the response was okay removes course from selectedCourses list using the courseID
         if (response.ok) {
             selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
-            
-            header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseInt(header.dataset.credits) - credits;
-            header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
+
+            // Null check before accessing header's properties
+            if (header) {
+                header.dataset.credits = parseInt(header.dataset.credits) - credits;
+                header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            }
 
             updateRequirementFulfillment();
         } else {
-            const error = await response.json();
-            console.error('Error removing course 1:', error);
+            const e = await response.json();
+            console.error('Error removing course 1:', e);
             alert('Error removing course. Please try again.');
         }
 

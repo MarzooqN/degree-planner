@@ -95,6 +95,17 @@ def select_major():
         major = request.form['major']
         session['major'] = major
         session['schedule_id'] = 0
+
+        user_id = current_user.id
+        connection = get_db_connection('users')
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute('''
+            DELETE FROM users.CoursesSelected WHERE userID = %s;
+        ''', (user_id,))
+        connection.commit()
+        connection.close()
+
         return redirect(url_for('index'))
     return render_template('select_major.html')
 
