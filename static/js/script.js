@@ -705,8 +705,8 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         courseID = course[0].courseID; 
         credits = course[0].credits;
 
-    } catch (error1) {
-        console.error('Error getting courseID: ', error1);
+    } catch (e) {
+        console.error('Error getting courseID: ', e);
         alert('Error removing course. Please try again.');
         return;
     }
@@ -725,20 +725,23 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         //If the response was okay removes course from selectedCourses list using the courseID
         if (response.ok) {
             selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
-            
-            header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseInt(header.dataset.credits) - credits;
-            header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
+
+            // Null check before accessing header's properties
+            if (header) {
+                header.dataset.credits = parseInt(header.dataset.credits) - credits;
+                header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+            }
 
             updateRequirementFulfillment();
         } else {
-            const error2 = await response.json();
-            console.error('Error removing course 1:', error2);
+            const e = await response.json();
+            console.error('Error removing course 1:', e);
             alert('Error removing course. Please try again.');
         }
 
-    } catch (error3) {
-        console.error('Error removing course 2: ', error3);
+    } catch (e) {
+        console.error('Error removing course 2: ', e);
         alert('Error removing course. Please try again.');
     }
 
