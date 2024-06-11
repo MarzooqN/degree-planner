@@ -343,7 +343,7 @@ async function displayRequirements() {
                 const ul = document.createElement('ul');
                 courses.forEach(course => {
                     const li = document.createElement('li');
-                    li.textContent = `${course.CourseID} - ${course.CourseName}`;
+                    li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
                     ul.appendChild(li);
                 });
                 reqDiv.appendChild(ul);
@@ -354,7 +354,7 @@ async function displayRequirements() {
             const ul = document.createElement('ul');
             reqData.courses.forEach(course => {
                 const li = document.createElement('li');
-                li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
+                li.textContent = `${course.CourseID} - ${course.CourseName}`;
                 ul.appendChild(li);
             });
             reqDiv.appendChild(ul);
