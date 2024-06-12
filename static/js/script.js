@@ -12,11 +12,12 @@ const scheduleId = parseInt(document.getElementById('schedule-id').value);
 When page is loaded get course data based on specified major and user data
 */
 document.addEventListener('DOMContentLoaded', (event) => {
-    fetchAllData();
+    messageModalFunctionality();
     saveScheduleModalFunctionality();
     loadedScheduleModalFunctionality();
     newScheduleModalFunctionality();
     prereqModalFunctionality();
+    fetchAllData();
 });
 
 async function fetchAllData() {
@@ -33,6 +34,28 @@ async function fetchAllData() {
 
 function openModal(modal){
     modal.style.display = 'block';
+}
+
+function closeModal(modal){
+    modal.style.display = 'none';
+}
+
+function messageModalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('messageModal');
+    const span = document.getElementsByClassName('close')[3];
+    const okayBtn = document.getElementById('messageOkay');
+
+    //When the x is clicked the modal goes away
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    //When okay is clicked the modal goes away
+    okayBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
 }
 
 function saveScheduleModalFunctionality(){
@@ -211,6 +234,10 @@ async function loadSavedSchedule(scheduleId) {
 
 async function populateSchedule(schedule) {
 
+    const waitModal = document.getElementById('waitModal');
+    openModal(waitModal);
+
+
     const semestersNeeded = new Set();
     
     for (const course of schedule.courses){
@@ -242,6 +269,8 @@ async function populateSchedule(schedule) {
             await addCourseBox(semester, year, course_id);
         }
     }
+
+    closeModal(waitModal);
 }
 
 
@@ -719,6 +748,10 @@ Function to check if user can take this a course and updating database if they c
 */
 async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID){
     
+    //message modal and text
+    const modal = document.getElementById('messageModal');
+    const modalMessage = document.getElementById('message');
+    
     //Get selected course 
     const selectedCourseID = selectElement.value;
     const selectedCourse = courseData.find(course => course.CourseID === selectedCourseID);
@@ -727,7 +760,8 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     header = document.getElementById(`${semesterTerm} ${semesterNum}`);
     if (parseInt(header.dataset.credits) + selectedCourse.Credits > 18){
         selectElement.value = "Click to Select Course"; // Reset selection
-        alert('Cannot add course: exceeds 18 credit hour limit');
+        modalMessage.textContent = 'Cannot add course: exceeds 18 credit hour limit';
+        openModal(modal);
         return;
     }
 
@@ -739,7 +773,8 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
     if(alreadySelected){
         selectElement.value = "Click to Select Course"; // Reset selection
-        alert('Cannot add course: Already selected in semester');
+        modalMessage.textContent = 'Cannot add course: Already selected in semester';
+        openModal(modal);
         return;
     }
 
@@ -773,8 +808,9 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
         if (!groupSatisfied) {
             allGroupsSatisfied = false;
-            alert(`You have not met the prerequisites for ${selectedCourseID}.`);
             selectElement.value = "Click to Select Course"; // Reset selection
+            modalMessage.textContent = `You have not met the prerequisites for ${selectedCourseID}`;
+            openModal(modal);
             return;
         }
     }
