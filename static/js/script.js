@@ -549,6 +549,8 @@ function addInternshipText(semesterTerm, semesterYear){
     const semester = document.getElementById(`${semesterTerm}-${semesterYear}`);
     const addCourseButton = document.getElementById(`add-course-${semesterTerm}-${semesterYear}`)
     if(addCourseButton){
+        const header = document.getElementById(`${semesterTerm} ${semesterYear}`);
+        header.textContent = `${semesterTerm} ${semesterYear}: Summer Internship`;
         semester.removeChild(addCourseButton);
     }
     
