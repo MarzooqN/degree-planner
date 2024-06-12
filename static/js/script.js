@@ -491,8 +491,20 @@ function removeSemester() {
         return;
     }
 
+    const lastSemesterRow = semesterRows.lastElementChild;
+    const lastSemester = lastSemesterRow.querySelector('.semester');
+    const semesterId = lastSemester.id;
+    const semesterTerm = semesterId.slice(0, 2);  // Get the first 2 characters
+    const semesterYear = semesterId.slice(-2);    // Get the last 2 characters
+
+    // Remove all courses in the semester
+    const ableToRemove = await removeAllCourses(userID, semesterTerm, semesterYear);
+    
+    if (!ableToRemove) {
+        return;
+    }
+
     // Remove the last semester row
-    let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
         const skipButton = document.getElementById('skip-button');
         const semesterdiv = document.getElementById('add-semester-div');
@@ -504,7 +516,8 @@ function removeSemester() {
     } else {
         semesterCount = 2;
     }
-    
+
+    /*
     let lastSemester = lastSemesterRow.querySelector('.semester');
     
     // Remove course boxes inside the semester 
@@ -516,6 +529,7 @@ function removeSemester() {
         const courseBoxId = courseBox.id; 
         removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
     });
+    */
     
     semesterRows.removeChild(lastSemesterRow);
 
@@ -821,10 +835,44 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 
 }
 
+/*
+Function that removes all courses at once when remove semester is pressed
+*/
+
+async function removeAllCourses(userID, semesterTerm, semesterYear) {
+    const removeCoursesPayload = {
+        user_id: userID,
+        semester: semesterTerm,
+        year: semesterYear
+    };
+
+    try {
+        const response = await fetch('/api/remove_all_courses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(removeCoursesPayload)
+        });
+
+        if (response.ok) {
+            return true;
+        } else {
+            const error = await response.json();
+            console.error('Error removing all courses:', error);
+            alert('Error removing all courses. Please try again.');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error removing all courses:', error);
+        alert('Error removing all courses. Please try again.');
+        return false;
+    }
+}
 
 /*
 Function to remove course box/list 
-*/
+
 function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
     const semester = document.getElementById(semesterID);
     const courseBox = document.getElementById(courseBoxID);
@@ -837,6 +885,8 @@ function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
     semester.removeChild(courseBox);
 
 }
+
+*/
 
 /*
 Function to save the current schedule
