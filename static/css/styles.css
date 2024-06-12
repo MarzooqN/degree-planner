@@ -38,6 +38,10 @@ section {
     max-width: 45%;
 }
 
+strong{
+    text-align: center;
+}
+
 /* Bordered form */
 form {
     display: flex;
@@ -194,6 +198,7 @@ button {
     border-radius: 5px;
     cursor: pointer;
     margin-top: 10px;
+    margin-right: 5px;
     transition: all 0.5s;
 }
 

@@ -236,7 +236,11 @@ async function populateSchedule(schedule) {
     //Adds courses and their specified semesters
     for (const course of schedule.courses) {
         const { course_id, semester, year } = course;
-        await addCourseBox(semester, year, course_id);
+        if (course_id === 'Internship' && semester ==='SU'){
+            addInternshipText(semester, year)
+        } else {
+            await addCourseBox(semester, year, course_id);
+        }
     }
 }
 
@@ -439,6 +443,7 @@ function addSemester(term = null, year = null) {
     //Creates button to add courses
     const addCourseButton = document.createElement('div');
     addCourseButton.classList.add('add-course');
+    addCourseButton.id = `add-course-${semesterTerm}-${semesterYear}`;
     addCourseButton.setAttribute('onclick', `addCourseBox('${semesterTerm}', ${semesterYear})`);
     addCourseButton.textContent = '+';
     semester.appendChild(addCourseButton);
@@ -476,14 +481,15 @@ function addSpringButtons(){
     skipSummerButton.onclick = () => skipSummer();
     skipSummerButton.textContent = 'Skip Summer';
     skipSummerButton.id = 'skip-button'
-    semesterBtnDiv.appendChild(skipSummerButton);
+    
 
     const internShipBtn = document.createElement('button');
     internShipBtn.onclick = () => addInternship();
     internShipBtn.textContent = 'Summer Internship';
     internShipBtn.id = 'internship-button'
+    
     semesterBtnDiv.appendChild(internShipBtn);
-
+    semesterBtnDiv.appendChild(skipSummerButton);
 }
 
 function removeSpringButtons(){
@@ -496,7 +502,61 @@ function removeSpringButtons(){
 
 
 function addInternship(){
-    console.log('add internship')
+
+    const semesterTerm = 'SU';
+    const semesterYear = semesterNum;
+
+    const internship = {
+        CourseID: 'Internship',
+        semester: 'SU',
+        year: semesterYear
+    }
+    selectedCourses.push(internship);
+
+    //Gets div that houses all semesters
+    const semesterRows = document.getElementById('semester-rows');
+
+    // Creates semester row divider 
+    const semesterRow = document.createElement('div');
+    semesterRow.classList.add('semester-row');
+    semesterRow.id = `${semesterTerm}-${semesterYear}-row`
+
+    // Creates header for semester row 
+    const header = document.createElement('h3');
+    header.id = `${semesterTerm} ${semesterYear}`
+    header.textContent = `${semesterTerm} ${semesterYear}: Summer Internship`;
+    semesterRow.appendChild(header);
+
+    // Creates semester divider
+    const semester = document.createElement('div');
+    semester.classList.add('semester');
+    semester.id = `${semesterTerm}-${semesterYear}`
+
+    
+    semesterRow.appendChild(semester);
+    semesterRows.appendChild(semesterRow);
+    
+    //Creates Big Text saying summer internship 
+    addInternshipText(`${semesterTerm}`, semesterYear);
+
+    removeSpringButtons();
+
+    semesterCount = 0;
+
+}
+
+function addInternshipText(semesterTerm, semesterYear){
+    const semester = document.getElementById(`${semesterTerm}-${semesterYear}`);
+    const addCourseButton = document.getElementById(`add-course-${semesterTerm}-${semesterYear}`)
+    if(addCourseButton){
+        semester.removeChild(addCourseButton);
+    }
+    
+    const summerInternshipText = document.createElement('strong');
+    summerInternshipText.id = `SU-${semesterYear} Internship`;
+    summerInternshipText.textContent = 'Summer Internship';
+    semester.appendChild(summerInternshipText);
+
 }
 
 /*
@@ -528,6 +588,7 @@ function removeSemester() {
     
     // Remove course boxes inside the semester 
     const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
+    
     courseBoxes.forEach(courseBox => { 
         const semesterId = lastSemester.id;
         const semesterTerm = semesterId.slice(0, 2); 
@@ -535,6 +596,11 @@ function removeSemester() {
         const courseBoxId = courseBox.id; 
         removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
     });
+
+    if(lastSemester.lastElementChild.id === `SU-${semesterNum} Internship`){
+        selectedCourses = selectedCourses.filter(course => !(course.CourseID === 'Internship' && course.year === semesterNum));
+    }
+
     
     semesterRows.removeChild(lastSemesterRow);
 
@@ -857,10 +923,10 @@ Function to save the current schedule
 */
 async function saveSchedule() {
     if (scheduleId > 0) {
-        loadedScheduleModal = document.getElementById('loadedScheduleModal');
+        const loadedScheduleModal = document.getElementById('loadedScheduleModal');
         openModal(loadedScheduleModal);
     } else {
-        saveScheduleModal = document.getElementById('saveScheduleModal');
+        const saveScheduleModal = document.getElementById('saveScheduleModal');
         openModal(saveScheduleModal);
     }
 }
