@@ -490,7 +490,7 @@ def index():
 @login_required
 def remove_all_courses():
     data = request.json
-    user_id = data.get('user_id')
+    user_id = current_user.id
     semester = data.get('semester')
     year = data.get('year')
 
@@ -502,18 +502,17 @@ def remove_all_courses():
 
     try:
         cursor.execute('''
-            DELETE FROM courses WHERE user_id = %s AND semester = %s AND year = %s
+            DELETE FROM CoursesSelected WHERE userID = %s AND semester = %s AND year = %s
         ''', (user_id, semester, year))
-
         connection.commit()
-    except mysql.connector.Error as error:
-        print(error)
-        return jsonify({'error': 'Failed to remove courses'}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({'error': f'Failed to remove courses: {e}'}), 500
     finally:
         cursor.close()
         connection.close()
 
-    return jsonify({'message': 'Courses removed successfully'}), 200
+    return jsonify({'success': 'Courses removed successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -481,7 +481,7 @@ function addSemester(term = null, year = null) {
 /*
 Function to delete semester row
 */
-function removeSemester() {
+async function removeSemester() {
     
     const semesterRows = document.getElementById('semester-rows');
     
@@ -498,7 +498,7 @@ function removeSemester() {
     const semesterYear = semesterId.slice(-2);    // Get the last 2 characters
 
     // Remove all courses in the semester
-    const ableToRemove = await removeAllCourses(userID, semesterTerm, semesterYear);
+    const ableToRemove = await removeAllCourses(semesterTerm, semesterYear);
     
     if (!ableToRemove) {
         return;
@@ -516,24 +516,16 @@ function removeSemester() {
     } else {
         semesterCount = 2;
     }
-
-    /*
-    let lastSemester = lastSemesterRow.querySelector('.semester');
     
     // Remove course boxes inside the semester 
     const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
-    courseBoxes.forEach(courseBox => { 
-        const semesterId = lastSemester.id;
-        const semesterTerm = semesterId.slice(0, 2); 
-        const semesterYear = semesterId.slice(-2);    
-        const courseBoxId = courseBox.id; 
-        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
+    courseBoxes.forEach(courseBox => {    
+        const courseID = courseBox.firstChild.value;
+        selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
     });
-    */
     
     semesterRows.removeChild(lastSemesterRow);
 
-    lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow){
         if(lastSemesterRow.id.indexOf('SP') != -1){
             const semesterdiv = document.getElementById('add-semester-div');
@@ -839,9 +831,8 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 Function that removes all courses at once when remove semester is pressed
 */
 
-async function removeAllCourses(userID, semesterTerm, semesterYear) {
+async function removeAllCourses(semesterTerm, semesterYear) {
     const removeCoursesPayload = {
-        user_id: userID,
         semester: semesterTerm,
         year: semesterYear
     };
@@ -872,7 +863,7 @@ async function removeAllCourses(userID, semesterTerm, semesterYear) {
 
 /*
 Function to remove course box/list 
-
+*/
 function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
     const semester = document.getElementById(semesterID);
     const courseBox = document.getElementById(courseBoxID);
@@ -886,7 +877,6 @@ function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
 
 }
 
-*/
 
 /*
 Function to save the current schedule
