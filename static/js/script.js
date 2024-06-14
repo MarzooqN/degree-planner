@@ -632,7 +632,7 @@ async function removeSemester() {
   
     courseBoxes.forEach(courseBox => {    
         const courseID = courseBox.firstChild.value;
-        selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID); 
+        selectedCourses = selectedCourses.filter(course => !(course.CourseID == courseID && course.year === semesterNum && course.semester === semesterTerm)); 
     });
 
     if(lastSemester.lastElementChild.id === `SU-${semesterNum} Internship`){
@@ -761,6 +761,12 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     //Get selected course 
     const selectedCourseID = selectElement.value;
     const selectedCourse = courseData.find(course => course.CourseID === selectedCourseID);
+    const newSelectedCourseInstance = {
+        CourseID: selectedCourse.CourseID,
+        CourseName: selectedCourse.CourseName,
+        prerequisites: selectedCourse.prerequisites,
+        Credits: selectedCourse.Credits,
+    }
 
     //Check if total credit hours less than 18 
     header = document.getElementById(`${semesterTerm} ${semesterNum}`);
@@ -842,9 +848,9 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
         //If the response was okay then adds semester and year attribute to courses and puts them into the selectedCourses list
         if (response.ok) {
-            selectedCourse.semester = `${semesterTerm}`;
-            selectedCourse.year = semesterNum;
-            selectedCourses.push(selectedCourse)
+            newSelectedCourseInstance.semester = `${semesterTerm}`;
+            newSelectedCourseInstance.year = semesterNum;
+            selectedCourses.push(newSelectedCourseInstance)
 
             selectElement.value = selectedCourseID;
 
@@ -921,7 +927,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 
         //If the response was okay removes course from selectedCourses list using the courseID
         if (response.ok) {
-            selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID);
+            selectedCourses = selectedCourses.filter(course => !(course.CourseID === courseID && course.year === semesterNum && course.semester === semesterTerm)); 
             const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
 
             // Null check before accessing header's properties
