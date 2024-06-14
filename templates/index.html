@@ -31,7 +31,7 @@
         <div class="modal-content">
             <h2>Do You Want To Save This Schedule?</h2>
             <button id="newScheduleYes">Yes</button>
-            <button id="newScheduleNo">No</button>
+            <button id="newScheduleNo">No (Return back to Home Page)</button>
         </div>
     </div>
 
@@ -50,6 +50,22 @@
             <h2>Enter A Name For Your Schedule:</h2>
             <input type="text" id="scheduleNameInput" placeholder="Enter Schedule Name">
             <button id="schdeuleNameSubmit">Submit</button>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="message"></h2>
+            <button id="messageOkay">OK</button>
+        </div>
+    </div>
+
+    <div id="waitModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 id="waitMessage">Please Wait Your Schedule Is Being Loaded</h2>
+            <div class="loader"></div>
+
         </div>
     </div>
 
