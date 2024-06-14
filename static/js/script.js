@@ -593,7 +593,7 @@ function addInternshipText(semesterTerm, semesterYear){
 /*
 Function to delete semester row
 */
-function removeSemester() {
+async function removeSemester() {
     
     const semesterRows = document.getElementById('semester-rows');
     
@@ -603,8 +603,20 @@ function removeSemester() {
         return;
     }
 
+    const lastSemesterRow = semesterRows.lastElementChild;
+    const lastSemester = lastSemesterRow.querySelector('.semester');
+    const semesterId = lastSemester.id;
+    const semesterTerm = semesterId.slice(0, 2);  // Get the first 2 characters
+    const semesterYear = semesterId.slice(-2);    // Get the last 2 characters
+
+    // Remove all courses in the semester
+    const ableToRemove = await removeAllCourses(semesterTerm, semesterYear);
+    
+    if (!ableToRemove) {
+        return;
+    }
+
     // Remove the last semester row
-    let lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow.id.indexOf('SP') != -1){
         removeSpringButtons();
         semesterCount = 1;
@@ -615,17 +627,12 @@ function removeSemester() {
         semesterCount = 2;
     }
     
-    let lastSemester = lastSemesterRow.querySelector('.semester');
-    
     // Remove course boxes inside the semester 
     const courseBoxes = lastSemester.querySelectorAll('.course-box'); 
-    
-    courseBoxes.forEach(courseBox => { 
-        const semesterId = lastSemester.id;
-        const semesterTerm = semesterId.slice(0, 2); 
-        const semesterYear = semesterId.slice(-2);    
-        const courseBoxId = courseBox.id; 
-        removeCourseBox(courseBoxId, semesterId, semesterTerm, semesterYear); 
+  
+    courseBoxes.forEach(courseBox => {    
+        const courseID = courseBox.firstChild.value;
+        selectedCourses = selectedCourses.filter(course => course.CourseID !== courseID); 
     });
 
     if(lastSemester.lastElementChild.id === `SU-${semesterNum} Internship`){
@@ -635,7 +642,6 @@ function removeSemester() {
     
     semesterRows.removeChild(lastSemesterRow);
 
-    lastSemesterRow = semesterRows.lastElementChild;
     if(lastSemesterRow){
         if(lastSemesterRow.id.indexOf('SP') != -1){
             addSpringButtons();
@@ -939,6 +945,39 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 
 }
 
+/*
+Function that removes all courses at once when remove semester is pressed
+*/
+
+async function removeAllCourses(semesterTerm, semesterYear) {
+    const removeCoursesPayload = {
+        semester: semesterTerm,
+        year: semesterYear
+    };
+
+    try {
+        const response = await fetch('/api/remove_all_courses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(removeCoursesPayload)
+        });
+
+        if (response.ok) {
+            return true;
+        } else {
+            const error = await response.json();
+            console.error('Error removing all courses:', error);
+            alert('Error removing all courses. Please try again.');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error removing all courses:', error);
+        alert('Error removing all courses. Please try again.');
+        return false;
+    }
+}
 
 /*
 Function to remove course box/list 
@@ -955,6 +994,7 @@ function removeCourseBox(courseBoxID, semesterID, semesterTerm, semesterNum) {
     semester.removeChild(courseBox);
 
 }
+
 
 /*
 Function to save the current schedule

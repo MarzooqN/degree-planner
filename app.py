@@ -485,6 +485,35 @@ def index():
     return render_template('index.html', schedule_id=schedule_id)
 
 
+#Route for removing all courses from row
+@app.route('/api/remove_all_courses', methods=['POST'])
+@login_required
+def remove_all_courses():
+    data = request.json
+    user_id = current_user.id
+    semester = data.get('semester')
+    year = data.get('year')
+
+    if not user_id or not semester or not year:
+        return jsonify({'error': 'Missing required parameters'}), 400
+
+    connection = get_db_connection('users')
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute('''
+            DELETE FROM CoursesSelected WHERE userID = %s AND semester = %s AND year = %s
+        ''', (user_id, semester, year))
+        connection.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({'error': f'Failed to remove courses: {e}'}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+    return jsonify({'success': 'Courses removed successfully'}), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
 
