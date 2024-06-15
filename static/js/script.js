@@ -526,7 +526,7 @@ function removeSpringButtons(){
     const internshipButton = document.getElementById('internship-button');
     const semesterBtnDiv = document.getElementById('add-semester-div');
     semesterBtnDiv.removeChild(skipButton);
-    semesterBtnDiv.removeChild(internshipButton)
+    semesterBtnDiv.removeChild(internshipButton);
 }
 
 
@@ -643,7 +643,7 @@ async function removeSemester() {
     semesterRows.removeChild(lastSemesterRow);
 
     if(lastSemesterRow){
-        if(lastSemesterRow.id.indexOf('SP') != -1){
+        if(lastSemesterRow.id.indexOf('SP') == -1){
             addSpringButtons();
         }
     }

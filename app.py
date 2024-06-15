@@ -92,8 +92,10 @@ def logout():
 @login_required
 def select_major():
     if request.method == 'POST':
+        college = request.form['college']
         major = request.form['major']
-        session['major'] = major
+        program = request.form['program']
+        session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
 
         user_id = current_user.id
@@ -109,20 +111,20 @@ def select_major():
         return redirect(url_for('index'))
     return render_template('select_major.html')
 
-#Route for getting major (probably should name it something else)
+#Route for getting degree (probably should name it something else)
 @app.route('/load_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def load_schedule(schedule_id):
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT major FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
+    cursor.execute('SELECT degree FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
     schedule = cursor.fetchone()
     cursor.close()
     connection.close()
 
     if schedule:
         session['schedule_id'] = schedule_id
-        session['major'] = schedule['major']
+        session['degree'] = schedule['degree']
         return redirect(url_for('index'))
     else:
         return 'Schedule not found', 404
@@ -132,12 +134,11 @@ def load_schedule(schedule_id):
 @app.route('/api/courses', methods=['GET'])
 @login_required
 def get_courses():
-    major = session.get('major')
-    connection = get_db_connection(major)
+    connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
         SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
-        FROM courses c
+        FROM Courses c
         LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
     ''')
     courses = cursor.fetchall()
@@ -167,14 +168,14 @@ def get_courses():
 @app.route('/api/requirements', methods=['GET'])
 @login_required
 def get_requirements():
-    major = session.get('major')
-    connection = get_db_connection(major)
+    degree = session.get('degree')
+    connection = get_db_connection(degree)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
         SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
         FROM Requirements r
         LEFT JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
-        LEFT JOIN courses c ON rc.CourseID = c.CourseID
+        LEFT JOIN Courses.Courses c ON rc.CourseID = c.CourseID
         ORDER BY r.RequirementName
     ''')
     requirements = {}
@@ -217,11 +218,11 @@ def get_courses_in_range():
     prefix = request.args.get('prefix')
     min_number = int(request.args.get('min'))
     max_number = int(request.args.get('max'))
-    connection = get_db_connection(prefix)
+    connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
         SELECT CourseID, CourseName, Credits
-        FROM courses
+        FROM Courses
         WHERE CourseID LIKE %s AND CAST(SUBSTR(CourseID, LENGTH(%s) + 1) AS UNSIGNED) BETWEEN %s AND %s
     ''', (f"{prefix}%", prefix, min_number, max_number))
     courses = cursor.fetchall()
@@ -322,16 +323,16 @@ def remove_course():
 def save_schedule():
     data = request.json
     schedule_name = data.get('schedule_name')
-    major = session.get('major')
+    degree = session.get('dergree')
     user_id = current_user.id
 
     connection = get_db_connection('users')
     cursor = connection.cursor()
     try:
         cursor.execute('''
-            INSERT INTO schedules (user_id, schedule_name, major)
+            INSERT INTO schedules (user_id, schedule_name, degree)
             VALUES (%s, %s, %s)
-        ''', (user_id, schedule_name, major))
+        ''', (user_id, schedule_name, degree))
         schedule_id = cursor.lastrowid
 
         for course in data.get('courses'):
@@ -353,10 +354,12 @@ def save_schedule():
 @login_required
 def get_schedules():
     user_id = current_user.id
+
+  
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.major, sc.course_id, sc.semester, sc.year
+        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
         FROM schedules s
         JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
         WHERE s.user_id = %s
@@ -369,7 +372,7 @@ def get_schedules():
         if row['schedule_id'] not in schedules_dict:
             schedules_dict[row['schedule_id']] = {
                 'schedule_name': row['schedule_name'],
-                'major': row['major'],
+                'degree': row['degree'],
                 'courses': []
             }
         schedules_dict[row['schedule_id']]['courses'].append({
@@ -396,7 +399,7 @@ def get_schedule(schedule_id):
     connection.commit()
 
     cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.major, sc.course_id, sc.semester, sc.year
+        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
         FROM schedules s
         JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
         WHERE s.schedule_id = %s AND s.user_id = %s
@@ -410,7 +413,7 @@ def get_schedule(schedule_id):
     schedule_data = {
         'schedule_id': schedule_id,
         'schedule_name': schedule[0]['schedule_name'],
-        'major': schedule[0]['major'],
+        'degree': schedule[0]['degree'],
         'courses': [
             {
                 'course_id': row['course_id'],
@@ -475,16 +478,6 @@ def update_schedule(schedule_id):
     connection.close()
     return jsonify({"success": True}), 200
 
-
-#Main route/page
-@app.route('/', methods=['POST', 'GET'])
-@login_required
-def index():
-    schedule_id = session.get('schedule_id')
-    print(schedule_id)
-    return render_template('index.html', schedule_id=schedule_id)
-
-
 #Route for removing all courses from row
 @app.route('/api/remove_all_courses', methods=['POST'])
 @login_required
@@ -513,6 +506,15 @@ def remove_all_courses():
         connection.close()
 
     return jsonify({'success': 'Courses removed successfully'}), 200
+
+#Main route/page
+@app.route('/', methods=['POST', 'GET'])
+@login_required
+def index():
+    schedule_id = session.get('schedule_id')
+    print(schedule_id)
+    return render_template('index.html', schedule_id=schedule_id)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
