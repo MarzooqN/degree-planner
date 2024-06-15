@@ -18,12 +18,26 @@
         <section id = "major-selection">
 
             <form method="POST" action="{{ url_for('select_major') }}">
-                <h2>Select Major:</h2>
-                <select id="major" name="major">
-                    <option value="CSE">Computer Science and Engineering</option>
-                    <option value="ECE">Electrical and Computer Engineering</option>
+                <h2>Select Degree:</h2>
+                
+                <select id="college" name="college">
+                    <option value="ENG">ENG - Engineering</option>
                     <!-- Add more majors as needed -->
                 </select>
+
+                <select id="major" name="major">
+                    <option value="CSE">Computer Science and Engineering</option>
+                    <!-- Add more majors as needed -->
+                </select>
+
+                <select id="program" name="program">
+                    <option value="AI">AIT - Artifical Intelligence</option>
+                    <!-- Add more majors as needed -->
+                </select>
+
+
+
+
                 <button type="submit">
                     <span>Submit</span> 
                 </button>
@@ -32,7 +46,7 @@
         </section>
 
         <section id = "saved-schedules">
-            <h2> Your Saved Schedules </h2>
+            <h2> Your Saved Degree Plans </h2>
 
             <div id="schedule-container">
                 <!-- Schedules will be displayed here dynamically -->
@@ -76,14 +90,14 @@
 
                 const loadButton = document.createElement('button');
                 const loadSpan = document.createElement('span');
-                loadSpan.textContent = 'Load Schedule';
+                loadSpan.textContent = 'Load Plan';
                 loadButton.appendChild(loadSpan);
                 loadButton.onclick = () => loadSchedule(scheduleId);
                 buttonDiv.appendChild(loadButton);
 
                 const deleteButton = document.createElement('button');
                 const deleteSpan = document.createElement('span');
-                deleteSpan.textContent = 'Delete Schedule';
+                deleteSpan.textContent = 'Delete Plan';
                 deleteButton.appendChild(deleteSpan);
                 deleteButton.onclick = () => deleteSchedule(scheduleId);
                 buttonDiv.appendChild(deleteButton);
