@@ -873,6 +873,54 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     }
 }
 
+async function addCourse(courseBoxID, courseID, semester, year, credits) {
+    const response = await fetch('/api/add_course', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_box_id: courseBoxID, course_id: courseID, semester: semester, year: year, credits: credits })
+    });
+
+    if (response.ok) {
+        console.log('Course added successfully');
+    } else {
+        console.error('Error adding course');
+    }
+}
+
+async function removeCourse(courseBoxID) {
+    const response = await fetch('/api/remove_course', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_box_id: courseBoxID })
+    });
+
+    if (response.ok) {
+        console.log('Course removed successfully');
+    } else {
+        console.error('Error removing course');
+    }
+}
+
+async function getCourses() {
+    const response = await fetch('/api/get_courses', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (response.ok) {
+        const courses = await response.json();
+        console.log('Courses:', courses);
+    } else {
+        console.error('Error fetching courses');
+    }
+}
+
 
 /*
 Function to remove course/coursebox from database
