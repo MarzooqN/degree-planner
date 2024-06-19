@@ -354,8 +354,6 @@ def save_schedule():
 @login_required
 def get_schedules():
     user_id = current_user.id
-
-  
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
@@ -375,11 +373,14 @@ def get_schedules():
                 'degree': row['degree'],
                 'courses': []
             }
+        
         schedules_dict[row['schedule_id']]['courses'].append({
             'course_id': row['course_id'],
             'semester': row['semester'],
             'year': row['year']
         })
+
+        session[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
 
     return jsonify(schedules_dict)
 
@@ -397,30 +398,18 @@ def get_schedule(schedule_id):
         DELETE FROM users.CoursesSelected WHERE userID = %s;
     ''', (user_id,))
     connection.commit()
-
-    cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
-        FROM schedules s
-        JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
-        WHERE s.schedule_id = %s AND s.user_id = %s
-    ''', (schedule_id, user_id))
-    schedule = cursor.fetchall()
     connection.close()
+
+    schedule = session.get(f'schedule {schedule_id}')
 
     if not schedule:
         return jsonify({"error": "Schedule not found"}), 404
 
     schedule_data = {
         'schedule_id': schedule_id,
-        'schedule_name': schedule[0]['schedule_name'],
-        'degree': schedule[0]['degree'],
-        'courses': [
-            {
-                'course_id': row['course_id'],
-                'semester': row['semester'],
-                'year': row['year']
-            } for row in schedule
-        ]
+        'schedule_name': schedule['schedule_name'],
+        'degree': schedule['degree'],
+        'courses': schedule['courses']
     }
 
     return jsonify(schedule_data)
