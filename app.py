@@ -258,3 +258,48 @@ def get_completed_courses():
     connection.close()
 
     return jsonify(courses)
+
+# Route for adding courses to the selected courses list
+@app.route('/api/add_course', methods=['POST'])
+@login_required
+def add_course():
+    data = request.json
+    course_box_id = data.get('course_box_id')
+    requirement_name = data.get('requirement_name')
+    requirement_type = data.get('requirement_type')
+    course_id = data.get('course_id')
+    course_name = data.get('course_name')
+    credits = data.get('credits')
+    selected = data.get('selected')
+
+    selected_courses = session.get('selected_courses', [])
+    selected_courses.append({
+        'courseBoxID': course_box_id,
+        'requirementName': requirement_name,
+        'requirementType': requirement_type,
+        'courseID': course_id,
+        'courseName': course_name,
+        'credits': credits,
+        'selected': selected
+    })
+    session['selected_courses'] = selected_courses
+
+    return jsonify(selected_courses)
+
+# Route for removing a course from the selected courses list
+@app.route('/api/remove_course', methods=['POST'])
+@login_required
+def remove_course():
+    data = request.json
+    course_box_id = data.get('course_box_id')
+
+    selected_courses = session.get('selected_courses', [])
+    selected_courses = [course for course in selected_courses if course['courseBoxID'] != course_box_id]
+    session['selected_courses'] = selected_courses
+
+    return jsonify(selected_courses)
+
+# Run the application
+if __name__ == '__main__':
+    app.run(debug=True)
+
