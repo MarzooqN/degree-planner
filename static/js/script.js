@@ -603,7 +603,7 @@ async function removeSemester() {
         return;
     }
 
-    const lastSemesterRow = semesterRows.lastElementChild;
+    let lastSemesterRow = semesterRows.lastElementChild;
     const lastSemester = lastSemesterRow.querySelector('.semester');
     const semesterId = lastSemester.id;
     const semesterTerm = semesterId.slice(0, 2);  // Get the first 2 characters
@@ -639,15 +639,13 @@ async function removeSemester() {
         selectedCourses = selectedCourses.filter(course => !(course.CourseID === 'Internship' && course.year === semesterNum));
     }
 
-    
     semesterRows.removeChild(lastSemesterRow);
 
-    if(lastSemesterRow){
-        if(lastSemesterRow.id.indexOf('SP') == -1){
+    if(semesterRows.lastElementChild){
+        if(semesterRows.lastElementChild.id.indexOf('SP') != -1){
             addSpringButtons();
         }
-    }
-    
+    } 
 }
 
 function skipSummer(){

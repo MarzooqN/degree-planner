@@ -20,20 +20,89 @@
             <form method="POST" action="{{ url_for('select_major') }}">
                 <h2>Select Degree:</h2>
                 
-                <select id="college" name="college">
-                    <option value="ENG">ENG - Engineering</option>
-                    <!-- Add more majors as needed -->
+                <select id="college" name="college" onchange="fetchMajors()">
+
+                    <option value="">Select College</option>
+
+                    <option value="AGR">
+                        AGR - Food Agricultural and Environmental Sciences
+                    </option>
+
+                    <option value="AHR">
+                        AHR - Architecture
+                    </option>
+
+                    <option value="ASC">
+                        ASC - Arts and Sciences
+                    </option>
+
+                    <option value="ATI">
+                        ATI - Agricultural Technical Institute
+                    </option>
+
+                    <option value="BUS">
+                        BUS - Business
+                    </option>
+
+                    <option value="DHY">
+                        DHY - Dental Hygiene
+                    </option>
+
+                    <option value="EHE">
+                        EHE - Education and Human Ecology
+                    </option>
+
+                    <option value="ENG">
+                        ENG - Engineering
+                    </option>
+
+                    <option value="ENR">
+                        ENR - Environment and Natural Resources
+                    </option>
+
+                    <option value="HRS">
+                        HRS - Health and Rehabilitation Sciences
+                    </option>
+
+                    <option value="JGS">
+                        JGS - John Glenn College of Public Affairs
+                    </option>
+
+                    <option value="LAW">
+                        LAW - Law
+                    </option>
+
+                    <option value="MED">
+                        MED - Medicine
+                    </option>
+
+                    <option value="NUR">
+                        NUR - Nursing
+                    </option>
+
+                    <option value="PBH">
+                        PBH - Public Health
+                    </option>
+
+                    <option value="PHR">
+                        PHR - Pharmacy
+                    </option>
+
+                    <option value="SWK">
+                        SWK - Social Work
+                    </option>
                 </select>
 
-                <select id="major" name="major">
-                    <option value="CSE">Computer Science and Engineering</option>
-                    <!-- Add more majors as needed -->
+                <select id="major" name="major" onchange="fetchPrograms()">
+                    <option value="">Select Major</option>
+                    <!-- Majors will dynamically populate -->
                 </select>
 
                 <select id="program" name="program">
-                    <option value="AI">AIT - Artifical Intelligence</option>
-                    <!-- Add more majors as needed -->
+                    <option value="">Select Program</option>
+                    <!-- Programs will dynamically populate -->
                 </select>
+
 
 
 
@@ -57,68 +126,7 @@
 
     </main>
 
-    <script>
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            fetchSchedules();
-        });
-
-        async function fetchSchedules() {
-            try {
-                const response = await fetch('/api/get_schedules');
-                const schedules = await response.json();
-                displaySchedules(schedules);
-            } catch (e) {
-                console.error('Error fetching schedules:', e);
-            }
-        }
-
-        function displaySchedules(schedules) {
-            const scheduleContainer = document.getElementById('schedule-container');
-            scheduleContainer.innerHTML = '';  // Clear any existing content
-
-            for (const [scheduleId, schedule] of Object.entries(schedules)) {
-                const scheduleDiv = document.createElement('div');
-                scheduleDiv.className = 'schedule';
-                scheduleDiv.id = `schedule-${scheduleId}`;
-
-                const header = document.createElement('h4');
-                header.textContent = schedule.schedule_name;
-                scheduleDiv.appendChild(header);
-
-                const buttonDiv = document.createElement('div');
-
-                const loadButton = document.createElement('button');
-                const loadSpan = document.createElement('span');
-                loadSpan.textContent = 'Load Plan';
-                loadButton.appendChild(loadSpan);
-                loadButton.onclick = () => loadSchedule(scheduleId);
-                buttonDiv.appendChild(loadButton);
-
-                const deleteButton = document.createElement('button');
-                const deleteSpan = document.createElement('span');
-                deleteSpan.textContent = 'Delete Plan';
-                deleteButton.appendChild(deleteSpan);
-                deleteButton.onclick = () => deleteSchedule(scheduleId);
-                buttonDiv.appendChild(deleteButton);
-                
-                scheduleDiv.appendChild(buttonDiv);
-                scheduleContainer.appendChild(scheduleDiv);
-            }
-        }
-
-        function loadSchedule(scheduleId) {
-            window.location.href = `/load_schedule/${scheduleId}`;
-        }
-
-        function deleteSchedule(scheduleId){
-            window.location.href = `/api/delete_schedule/${scheduleId}`;
-        }
-
-        function logout() {
-            window.location.href = '/logout';
-        }
-
+    <script src="static/js/select_degree.js"></script>
 
     </script>
 </body>
