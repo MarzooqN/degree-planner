@@ -504,6 +504,33 @@ def index():
     print(schedule_id)
     return render_template('index.html', schedule_id=schedule_id)
 
+@app.route('/api/majors', methods=['GET'])
+@login_required
+def get_majors():
+    college = request.args.get('college')
+    connection = get_db_connection('DegreeData')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('SELECT MajorID, MajorName FROM Majors WHERE CollegeID = %s', (college,))
+    majors = cursor.fetchall()
+    connection.close()
+
+    major_list = [{'value': major['MajorID'], 'label': major['MajorName']} for major in majors]
+    return jsonify(major_list)
+
+@app.route('/api/programs', methods=['GET'])
+@login_required
+def get_programs():
+    major = request.args.get('major')
+    connection = get_db_connection('DegreeData')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('SELECT ProgramID, ProgramName FROM Programs WHERE MajorID = %s', (major,))
+    programs = cursor.fetchall()
+    connection.close()
+
+    program_list = [{'value': program['ProgramID'], 'label': program['ProgramName']} for program in programs]
+    return jsonify(program_list)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
