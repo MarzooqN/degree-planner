@@ -372,7 +372,7 @@ async function displayRequirements() {
             header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
             const dynamicCoursesBtn = document.createElement('button');
             dynamicCoursesBtn.textContent = 'View Eligible Courses';
-            dynamicCoursesBtn.onclick = async () => {
+            dynamicCoursesBtn.onclick = () => {
                 //TODO: Change this to modal 
                 const ul = document.createElement('ul');
                 courses.forEach(course => {
@@ -384,6 +384,15 @@ async function displayRequirements() {
                 
             };
             reqDiv.appendChild(dynamicCoursesBtn);
+        } else if (reqData.type === 'credit_hours') {
+            header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
+            const ul = document.createElement('ul');
+            reqData.courses.forEach(course => {
+                const li = document.createElement('li');
+                li.textContent = `${course.CourseID} - ${course.CourseName}(${course.Credits} Credits)`;
+                ul.appendChild(li);
+            });
+            reqDiv.appendChild(ul);
         } else {
             const ul = document.createElement('ul');
             reqData.courses.forEach(course => {
