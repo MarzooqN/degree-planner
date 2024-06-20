@@ -72,47 +72,11 @@ def login():
         if user_data and check_password_hash(user_data['password'], password):
             user = User(id=user_data['userID'], username=user_data['username'], password=user_data['password'])
             login_user(user)
-           
-            #added to store schedules in session after login
-            store_session_user_schedules(user.id)
-            
             return redirect(url_for('select_major'))
         else:
             return 'Invalid credentials'
         
     return render_template('login.html')
-
-#Loading in the schedules into the session
-def store_session_user_schedules(user_id):
-    connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
-        FROM schedules s
-        JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
-        WHERE s.user_id = %s
-    ''', (user_id,))
-    schedules = cursor.fetchall()
-    connection.close()
-
-    schedules_dict = {}
-    for row in schedules:
-        if row['schedule_id'] not in schedules_dict:
-            schedules_dict[row['schedule_id']] = {
-                'schedule_name': row['schedule_name'],
-                'degree': row['degree'],
-                'courses': []
-            }
-        
-        schedules_dict[row['schedule_id']]['courses'].append({
-            'course_id': row['course_id'],
-            'semester': row['semester'],
-            'year': row['year']
-        })
-
-        session[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
-
-    session['schedules'] = schedules_dict
 
 
 #Route for logging out
@@ -420,51 +384,27 @@ def get_schedules():
 
     return jsonify(schedules_dict)
 
-#Modified route to incorporate session variable from store_session_user_schedules
-#Route for getting specific schedule
+
+
+#Route for getting specifc schedule
 @app.route('/api/get_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def get_schedule(schedule_id):
     user_id = current_user.id
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
+
     cursor.execute('''
         DELETE FROM users.CoursesSelected WHERE userID = %s;
     ''', (user_id,))
     connection.commit()
+    connection.close()
 
     schedule = session.get(f'schedule {schedule_id}')
+
     if not schedule:
-        cursor.execute('''
-            SELECT s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
-            FROM schedules s
-            JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
-            WHERE s.user_id = %s AND s.schedule_id = %s
-        ''', (user_id, schedule_id))
-        schedule_rows = cursor.fetchall()
+        return jsonify({"error": "Schedule not found"}), 404
 
-        if not schedule_rows:
-            cursor.close()
-            connection.close()
-            return jsonify({"error": "Schedule not found"}), 404
-
-        schedule = {
-            'schedule_name': schedule_rows[0]['schedule_name'],
-            'degree': schedule_rows[0]['degree'],
-            'courses': []
-        }
-        
-        for row in schedule_rows:
-            schedule['courses'].append({
-                'course_id': row['course_id'],
-                'semester': row['semester'],
-                'year': row['year']
-            })
-
-        session[f'schedule {schedule_id}'] = schedule
-
-    cursor.close()
-    connection.close()
     schedule_data = {
         'schedule_id': schedule_id,
         'schedule_name': schedule['schedule_name'],
@@ -567,4 +507,5 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
