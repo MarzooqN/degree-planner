@@ -97,16 +97,9 @@ def select_major():
         program = request.form['program']
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
+        session['courses_selected'] = []
 
         user_id = current_user.id
-        connection = get_db_connection('users')
-        cursor = connection.cursor(dictionary=True)
-
-        cursor.execute('''
-            DELETE FROM users.CoursesSelected WHERE userID = %s;
-        ''', (user_id,))
-        connection.commit()
-        connection.close()
 
         return redirect(url_for('index'))
     return render_template('select_major.html')
@@ -125,6 +118,7 @@ def load_schedule(schedule_id):
     if schedule:
         session['schedule_id'] = schedule_id
         session['degree'] = schedule['degree']
+        session['courses_selected'] = []
         return redirect(url_for('index'))
     else:
         return 'Schedule not found', 404
@@ -236,17 +230,15 @@ def get_courses_in_range():
 def get_selected_course():
     data = request.json
     course_box_id = data.get('course_box_id')
-    user = current_user.id
 
-    connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('''
-        SELECT c.courseID, c.credits FROM CoursesSelected c WHERE userID=%s AND courseBoxID=%s
-                   ''', (user, course_box_id))
-    course = cursor.fetchall()
-    cursor.close()
+
+    for course in session['courses_selected']:
+        if course['course_box_id'] == str(course_box_id):
+            return jsonify(course)
+        
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
     
-    return jsonify(course)
 
 
 #Route for getting all completed courses by the user
@@ -277,22 +269,15 @@ def add_course():
     year = data.get('year')
     credits = data.get('credits')
 
-    try:
-        connection = get_db_connection('users')
-    except:
-        return jsonify({"error": "Failed connecting to database"}), 404
-    
-    cursor = connection.cursor()
-    try:
-        cursor.execute('''
-            INSERT INTO CoursesSelected (courseBoxID, userID, courseID, semester, year, credits)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        ''', (course_box_id, user_id, course_id, semester, year, credits))
-        connection.commit()
-    except:
-        return jsonify({"error": "Failed to commit to database"}), 404
-    
-    connection.close()
+    course = {
+        'course_box_id': course_box_id,
+        'courseID': course_id,
+        'semester': semester,
+        'year': year,
+        'credits': credits
+    }
+
+    session['courses_selected'].append(course)
 
     return jsonify({"success": True}), 201
 
@@ -313,6 +298,10 @@ def remove_course():
         connection.commit()
     except:
         return jsonify({"error": "Something went wrong"}), 404
+    
+    #loop through each course in courses selected
+    #remove any where the courseBoxID = course_box_id
+
     
     return jsonify({"success": True}), 201
 
@@ -390,15 +379,6 @@ def get_schedules():
 @app.route('/api/get_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def get_schedule(schedule_id):
-    user_id = current_user.id
-    connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-
-    cursor.execute('''
-        DELETE FROM users.CoursesSelected WHERE userID = %s;
-    ''', (user_id,))
-    connection.commit()
-    connection.close()
 
     schedule = session.get(f'schedule {schedule_id}')
 
@@ -493,6 +473,9 @@ def remove_all_courses():
     finally:
         cursor.close()
         connection.close()
+
+    #loop through each course in courses selected
+    #remove any where the semester = semester and year = year 
 
     return jsonify({'success': 'Courses removed successfully'}), 200
 
