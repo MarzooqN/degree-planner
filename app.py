@@ -33,7 +33,7 @@ def load_user(user_id):
 #Database connection function 
 def get_db_connection(database):
     connection = mysql.connector.connect(
-        host="120.0.0.1",
+        host="34.162.95.182",
         database=database,
         user="root",
         password="OSUDEGREEPLAN!"
