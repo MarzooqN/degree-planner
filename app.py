@@ -455,8 +455,8 @@ def remove_all_courses():
     
     if 'courses_selected' in session:
         session['courses_selected'] =  
-            [course for course in session['courses_selected'] if course['semester'] != semester or course['year'] != year]
-
+            course for course in session['courses_selected']
+            if course['semester'] != semester or course['year'] != year
     return jsonify({'success': 'Courses removed successfully'}), 200
 
 #Main route/page
