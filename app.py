@@ -360,7 +360,7 @@ def get_schedules():
             'year': row['year']
         })
 
-        [f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
+        schedules_dict[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
 
     return jsonify(schedules_dict)
 
