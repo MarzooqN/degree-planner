@@ -257,7 +257,7 @@ def get_completed_courses():
 
     return jsonify(courses)
 
-#Route for adding a coure into selected courses table
+#Route for adding a course into selected courses table
 @app.route('/api/add_course', methods=['POST'])
 @login_required
 def add_course():
@@ -288,20 +288,11 @@ def remove_course():
     data = request.json
     user_id = current_user.id
     course_box_id = data.get('course_box_id')
-
-    connection = get_db_connection('users')
-    cursor = connection.cursor()
-    try:
-        cursor.execute('''
-            DELETE FROM CoursesSelected WHERE courseBoxID=%s AND userID=%s
-        ''', (course_box_id, user_id))
-        connection.commit()
-    except:
-        return jsonify({"error": "Something went wrong"}), 404
     
     #loop through each course in courses selected
     #remove any where the courseBoxID = course_box_id
-
+    if 'courses_selected' in session:
+        session['courses_selected'] = [course for course in session['courses_selected'] if course['course_box_id'] != course_box_id]
     
     return jsonify({"success": True}), 201
 
@@ -312,7 +303,7 @@ def remove_course():
 def save_schedule():
     data = request.json
     schedule_name = data.get('schedule_name')
-    degree = session.get('dergree')
+    degree = session.get('degree')
     user_id = current_user.id
 
     connection = get_db_connection('users')
@@ -369,7 +360,7 @@ def get_schedules():
             'year': row['year']
         })
 
-        session[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
+        [f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
 
     return jsonify(schedules_dict)
 
@@ -459,23 +450,12 @@ def remove_all_courses():
     if not user_id or not semester or not year:
         return jsonify({'error': 'Missing required parameters'}), 400
 
-    connection = get_db_connection('users')
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute('''
-            DELETE FROM CoursesSelected WHERE userID = %s AND semester = %s AND year = %s
-        ''', (user_id, semester, year))
-        connection.commit()
-    except Exception as e:
-        print(e)
-        return jsonify({'error': f'Failed to remove courses: {e}'}), 500
-    finally:
-        cursor.close()
-        connection.close()
-
     #loop through each course in courses selected
     #remove any where the semester = semester and year = year 
+    
+    if 'courses_selected' in session:
+        session['courses_selected'] =  
+            [course for course in session['courses_selected'] if course['semester'] != semester or course['year'] != year]
 
     return jsonify({'success': 'Courses removed successfully'}), 200
 
