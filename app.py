@@ -9,6 +9,7 @@ app.secret_key = 'abc123'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+courses_selected = []
 
 #Class for User
 class User(UserMixin):
@@ -97,7 +98,7 @@ def select_major():
         program = request.form['program']
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
-        session['courses_selected'] = []
+        courses_selected = []
 
         user_id = current_user.id
 
@@ -118,7 +119,7 @@ def load_schedule(schedule_id):
     if schedule:
         session['schedule_id'] = schedule_id
         session['degree'] = schedule['degree']
-        session['courses_selected'] = []
+        courses_selected = []
         return redirect(url_for('index'))
     else:
         return 'Schedule not found', 404
@@ -157,6 +158,21 @@ def get_courses():
 
     return jsonify(list(course_dict.values()))
 
+#Route for getting all completed courses by the user
+@app.route('/api/completed_courses', methods=['GET'])
+@login_required
+def get_completed_courses():
+    user = current_user.id
+    connection = get_db_connection('users')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute(f'''
+        SELECT c.courseID, c.semester, c.year FROM CoursesTaken c WHERE userID= {user}
+    ''')
+    courses = cursor.fetchall()
+    connection.close()
+
+
+    return jsonify(courses)
 
 #Route for getting degree requirements 
 @app.route('/api/requirements', methods=['GET'])
@@ -231,31 +247,12 @@ def get_selected_course():
     data = request.json
     course_box_id = data.get('course_box_id')
 
-
-    for course in session['courses_selected']:
+    for course in courses_selected:
         if course['course_box_id'] == str(course_box_id):
             return jsonify(course)
         
-    if not course:
-        return jsonify({'error': 'Course not found'}), 404
+    return jsonify({'error': 'Course not found'}), 404
     
-
-
-#Route for getting all completed courses by the user
-@app.route('/api/completed_courses', methods=['GET'])
-@login_required
-def get_completed_courses():
-    user = current_user.id
-    connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute(f'''
-        SELECT c.courseID, c.semester, c.year FROM CoursesTaken c WHERE userID= {user}
-    ''')
-    courses = cursor.fetchall()
-    connection.close()
-
-
-    return jsonify(courses)
 
 #Route for adding a course into selected courses table
 @app.route('/api/add_course', methods=['POST'])
@@ -277,7 +274,7 @@ def add_course():
         'credits': credits
     }
 
-    session['courses_selected'].append(course)
+    courses_selected.append(course)
 
     return jsonify({"success": True}), 201
 
@@ -286,16 +283,32 @@ def add_course():
 @login_required
 def remove_course():
     data = request.json
-    user_id = current_user.id
     course_box_id = data.get('course_box_id')
     
-    #loop through each course in courses selected
-    #remove any where the courseBoxID = course_box_id
-    if 'courses_selected' in session:
-        session['courses_selected'] = [course for course in session['courses_selected'] if course['course_box_id'] != course_box_id]
-    
+    global courses_selected
+    courses_selected = [course for course in courses_selected if course['course_box_id'] != course_box_id]
+
     return jsonify({"success": True}), 201
 
+#Route for removing all courses from row
+@app.route('/api/remove_all_courses', methods=['POST'])
+@login_required
+def remove_all_courses():
+    data = request.json
+    user_id = current_user.id
+    semester = data.get('semester')
+    year = data.get('year')
+    
+    if not user_id or not semester or not year:
+        return jsonify({'error': 'Missing required parameters'}), 400
+
+    global courses_selected
+    courses_selected=  [
+        course for course in courses_selected
+        if course['semester'] != str(semester) or course['year'] != int(year)
+    ]
+    
+    return jsonify({'success': 'Courses removed successfully'}), 200
 
 #Route for saving schdule 
 @app.route('/api/save_schedule', methods=['POST'])
@@ -360,7 +373,7 @@ def get_schedules():
             'year': row['year']
         })
 
-        schedules_dict[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
+        session[f'schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
 
     return jsonify(schedules_dict)
 
@@ -432,41 +445,17 @@ def update_schedule(schedule_id):
 
         connection.commit()
     except Exception as e:
-        print(e)
         return jsonify({"error": "Failed to update schedule"}), 404
     
     connection.close()
     return jsonify({"success": True}), 200
 
-#Route for removing all courses from row
-@app.route('/api/remove_all_courses', methods=['POST'])
-@login_required
-def remove_all_courses():
-    data = request.json
-    user_id = current_user.id
-    semester = data.get('semester')
-    year = data.get('year')
-
-    if not user_id or not semester or not year:
-        return jsonify({'error': 'Missing required parameters'}), 400
-
-    #loop through each course in courses selected
-    #remove any where the semester = semester and year = year 
-    
-    if 'courses_selected' in session:
-        session['courses_selected'] =  [
-            course for course in session['courses_selected']
-            if course['semester'] != semester or course['year'] != year
-        ]
-    
-    return jsonify({'success': 'Courses removed successfully'}), 200
 
 #Main route/page
 @app.route('/', methods=['POST', 'GET'])
 @login_required
 def index():
     schedule_id = session.get('schedule_id')
-    print(schedule_id)
     return render_template('index.html', schedule_id=schedule_id)
 
 @app.route('/api/majors', methods=['GET'])
