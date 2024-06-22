@@ -7,6 +7,11 @@ let completedCourses = [];
 let requirementsData = {};
 const scheduleId = parseInt(document.getElementById('schedule-id').value);
 
+let loadingSchedule = false;
+if(scheduleId > 0){
+    loadingSchedule = true;
+}
+
 
 /*
 When page is loaded get course data based on specified major and user data
@@ -25,10 +30,10 @@ async function fetchAllData() {
     const scheduleId = parseInt(document.getElementById('schedule-id').value);
     await fetchCourseData();
     await fetchUserData();
-    fetchRequirementsData();
+    await fetchRequirementsData();
 
     if (scheduleId > 0){
-        loadSavedSchedule(scheduleId);
+        await loadSavedSchedule(scheduleId);
     }
 }
 
@@ -271,6 +276,7 @@ async function populateSchedule(schedule) {
     }
 
     closeModal(waitModal);
+    loadingSchedule = false;
 }
 
 
@@ -314,7 +320,7 @@ async function fetchRequirementsData() {
         const requirements = await response.json();
         requirementsData = requirements;
         console.log(requirementsData)
-        displayRequirements();
+        await displayRequirements();
     } catch (e) {
         console.error('Error fetching requirements data:', e);
     }
@@ -680,6 +686,7 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     selectList.className = 'course-select'
     selectList.id = `course-select-${semesterTerm}-${semesterNum}-${courseBoxNum}`;
     selectList.setAttribute('onchange', `courseChange(this, '${semesterTerm}', ${semesterNum}, '${courseBox.id}')`);
+    selectList.dataset.firstSelected = 'false';
     
     //Creates first option for list
     const option = document.createElement('option');
@@ -721,8 +728,11 @@ async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxI
     if (selectElement.value == "Click to Select Course"){
         await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
     } else {
-        await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
+        if(!loadingSchedule && selectElement.dataset.firstSelected === 'true'){
+            await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
+        }
         await checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID);
+        selectElement.dataset.firstSelected = 'true';
     }
 }
 
@@ -880,7 +890,6 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     }
 }
 
-
 /*
 Function to remove course/coursebox from database
 */
@@ -906,9 +915,9 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
         });
 
         const course = await response.json();
-        if(course[0]){
-            courseID = course[0].courseID; 
-            credits = course[0].credits;
+        if(course){
+            courseID = course.courseID; 
+            credits = course.credits;
         }
 
     } catch (e) {
@@ -918,7 +927,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
     }
 
     if(courseID === 'CSE XXXX'){
-        console.log('No Course Found')
+        console.error('No Course Found')
         return;
     }
     //Removes course from database
@@ -961,7 +970,6 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 /*
 Function that removes all courses at once when remove semester is pressed
 */
-
 async function removeAllCourses(semesterTerm, semesterYear) {
     const removeCoursesPayload = {
         semester: semesterTerm,
