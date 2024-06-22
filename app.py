@@ -158,6 +158,39 @@ def get_courses():
 
     return jsonify(list(course_dict.values()))
 
+#Route for getting specific course
+@app.route('/api/course/<course_id>', methods=['GET'])
+@login_required
+def get_course(course_id):
+    connection = get_db_connection('Courses')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('''
+        SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
+        FROM Courses c
+        LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
+        WHERE c.CourseID = %s
+    ''', (course_id,))
+    course = cursor.fetchone()
+    connection.close()
+
+    if course:
+        course_data = {
+            'CourseID': course['CourseID'],
+            'CourseName': course['CourseName'],
+            'Credits': course['Credits'],
+            'prerequisites': []
+        }
+        if course['RequirementID']:
+            course_data['prerequisites'].append({
+                'prerequisiteID': course['RequirementID'],
+                'group': course['PrerequisiteGroup'],
+                'type': course['Type']
+            })
+        return jsonify(course_data)
+    else:
+        return jsonify({'error': 'Course not found'}), 404
+
+
 #Route for getting all completed courses by the user
 @app.route('/api/completed_courses', methods=['GET'])
 @login_required

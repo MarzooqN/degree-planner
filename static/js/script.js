@@ -27,13 +27,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 async function fetchAllData() {
 
+    const waitModal = document.getElementById('waitModal');
+    openModal(waitModal);
+
     const scheduleId = parseInt(document.getElementById('schedule-id').value);
     await fetchCourseData();
     await fetchUserData();
+
     await fetchRequirementsData();
 
     if (scheduleId > 0){
         await loadSavedSchedule(scheduleId);
+    } else {
+        closeModal(waitModal);
     }
 }
 
@@ -395,7 +401,7 @@ async function displayRequirements() {
             const ul = document.createElement('ul');
             reqData.courses.forEach(course => {
                 const li = document.createElement('li');
-                li.textContent = `${course.CourseID} - ${course.CourseName}(${course.Credits} Credits)`;
+                li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
                 ul.appendChild(li);
             });
             reqDiv.appendChild(ul);
@@ -494,6 +500,8 @@ function addSemester(term = null, year = null) {
     
     semesterRow.appendChild(semester);
     semesterRows.appendChild(semesterRow);
+
+    updateSemesterDropdown();
     
 
     const skipButton = document.getElementById('skip-button');
@@ -661,7 +669,29 @@ async function removeSemester() {
             addSpringButtons();
         }
     } 
+
+    updateSemesterDropdown();
 }
+
+/*
+Function for updating semester drop down for manual coure addition
+*/
+function updateSemesterDropdown() {
+    const manualSemesterSelect = document.getElementById('manualSemesterSelect');
+    manualSemesterSelect.innerHTML = ''; // Clear existing options
+
+    const semesterRows = document.getElementById('semester-rows');
+    const semesterDivs = semesterRows.getElementsByClassName('semester-row');
+
+    Array.from(semesterDivs).forEach(semesterDiv => {
+        const header = semesterDiv.querySelector('h3');
+        const option = document.createElement('option');
+        option.value = header.id;
+        option.textContent = header.id;
+        manualSemesterSelect.appendChild(option);
+    });
+}
+
 
 function skipSummer(){
     semesterCount = 0;
@@ -693,8 +723,21 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     option.textContent = "Click to Select Course";
     selectList.appendChild(option);
 
+    // Filters courses based on requirements
+    const filteredCourses = courseData.filter(course => {
+        return Object.values(requirementsData).some(req => {
+            if (req.type === 'credit_hours' || req.type === 'all_courses') {
+                return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
+            } else if (req.type === 'some_courses') {
+                return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
+            }
+            return false;
+        });
+    });
+
+
     //Loops through each course in courseData and adds them to list, specifiying course prerequisites in dataset
-    for (const course of courseData){
+    for (const course of filteredCourses){
         const option = document.createElement('option');
         option.value = course.CourseID;
         option.textContent = `${course.CourseID} - ${course.CourseName}`;
@@ -714,6 +757,14 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     courseBoxNum++;
 
     if(courseID){
+        if(!filteredCourses.some(course => course.CourseID == courseID)){
+            const selectedCourse = courseData.find(course => course.CourseID === courseID);
+            const option = document.createElement('option');
+            option.value = selectedCourse.CourseID;
+            option.textContent = `${selectedCourse.CourseID} - ${selectedCourse.CourseName} - Manually Added`;
+            option.dataset.prerequisites = JSON.stringify(selectedCourse.prerequisites)
+            selectList.appendChild(option);
+        }
         selectList.value = courseID;
         await courseChange(selectList, semesterTerm, semesterNum, courseBox.id)
     }
@@ -735,6 +786,46 @@ async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxI
         selectElement.dataset.firstSelected = 'true';
     }
 }
+
+/*
+Function for adding course manually
+*/
+async function addManualCourse() {
+    const courseId = document.getElementById('manualCourseInput').value;
+    const selectedSemester = document.getElementById('manualSemesterSelect').value;
+
+    if (!selectedSemester) {
+        alert('Please select a semester.');
+        return;
+    }
+
+    const [semesterTerm, semesterYear] = selectedSemester.split(' ');
+
+    // Fetch course data based on the entered course ID
+    const response = await fetch(`/api/course/${courseId}`);
+    if (!response.ok) {
+        alert('Invalid course ID or course not found.');
+        return;
+    }
+
+    const course = await response.json();
+
+    if (!course) {
+        alert('Invalid course ID or course not found.');
+        return;
+    }
+
+    // Check if the course is already selected
+    if (selectedCourses.some(c => c.CourseID === course.CourseID)) {
+        alert('Course already selected.');
+        return;
+    }
+
+
+    // Add the course to the UI (you can reuse addCourseBox logic if needed)
+    addCourseBox(semesterTerm, parseInt(semesterYear), course.CourseID);
+}
+
 
 
 // Mapping of terms to numerical values for comparison
@@ -787,7 +878,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
     //Check if total credit hours less than 18 
     header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-    if (parseInt(header.dataset.credits) + selectedCourse.Credits > 18){
+    if (parseFloat(header.dataset.credits) + selectedCourse.Credits > 18){
         selectElement.value = "Click to Select Course"; // Reset selection
         modalMessage.textContent = 'Cannot add course: exceeds 18 credit hour limit';
         openModal(modal);
@@ -872,7 +963,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
             selectElement.value = selectedCourseID;
 
             header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseInt(header.dataset.credits) + selectedCourse.Credits;
+            header.dataset.credits = parseFloat(header.dataset.credits) + selectedCourse.Credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
 
             updateRequirementFulfillment();
@@ -948,7 +1039,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 
             // Null check before accessing header's properties
             if (header) {
-                header.dataset.credits = parseInt(header.dataset.credits) - credits;
+                header.dataset.credits = parseFloat(header.dataset.credits) - credits;
                 header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
             }
 

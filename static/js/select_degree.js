@@ -105,8 +105,15 @@ function loadSchedule(scheduleId) {
     window.location.href = `/load_schedule/${scheduleId}`;
 }
 
-function deleteSchedule(scheduleId){
-    window.location.href = `/api/delete_schedule/${scheduleId}`;
+async function deleteSchedule(scheduleId){
+    try {
+        const response = await fetch(`/api/delete_schedule/${scheduleId}`);
+        window.location.reload();
+
+    } catch(e) {
+        console.error('Error Deleting schedule:', e);
+    }
+
 }
 
 function logout() {

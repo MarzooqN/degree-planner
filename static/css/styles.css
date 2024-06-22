@@ -350,3 +350,30 @@ button:hover span:after {
       width: 100%;
     }
   }
+
+
+  /* Manual Course Adding */
+#manualCourseHeading{
+    margin: 0px;
+}
+
+#manualCourseInput, #manualSemesterSelect, #manualCourseBtn {
+    margin-right: 5px;
+    padding: 5px;
+    width: 100px
+}
+
+#manualCourseInput {
+    width: 100px;
+}
+
+#manualCourseBtn {
+    background-color: #b31b1b;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#manualCourseBtn:hover {
+    background-color: #a31b1b;
+}

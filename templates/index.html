@@ -63,17 +63,26 @@
 
     <div id="waitModal" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <h2 id="waitMessage">Please Wait Your Schedule Is Being Loaded</h2>
+            <h2 id="waitMessage">Please Wait Your Degree Plan Is Being Loaded</h2>
             <div class="loader"></div>
 
         </div>
     </div>
 
-
     
     <main>
         <section id="semester-planner">
             <h2>Semester Planner</h2>
+            <div>
+                <h5 id="manualCourseHeading">Manually Add Course</h5>
+                <input type="text" id="manualCourseInput" placeholder="Enter Course ID">
+                <select id="manualSemesterSelect">
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <button onclick="addManualCourse()">Add Course</button>
+            </div>
+            
+
             <div id="semester-rows">
                 <!-- Semester rows will be added dynamically here -->
             </div>
@@ -82,7 +91,6 @@
                 <button id='add-semester-button' onclick="addSemester()">Add Semester</button>
                 <button id='remove-semester-button' onclick="removeSemester()">Remove Semester</button>
             </div>
-
         </section>
 
         <section id="degree-requirements-container">
