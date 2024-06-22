@@ -420,7 +420,6 @@ def delete_schedule(schedule_id):
     connection.close()
     return render_template('select_major.html')
 
-
 #Route for updating a schedule
 @app.route('/api/update_schedule/<int:schedule_id>', methods=['POST'])
 @login_required
@@ -450,14 +449,6 @@ def update_schedule(schedule_id):
     connection.close()
     return jsonify({"success": True}), 200
 
-
-#Main route/page
-@app.route('/', methods=['POST', 'GET'])
-@login_required
-def index():
-    schedule_id = session.get('schedule_id')
-    return render_template('index.html', schedule_id=schedule_id)
-
 @app.route('/api/majors', methods=['GET'])
 @login_required
 def get_majors():
@@ -484,6 +475,14 @@ def get_programs():
     program_list = [{'value': program['ProgramID'], 'label': program['ProgramName']} for program in programs]
     return jsonify(program_list)
 
+#Main route/page
+@app.route('/', methods=['POST', 'GET'])
+@login_required
+def index():
+    schedule_id = session.get('schedule_id')
+    global courses_selected
+    courses_selected = []
+    return render_template('index.html', schedule_id=schedule_id)
 
 
 if __name__ == '__main__':
