@@ -100,10 +100,52 @@ def select_major():
         session['schedule_id'] = 0
         courses_selected = []
 
-        user_id = current_user.id
-
         return redirect(url_for('index'))
     return render_template('select_major.html')
+
+
+@app.route('/compare_degrees', methods=['GET','POST'])
+@login_required
+def compare_degrees():
+    if request.method =='POST':
+        degree_count = int(request.form.get('degree_count'))
+        degrees = []
+
+        for i in range(1, degree_count + 1):
+            college = request.form.get(f'college{i}')
+            major = request.form.get(f'major{i}')
+            program = request.form.get(f'program{i}')
+            if college and major and program:
+                degrees.append(f"{college}_{major}_{program}")
+
+        common_courses = {}
+        all_courses = {}
+
+        for degree in degrees:
+            connection = get_db_connection(degree)
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute('''
+                SELECT rc.CourseID, c.CourseName, rc.Credits
+                FROM RequirementCourses rc
+                LEFT JOIN Courses.Courses c ON rc.CourseID = c.CourseID
+            ''')
+            courses = cursor.fetchall()
+            connection.close()
+
+            courses_checked = {}
+            for course in courses:
+                course_id = course['CourseID']
+                if course_id not in courses_checked:
+                    if course_id not in all_courses:
+                        all_courses[course_id] = 0
+                    all_courses[course_id] += 1
+                    if all_courses[course_id] == len(degrees):
+                        common_courses[course_id] = course
+                    courses_checked[course_id] = 'checked'
+
+        return render_template('compare_degrees.html', common_courses=common_courses, degrees=degrees)
+    return render_template('compare_degrees.html')
+
 
 #Route for getting degree (probably should name it something else)
 @app.route('/load_schedule/<int:schedule_id>', methods=['GET'])

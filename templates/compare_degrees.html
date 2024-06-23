@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Degrees</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Compare Degrees</h1>
+        <div class="header-buttons">
+            <button onclick="logout()"><span>Logout</span></button>
+            <button onclick="homepage()"><span>Home Page</span></button>
+        </div>
+    </header>
+    <main>
+
+        <section id="compare-degrees">
+            <h2>Compare Degrees:</h2>
+            <form method="POST" action="{{ url_for('compare_degrees') }}">
+                <label for="degree-count">Number of Degrees to Compare:</label>
+                <select id="degree-count" name="degree_count" onchange="updateDegreeSelectionForms()">
+                    <option value="2">2 Degrees</option>
+                    <option value="3">3 Degrees</option>
+                    <option value="4">4 Degrees</option>
+                </select>
+
+                <div id="degree-selection-forms">
+                    <!-- Degree selection forms will be dynamically added here -->
+                </div>
+
+                <button type="submit"><span>Compare</span></button>
+            </form>
+        </section>
+
+
+
+
+
+        <section id="common-courses">
+
+            <h2>Common Courses</h2>
+            <ul>
+                {%if common_courses %}
+                    {% for course_id, course in common_courses.items() %}
+                        <li>{{ course.CourseID }} - {{ course.CourseName }} ({{ course.Credits }} Credits)</li>
+                    {% endfor %}
+                {% endif %}
+
+            </ul>
+        </section>
+    </main>
+    <script src="static/js/compare_degrees.js"></script>
+</body>
+</html>

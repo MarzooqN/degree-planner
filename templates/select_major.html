@@ -31,7 +31,12 @@
         </section>
 
         <section id="compare-degrees">
-            <h2>Compare Degrees: </h2>
+            <form method="GET" action="{{ url_for('compare_degrees')}}">
+                <h2>Compare Degrees: </h2>
+                <button type="submit">
+                    <span>Go to Compare Degrees</span> 
+                </button>
+            </form>
         </section>
 
         <section id = "saved-schedules">

@@ -1,5 +1,5 @@
-                
-<select id="college" name="college" onchange="fetchMajors()">
+{% if num %}        
+<select id="college{{ num }}" name="college{{ num }}" onchange="fetchMajors(this.value, 'major{{ num }}', 'program{{ num }}')">
 
     <option value="">Select College</option>
 
@@ -72,7 +72,91 @@
     </option>
 </select>
 
-<select id="major" name="major" onchange="fetchPrograms()">
+<select id="major{{ num }}" name="major{{ num }}" onchange="fetchPrograms(this.value, 'program{{ num }}')">
+    <option value="">Select Major</option>
+    <!-- Majors will dynamically populate -->
+</select>
+
+<select id="program{{ num }}" name="program{{ num }}">
+    <option value="">Select Program</option>
+    <!-- Programs will dynamically populate -->
+</select>
+
+{% else %}
+<select id="college" name="college" onchange="fetchMajors(this.value, 'major', 'program')">
+
+    <option value="">Select College</option>
+
+    <option value="AGR">
+        AGR - Food Agricultural and Environmental Sciences
+    </option>
+
+    <option value="AHR">
+        AHR - Architecture
+    </option>
+
+    <option value="ASC">
+        ASC - Arts and Sciences
+    </option>
+
+    <option value="ATI">
+        ATI - Agricultural Technical Institute
+    </option>
+
+    <option value="BUS">
+        BUS - Business
+    </option>
+
+    <option value="DHY">
+        DHY - Dental Hygiene
+    </option>
+
+    <option value="EHE">
+        EHE - Education and Human Ecology
+    </option>
+
+    <option value="ENG">
+        ENG - Engineering
+    </option>
+
+    <option value="ENR">
+        ENR - Environment and Natural Resources
+    </option>
+
+    <option value="HRS">
+        HRS - Health and Rehabilitation Sciences
+    </option>
+
+    <option value="JGS">
+        JGS - John Glenn College of Public Affairs
+    </option>
+
+    <option value="LAW">
+        LAW - Law
+    </option>
+
+    <option value="MED">
+        MED - Medicine
+    </option>
+
+    <option value="NUR">
+        NUR - Nursing
+    </option>
+
+    <option value="PBH">
+        PBH - Public Health
+    </option>
+
+    <option value="PHR">
+        PHR - Pharmacy
+    </option>
+
+    <option value="SWK">
+        SWK - Social Work
+    </option>
+</select>
+
+<select id="major" name="major" onchange="fetchPrograms(this.value, 'program')">
     <option value="">Select Major</option>
     <!-- Majors will dynamically populate -->
 </select>
@@ -81,5 +165,8 @@
     <option value="">Select Program</option>
     <!-- Programs will dynamically populate -->
 </select>
+
+
+{% endif %}
 
 
