@@ -75,7 +75,7 @@ def login():
             login_user(user)
             return redirect(url_for('select_major'))
         else:
-            return 'Invalid credentials'
+            return render_template('register.html')
         
     return render_template('login.html')
 

@@ -17,6 +17,7 @@ if(scheduleId > 0){
 When page is loaded get course data based on specified major and user data
 */
 document.addEventListener('DOMContentLoaded', (event) => {
+    validCoursesModalFunctionality();
     messageModalFunctionality();
     saveScheduleModalFunctionality();
     loadedScheduleModalFunctionality();
@@ -49,6 +50,24 @@ function openModal(modal){
 
 function closeModal(modal){
     modal.style.display = 'none';
+}
+
+function validCoursesModalFunctionality(){
+
+    //Declare needed elements
+    const modal = document.getElementById('validCoursesModal');
+    const span = document.getElementsByClassName('close')[4];
+    const okayBtn = document.getElementById('validCoursesOkay');
+
+    //When the x is clicked the modal goes away
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    //When okay is clicked the modal goes away
+    okayBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
 }
 
 function messageModalFunctionality(){
@@ -387,14 +406,17 @@ async function displayRequirements() {
             dynamicCoursesBtn.textContent = 'View Eligible Courses';
             dynamicCoursesBtn.onclick = () => {
                 //TODO: Change this to modal 
-                const ul = document.createElement('ul');
+
+                const modal = document.getElementById('validCoursesModal');
+                const validCourses = document.getElementById('validCourses');
+                validCourses.innerHTML = ''
                 courses.forEach(course => {
                     const li = document.createElement('li');
                     li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
                     li.setAttribute('data-course-id', course.CourseID); // Unique identifier
-                    ul.appendChild(li);
+                    validCourses.appendChild(li);
                 });
-                reqDiv.appendChild(ul);
+                openModal(modal);
                 
             };
             reqDiv.appendChild(dynamicCoursesBtn);
