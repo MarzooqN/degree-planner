@@ -386,6 +386,6 @@ button:hover span:after {
 }
 
 /*adding course */
-.selected-course {
+.completed-course {
     color: green; /* or any color you prefer */
 }

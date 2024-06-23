@@ -432,20 +432,20 @@ function updateRequirementFulfillment() {
         const reqDiv = document.getElementById(`requirement-${reqName.replace(/ /g, '-')}`);
         let coursesFulfilled = false;
 
-        // Remove the selected-course class from all courses
+        // Remove the completed-course class from all courses
         const courseLis = reqDiv.querySelectorAll('li[data-course-id]');
         courseLis.forEach(courseLi => {
-            courseLi.classList.remove('selected-course');
+            courseLi.classList.remove('completed-course');
         });
 
         if (reqData.type === 'all_courses') {
             coursesFulfilled = reqData.courses.every(course => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
                 const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
-                if (isCourseSelected) {
+                if (isCourseSelected || isCourseCompleted) {
                     const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
                     if (courseLi) {
-                        courseLi.classList.add('selected-course');
+                        courseLi.classList.add('completed-course');
                     }
                 }
                 return isCourseCompleted || isCourseSelected;
@@ -454,10 +454,10 @@ function updateRequirementFulfillment() {
             const totalCredits = reqData.courses.reduce((sum, course) => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
                 const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
-                if (isCourseSelected) {
+                if (isCourseSelected || isCourseCompleted) {
                     const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
                     if (courseLi) {
-                        courseLi.classList.add('selected-course');
+                        courseLi.classList.add('completed-course');
                     }
                 }
                 if (isCourseCompleted || isCourseSelected) {
@@ -471,10 +471,10 @@ function updateRequirementFulfillment() {
                 group.some(course => {
                     const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
                     const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
-                    if (isCourseSelected) {
+                    if (isCourseSelected || isCourseCompleted) {
                         const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
                         if (courseLi) {
-                            courseLi.classList.add('selected-course');
+                            courseLi.classList.add('completed-course');
                         }
                     }
                     return isCourseCompleted || isCourseSelected;
