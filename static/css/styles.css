@@ -289,6 +289,13 @@ button:hover span:after {
     border-radius: 20px;
 }
 
+.modal-content img{
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    width: 50%;
+}
+
 .modal-content input {
     width: 80%
 }
@@ -314,7 +321,7 @@ button:hover span:after {
     /* color of choise */
     --clr: #ba0c2f;
     /* loading time of choice */
-    --load-time: 2s;
+    --load-time: 1.5s;
     outline: 5px solid var(--clr);
     outline-offset: 5px;
     position: relative;

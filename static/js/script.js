@@ -783,7 +783,6 @@ async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxI
             await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
         }
         await checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID);
-        selectElement.dataset.firstSelected = 'true';
     }
 }
 
@@ -965,6 +964,8 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
             header = document.getElementById(`${semesterTerm} ${semesterNum}`);
             header.dataset.credits = parseFloat(header.dataset.credits) + selectedCourse.Credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+
+            selectElement.dataset.firstSelected = 'true';
 
             updateRequirementFulfillment();
         } else {
