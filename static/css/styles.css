@@ -384,3 +384,8 @@ button:hover span:after {
 #manualCourseBtn:hover {
     background-color: #a31b1b;
 }
+
+/*adding course */
+.selected-course {
+    color: green; /* or any color you prefer */
+}

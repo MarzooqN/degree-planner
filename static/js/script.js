@@ -374,6 +374,7 @@ async function displayRequirements() {
                 courses.forEach(course => {
                     const li = document.createElement('li');
                     li.textContent = `${course.CourseID} - ${course.CourseName}`;
+                    li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                     ul.appendChild(li);
                 });
                 reqDiv.appendChild(ul);
@@ -390,6 +391,7 @@ async function displayRequirements() {
                 courses.forEach(course => {
                     const li = document.createElement('li');
                     li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
+                    li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                     ul.appendChild(li);
                 });
                 reqDiv.appendChild(ul);
@@ -402,6 +404,7 @@ async function displayRequirements() {
             reqData.courses.forEach(course => {
                 const li = document.createElement('li');
                 li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
+                li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                 ul.appendChild(li);
             });
             reqDiv.appendChild(ul);
@@ -410,6 +413,7 @@ async function displayRequirements() {
             reqData.courses.forEach(course => {
                 const li = document.createElement('li');
                 li.textContent = `${course.CourseID} - ${course.CourseName}`;
+                li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                 ul.appendChild(li);
             });
             reqDiv.appendChild(ul);
@@ -428,15 +432,35 @@ function updateRequirementFulfillment() {
         const reqDiv = document.getElementById(`requirement-${reqName.replace(/ /g, '-')}`);
         let coursesFulfilled = false;
 
+        // Remove the selected-course class from all courses
+        const courseLis = reqDiv.querySelectorAll('li[data-course-id]');
+        courseLis.forEach(courseLi => {
+            courseLi.classList.remove('selected-course');
+        });
+
         if (reqData.type === 'all_courses') {
-            coursesFulfilled = reqData.courses.every(course =>
-                completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
-                selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)
-            );
+            coursesFulfilled = reqData.courses.every(course => {
+                const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
+                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
+                if (isCourseSelected) {
+                    const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
+                    if (courseLi) {
+                        courseLi.classList.add('selected-course');
+                    }
+                }
+                return isCourseCompleted || isCourseSelected;
+            });
         } else if (reqData.type === 'credit_hours') {
             const totalCredits = reqData.courses.reduce((sum, course) => {
-                if (completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
-                    selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)) {
+                const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
+                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
+                if (isCourseSelected) {
+                    const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
+                    if (courseLi) {
+                        courseLi.classList.add('selected-course');
+                    }
+                }
+                if (isCourseCompleted || isCourseSelected) {
                     return sum + course.Credits;
                 }
                 return sum;
@@ -444,10 +468,17 @@ function updateRequirementFulfillment() {
             coursesFulfilled = totalCredits >= reqData.required_credits;
         } else if (reqData.type === 'some_courses') {
             coursesFulfilled = Object.values(reqData.groups).every(group => 
-                group.some(course => 
-                    completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID) ||
-                    selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID)
-                )
+                group.some(course => {
+                    const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
+                    const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
+                    if (isCourseSelected) {
+                        const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
+                        if (courseLi) {
+                            courseLi.classList.add('selected-course');
+                        }
+                    }
+                    return isCourseCompleted || isCourseSelected;
+                })
             );
         }
 
