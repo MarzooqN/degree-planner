@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
+    <style>
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>    
 <body>
     <header>
         <h1>Register</h1>
@@ -20,6 +26,11 @@
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
 
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                
+                <span id="error" class="error">Passwords do not match</span>
+
                 <button type="submit"><span>Register</span></button>
                 <div class="login-link">
                     Already have an account? <a href="{{ url_for('login') }}">Login here</a>
@@ -27,5 +38,20 @@
             </form>
         </section>
     </main>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorElement = document.getElementById('error');
+
+            if (password !== confirmPassword) {
+                errorElement.style.display = 'block';
+                event.preventDefault(); 
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
+
