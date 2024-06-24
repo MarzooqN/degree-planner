@@ -27,7 +27,17 @@ def username_exists(username):
     cursor.close()
     connection.close()
     return existing_user is not None
-    
+
+#Route to check if the username is available
+@app.route('/check_username', methods=['POST'])
+def check_username():
+    data = request.json
+    username = data.get('username')
+    if username_exists(username):
+        return jsonify({'available': False})
+    else:
+        return jsonify({'available': True})
+
 #Loading in the user/creating user object from database
 @login_manager.user_loader
 def load_user(user_id):
@@ -55,19 +65,20 @@ def get_db_connection(database):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        if username_exists(username):
-            return jsonify({'available': False})
+        data = request.json
+        username = data.get('username')
+        password = generate_password_hash(data.get('password'))
         
-        password = generate_password_hash(request.form['password'])
+        if username_exists(username):
+            return jsonify({'success': False, 'message': 'Username already exists'})
+
         connection = get_db_connection('users')
         cursor = connection.cursor()
         cursor.execute('INSERT INTO User (username, password) VALUES (%s, %s)', (username, password))
         connection.commit()
         cursor.close()
         connection.close()
-        return redirect(url_for('login'))
-        return jsonify({'available': True})
+        return jsonify({'success': True})
         
     return render_template('register.html')
 
