@@ -39,17 +39,20 @@
         </section>
     </main>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
             const errorElement = document.getElementById('error');
 
-            if (password !== confirmPassword) {
-                errorElement.style.display = 'block';
-                event.preventDefault(); 
-            } else {
-                errorElement.style.display = 'none';
-            }
+            registerForm.addEventListener('submit', function(event) {
+                if (password.value !== confirmPassword.value) {
+                    errorElement.style.display = 'block';
+                    event.preventDefault(); // Prevent the form from being submitted
+                } else {
+                    errorElement.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>
