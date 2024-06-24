@@ -18,18 +18,8 @@ class User(UserMixin):
         self.username = username
         self.password = password
 
-@app.route('/api/check_username', methods=['POST'])
-def check_username():
-    username = request.json.get('username')
-
-    if username in ['existing_user1', 'existing_user2']:  # Simulated existing usernames
-        return jsonify({'available': False})
-    else:
-        return jsonify({'available': True})
-        
-#Loading in the user/creating user object from database
-@login_manager.user_loader
-def load_user(user_id):
+#Function to check if username exists in the database
+def username_exists(username):
     connection = get_db_connection('users')
     cursor = connection.cursor()
     cursor.execute('SELECT username FROM User WHERE username = %s', (username,))
@@ -37,6 +27,19 @@ def load_user(user_id):
     cursor.close()
     connection.close()
     return existing_user is not None
+    
+#Loading in the user/creating user object from database
+@login_manager.user_loader
+def load_user(user_id):
+connection = get_db_connection('users')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM User WHERE userID = %s', (user_id,))
+    user_data = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    if user_data:
+        return User(id = user_data['userID'], username=user_data['username'], password=user_data['password'])
+    return None
 
 #Database connection function 
 def get_db_connection(database):
