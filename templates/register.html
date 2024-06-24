@@ -84,11 +84,8 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Redirect to login page or show success message
                             window.location.href = "{{ url_for('login') }}";
-                        } else {
-                            // Handle other registration errors if needed
-                        }
+                        } 
                     });
                 }
             })
