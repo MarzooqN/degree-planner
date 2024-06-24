@@ -11,14 +11,14 @@
             display: none;
         }
     </style>
-</head>    
+</head>
 <body>
     <header>
         <h1>Register</h1>
     </header>
     <main>
         <section>
-            <form method="POST" action="{{ url_for('register') }}">
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
                 <h2>Register</h2>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -57,4 +57,3 @@
     </script>
 </body>
 </html>
-
