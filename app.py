@@ -18,18 +18,25 @@ class User(UserMixin):
         self.username = username
         self.password = password
 
+@app.route('/api/check_username', methods=['POST'])
+def check_username():
+    username = request.json.get('username')
+
+    if username in ['existing_user1', 'existing_user2']:  # Simulated existing usernames
+        return jsonify({'available': False})
+    else:
+        return jsonify({'available': True})
+        
 #Loading in the user/creating user object from database
 @login_manager.user_loader
 def load_user(user_id):
     connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM User WHERE userID = %s', (user_id,))
-    user_data = cursor.fetchone()
+    cursor = connection.cursor()
+    cursor.execute('SELECT username FROM User WHERE username = %s', (username,))
+    existing_user = cursor.fetchone()
     cursor.close()
     connection.close()
-    if user_data:
-        return User(id = user_data['userID'], username=user_data['username'], password=user_data['password'])
-    return None
+    return existing_user is not None
 
 #Database connection function 
 def get_db_connection(database):
@@ -46,6 +53,9 @@ def get_db_connection(database):
 def register():
     if request.method == 'POST':
         username = request.form['username']
+        if username_exists(username):
+            return jsonify({'available': False})
+        
         password = generate_password_hash(request.form['password'])
         connection = get_db_connection('users')
         cursor = connection.cursor()
@@ -54,6 +64,8 @@ def register():
         cursor.close()
         connection.close()
         return redirect(url_for('login'))
+        return jsonify({'available': True})
+        
     return render_template('register.html')
 
 
