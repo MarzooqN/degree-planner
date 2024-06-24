@@ -8,7 +8,7 @@
     <style>
         .error {
             color: red;
-            display: none; /* Initially hidden */
+            display: none;
         }
     </style>
 </head>
@@ -30,6 +30,7 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
                 
                 <span id="error" class="error">Passwords do not match</span>
+                <span id="usernameError" class="error">Username already taken</span>
 
                 <button type="submit" id="registerBtn" disabled><span>Register</span></button>
                 <div class="login-link">
@@ -43,6 +44,8 @@
             const password = document.getElementById('password');
             const confirmPassword = document.getElementById('confirmPassword');
             const errorElement = document.getElementById('error');
+            const usernameInput = document.getElementById('username');
+            const usernameError = document.getElementById('usernameError');
             const registerBtn = document.getElementById('registerBtn');
 
             function validatePassword() {
@@ -55,8 +58,37 @@
                 }
             }
 
+            function checkUsernameAvailability() {
+                const username = usernameInput.value.trim();
+                if (username === '') {
+                    return;  // No need to check if username is empty
+                }
+
+                fetch('/api/check_username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: username }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.available) {
+                        usernameError.style.display = 'block';
+                        registerBtn.disabled = true;
+                    } else {
+                        usernameError.style.display = 'none';
+                        validatePassword();  // Check password validity again
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking username:', error);
+                });
+            }
+
             password.addEventListener('input', validatePassword);
             confirmPassword.addEventListener('input', validatePassword);
+            usernameInput.addEventListener('blur', checkUsernameAvailability);
         });
     </script>
 </body>
