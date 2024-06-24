@@ -18,7 +18,7 @@
     </header>
     <main>
         <section>
-            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+            <form id="registerForm">
                 <h2>Register</h2>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -30,9 +30,9 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
                 
                 <span id="error" class="error">Passwords do not match</span>
-                <span id="usernameError" class="error">Username already taken</span>
+                <span id="usernameError" class="error">Username is already taken</span>
 
-                <button type="submit" id="registerBtn" disabled><span>Register</span></button>
+                <button type="submit"><span>Register</span></button>
                 <div class="login-link">
                     Already have an account? <a href="{{ url_for('login') }}">Login here</a>
                 </div>
@@ -40,55 +40,61 @@
         </section>
     </main>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirmPassword');
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from being submitted immediately
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
             const errorElement = document.getElementById('error');
-            const usernameInput = document.getElementById('username');
-            const usernameError = document.getElementById('usernameError');
-            const registerBtn = document.getElementById('registerBtn');
+            const usernameErrorElement = document.getElementById('usernameError');
+            const username = document.getElementById('username').value;
 
-            function validatePassword() {
-                if (password.value !== confirmPassword.value) {
-                    errorElement.style.display = 'block';
-                    registerBtn.disabled = true;
+            if (password !== confirmPassword) {
+                errorElement.style.display = 'block';
+                return;
+            } else {
+                errorElement.style.display = 'none';
+            }
+
+            fetch('/check_username', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.available) {
+                    usernameErrorElement.style.display = 'block';
                 } else {
-                    errorElement.style.display = 'none';
-                    registerBtn.disabled = false;
+                    usernameErrorElement.style.display = 'none';
+
+                    // If the username is available, submit the form data via fetch
+                    fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to login page or show success message
+                            window.location.href = "{{ url_for('login') }}";
+                        } else {
+                            // Handle other registration errors if needed
+                        }
+                    });
                 }
-            }
-
-            function checkUsernameAvailability() {
-                const username = usernameInput.value.trim();
-                if (username === '') {
-                    return;  // No need to check if username is empty
-                }
-
-                fetch('/api/check_username', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username: username }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.available) {
-                        usernameError.style.display = 'block';
-                        registerBtn.disabled = true;
-                    } else {
-                        usernameError.style.display = 'none';
-                        validatePassword();  // Check password validity again
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking username:', error);
-                });
-            }
-
-            password.addEventListener('input', validatePassword);
-            confirmPassword.addEventListener('input', validatePassword);
-            usernameInput.addEventListener('blur', checkUsernameAvailability);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
     </script>
 </body>
