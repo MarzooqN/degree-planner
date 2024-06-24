@@ -31,7 +31,7 @@ def username_exists(username):
 #Loading in the user/creating user object from database
 @login_manager.user_loader
 def load_user(user_id):
-connection = get_db_connection('users')
+    connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('SELECT * FROM User WHERE userID = %s', (user_id,))
     user_data = cursor.fetchone()
