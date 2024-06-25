@@ -14,56 +14,47 @@ async function fetchSchedules() {
     }
 }
 
-async function fetchMajors() {
-    const college = document.getElementById('college').value;
-    const majorSelect = document.getElementById('major');
-    const programSelect = document.getElementById('program');
-
-    if (college === '') {
-        majorSelect.innerHTML = '<option value="">Select Major</option>';
-        programSelect.innerHTML = '<option value="">Select Program</option>';
-        return;
-    }
-
-    try {
+async function fetchMajors(college, majorElementId, programElementId) {
+    const majorSelect = document.getElementById(majorElementId);
+    const programSelect = document.getElementById(programElementId);
+    if (college) {
         const response = await fetch(`/api/majors?college=${college}`);
         const majors = await response.json();
 
+        
         majorSelect.innerHTML = '<option value="">Select Major</option>';
         programSelect.innerHTML = '<option value="">Select Program</option>';
+
         majors.forEach(major => {
             const option = document.createElement('option');
             option.value = major.value;
             option.textContent = `${major.value} - ${major.label}`;
             majorSelect.appendChild(option);
         });
-    } catch (e) {
-        console.error('Error fetching majors:', e);
+    } else {
+
+        majorSelect.innerHTML = '<option value="">Select Major</option>';
+        programSelect.innerHTML = '<option value="">Select Program</option>';
+
     }
 }
 
-async function fetchPrograms() {
-    const major = document.getElementById('major').value;
-    const programSelect = document.getElementById('program');
-
-    if (major === '') {
-        programSelect.innerHTML = '<option value="">Select Program</option>';
-        return;
-    }
-
-    try {
+async function fetchPrograms(major, programElementId) {
+    const programSelect = document.getElementById(programElementId);
+    if (major) {
         const response = await fetch(`/api/programs?major=${major}`);
         const programs = await response.json();
-
         programSelect.innerHTML = '<option value="">Select Program</option>';
         programs.forEach(program => {
             const option = document.createElement('option');
             option.value = program.value;
+            option.textContent = program.label;
             option.textContent = `${program.value} - ${program.label}`;
             programSelect.appendChild(option);
         });
-    } catch (e) {
-        console.error('Error fetching programs:', e);
+    } else {
+        programSelect.innerHTML = '<option value="">Select Program</option>';
+
     }
 }
 
