@@ -28,6 +28,10 @@
 
                 <label for="confirmPassword">Confirm Password:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+                <label>
+                    <input type="checkbox" onclick="unHidePassword()">Show Password
+                </label>
                 
                 <span id="error" class="error">Passwords do not match</span>
                 <span id="usernameError" class="error">Username is already taken</span>
@@ -39,59 +43,6 @@
             </form>
         </section>
     </main>
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from being submitted immediately
-
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorElement = document.getElementById('error');
-            const usernameErrorElement = document.getElementById('usernameError');
-            const username = document.getElementById('username').value;
-
-            if (password !== confirmPassword) {
-                errorElement.style.display = 'block';
-                return;
-            } else {
-                errorElement.style.display = 'none';
-            }
-
-            fetch('/check_username', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: username })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.available) {
-                    usernameErrorElement.style.display = 'block';
-                } else {
-                    usernameErrorElement.style.display = 'none';
-
-                    fetch('/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            password: password
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.href = "{{ url_for('login') }}";
-                        } 
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    </script>
+    <script src="static/js/register.js"></script>
 </body>
 </html>
