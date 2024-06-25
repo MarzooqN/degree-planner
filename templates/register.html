@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,13 +18,23 @@
     </header>
     <main>
         <section>
-            <form method="POST" action="{{ url_for('register') }}">
+            <form id="registerForm">
                 <h2>Register</h2>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
 
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
+
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+                <label>
+                    <input type="checkbox" onclick="unHidePassword()">Show Password
+                </label>
+                
+                <span id="error" class="error">Passwords do not match</span>
+                <span id="usernameError" class="error">Username is already taken</span>
 
                 <button type="submit"><span>Register</span></button>
                 <div class="login-link">
@@ -27,5 +43,6 @@
             </form>
         </section>
     </main>
+    <script src="static/js/register.js"></script>
 </body>
 </html>
