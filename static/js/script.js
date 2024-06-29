@@ -620,6 +620,7 @@ function removeSpringButtons(){
 
 
 function addInternship(){
+    console.log('adding internship')
 
     const semesterTerm = 'SU';
     const semesterYear = semesterNum;
@@ -1027,9 +1028,14 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
             selectElement.value = selectedCourseID;
 
-            header = document.getElementById(`${semesterTerm} ${semesterNum}`);
+            const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
             header.dataset.credits = parseFloat(header.dataset.credits) + selectedCourse.Credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
+
+
+            const totalCreditsHeader = document.getElementById(`totalCredits`);
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             selectElement.dataset.firstSelected = 'true';
 
@@ -1109,6 +1115,10 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
                 header.dataset.credits = parseFloat(header.dataset.credits) - credits;
                 header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
             }
+
+            const totalCreditsHeader = document.getElementById(`totalCredits`);
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             updateRequirementFulfillment();
         } else {
