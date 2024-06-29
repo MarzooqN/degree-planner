@@ -6,7 +6,8 @@ body {
     align-items: center;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #ba0c2f, #646a6e); /* Gradient background */
 }
 
 header {
@@ -16,7 +17,9 @@ header {
     padding: 20px 0;
     text-align: center;
     /* max-width: 1200px; */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    
 }
 
 
@@ -231,6 +234,7 @@ button:hover span:after {
     right: 0;
 }
 
+
 .schedule {
     background: #f9f9f9;
     padding: 20px;
@@ -329,7 +333,7 @@ button:hover span:after {
     border-radius: 5rem;
     /* width: 10rem; */
     /* height: 2rem; */
-    padding: 1rem 10rem;
+    padding: 1rem 5rem;
     /* use either padding or width + height*/
     /* I prefer the padding one */
     /* rotate: -90deg; */
@@ -357,6 +361,7 @@ button:hover span:after {
       width: 100%;
     }
   }
+  
 
 
   /* Manual Course Adding */
@@ -388,4 +393,17 @@ button:hover span:after {
 /*adding course */
 .completed-course {
     color: green; /* or any color you prefer */
+}
+
+/* Requirements section */
+.requirement-header {
+    cursor: pointer;
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.requirement-content {
+    margin-top: 10px;
+    padding-left: 20px;
 }
