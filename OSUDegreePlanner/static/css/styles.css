@@ -295,9 +295,7 @@ button:hover span:after {
 
 .modal-content img{
     display: block;
-    margin-right: auto;
-    margin-left: auto;
-    width: 50%;
+    width: 15%;
 }
 
 .modal-content input {
