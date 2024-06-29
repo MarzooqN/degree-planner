@@ -6,7 +6,8 @@ body {
     align-items: center;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #666666, #BB0000); /* Gradient background */
 }
 
 header {
@@ -389,3 +390,176 @@ button:hover span:after {
 .completed-course {
     color: green; /* or any color you prefer */
 }
+
+/* Requirements section */
+.requirement-header {
+    cursor: pointer;
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.requirement-content {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+/*
+Login page styling
+*/
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px; /* Increased width */
+    animation: fadeIn 1s ease-in-out;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 0.25rem; /* Reduced gap */
+    color: #333;
+    font-size: 2rem; /* Increased font size */
+    animation: slideIn 1s ease-in-out;
+}
+
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 1rem; /* Reduced gap */
+    animation: fadeIn 1s ease-in-out 0.5s;
+    animation-fill-mode: backwards;
+}
+
+
+.input-container {
+    position: relative;
+}
+
+
+.input-container input {
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 0.5rem 0;
+    padding-right: 30px; /* Space for the icon */
+    outline: none;
+    transition: border-color 0.3s;
+    font-size: 1rem; /* Adjusted font size */
+}
+
+
+.input-container input:focus,
+.input-container input:valid {
+    border-color: #BB0000; /* Border color on focus and when input is valid */
+}
+
+
+.input-container label {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    transition: all 0.3s;
+    color: #aaa;
+    pointer-events: none;
+    font-size: 1rem; /* Adjusted font size */
+}
+
+
+.input-container input:focus + label,
+.input-container input:valid + label {
+    top: -1rem;
+    left: 0;
+    color: #BB0000; /* Label color when input is focused or valid */
+    font-size: 0.8rem; /* Adjusted font size */
+}
+
+
+.input-container i {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    transition: color 0.3s;
+    pointer-events: none;
+}
+
+
+.input-container input:focus + label + i,
+.input-container input:valid + label + i {
+    color: #BB0000; /* Icon color when input is focused or valid */
+}
+
+
+button {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #BB0000; /* Button background color */
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    animation: fadeIn 1s ease-in-out 1s;
+    animation-fill-mode: backwards;
+}
+
+
+button:hover {
+    background-color: #BB0000; /* Button background color on hover */
+}
+
+
+.signup-link {
+    text-align: center;
+    margin-top: 1rem;
+    color: #333;
+}
+
+
+.signup-link a {
+    color: #BB0000; /* Signup link color */
+    text-decoration: none;
+}
+
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+

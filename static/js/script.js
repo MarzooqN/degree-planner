@@ -379,15 +379,20 @@ async function displayRequirements() {
         const reqDiv = document.createElement('div');
         reqDiv.className = 'requirement';
         reqDiv.id = `requirement-${reqName.replace(/ /g, '-')}`;
+        
         const header = document.createElement('h4');
         header.textContent = reqName;
+        header.classList.add('requirement-header');
         reqDiv.appendChild(header);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'requirement-content';
 
         if (reqData.type === 'some_courses') {
             for (const [group, courses] of Object.entries(reqData.groups)) {
                 const groupHeader = document.createElement('h5');
                 groupHeader.textContent = `Group ${group} - Select 1 from this group`;
-                reqDiv.appendChild(groupHeader);
+                contentDiv.appendChild(groupHeader);
 
                 const ul = document.createElement('ul');
                 courses.forEach(course => {
@@ -396,7 +401,7 @@ async function displayRequirements() {
                     li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                     ul.appendChild(li);
                 });
-                reqDiv.appendChild(ul);
+                contentDiv.appendChild(ul);
             }
         } else if (reqData.type === 'credit_hours' && reqData.course_prefix && reqData.min_course_number && reqData.max_course_number) {
             const courses = await fetchCoursesInRange(reqData.course_prefix, reqData.min_course_number, reqData.max_course_number);
@@ -419,7 +424,7 @@ async function displayRequirements() {
                 openModal(modal);
                 
             };
-            reqDiv.appendChild(dynamicCoursesBtn);
+            contentDiv.appendChild(dynamicCoursesBtn);
         } else if (reqData.type === 'credit_hours') {
             header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
             const ul = document.createElement('ul');
@@ -429,7 +434,7 @@ async function displayRequirements() {
                 li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                 ul.appendChild(li);
             });
-            reqDiv.appendChild(ul);
+            contentDiv.appendChild(ul);
         } else {
             const ul = document.createElement('ul');
             reqData.courses.forEach(course => {
@@ -438,9 +443,17 @@ async function displayRequirements() {
                 li.setAttribute('data-course-id', course.CourseID); // Unique identifier
                 ul.appendChild(li);
             });
-            reqDiv.appendChild(ul);
+            contentDiv.appendChild(ul);
         }
+
+        contentDiv.style.display = 'none'; // Initially hide the content
+        reqDiv.appendChild(contentDiv);
+
         requirementsDiv.appendChild(reqDiv);
+
+        header.addEventListener('click', () => {
+            contentDiv.style.display = contentDiv.style.display === 'none' ? 'block' : 'none';
+        });
     }
 }
 
