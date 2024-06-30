@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Back</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-    <!-- Add link to your main CSS file -->
+
 </head>
 <body>
     <div class="login-page">
@@ -25,9 +24,10 @@
                     <i class="fas fa-lock"></i>
                 </div>
 
-                <label>
-                    <input type="checkbox" onclick="unHidePassword()">Show Password
-                </label>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-password" onclick="unHidePassword()">
+                    <label for="show-password">Show Password</label>
+                </div>
 
                 <button type="submit">Login</button>
                 <p class="signup-link">Don't have an account? <a href="{{ url_for('register') }}">Sign up</a></p>
