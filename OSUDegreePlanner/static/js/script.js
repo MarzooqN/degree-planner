@@ -1121,7 +1121,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
             }
 
             const totalCreditsHeader = document.getElementById(`totalCredits`);
-            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
             totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             updateRequirementFulfillment();

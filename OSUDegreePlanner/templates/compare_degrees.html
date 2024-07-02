@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compare Degrees</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compare_degrees.css') }}">
 </head>
+
 <body>
     <header>
         <h1>Compare Degrees</h1>
@@ -35,22 +38,21 @@
         </section>
 
 
-
-
-
         <section id="common-courses">
-
             <h2>Common Courses</h2>
-            <ul>
+            <div class="common-courses-containter">
                 {%if common_courses %}
                     {% for course_id, course in common_courses.items() %}
-                        <li>{{ course.CourseID }} - {{ course.CourseName }} ({{ course.Credits }} Credits)</li>
+                        <div class="common-course-card">
+                            <h3>{{ course.CourseID }} - {{ course.CourseName }}</h3>
+                            <p>{{ course.Credits }} Credits</p>
+                        </div>
                     {% endfor %}
                 {% endif %}
-
-            </ul>
+            </div>
         </section>
     </main>
     <script src="static/js/compare_degrees.js"></script>
 </body>
+
 </html>
