@@ -1,11 +1,12 @@
-from OSUDegreePlanner import app
 from functions import get_db_connection
-from flask import jsonify, request, session
+from flask import jsonify, request, session, Blueprint
 from flask_login import login_required, current_user
+
+courses_bp = Blueprint('courses', __name__, template_folder='templates')
 
 courses_selected = []
 #Route for getting courses and their prerequisties 
-@app.route('/api/courses', methods=['GET'])
+@courses_bp.route('/api/courses', methods=['GET'])
 @login_required
 def get_courses():
     connection = get_db_connection('Courses')
@@ -38,7 +39,7 @@ def get_courses():
     return jsonify(list(course_dict.values()))
 
 #Route for getting specific course
-@app.route('/api/course/<course_id>', methods=['GET'])
+@courses_bp.route('/api/course/<course_id>', methods=['GET'])
 @login_required
 def get_course(course_id):
     connection = get_db_connection('Courses')
@@ -71,7 +72,7 @@ def get_course(course_id):
     
 
 #Route for getting courses between a certain range
-@app.route('/api/courses_in_range', methods=['GET'])
+@courses_bp.route('/api/courses_in_range', methods=['GET'])
 @login_required
 def get_courses_in_range():
     prefix = request.args.get('prefix')
@@ -90,7 +91,7 @@ def get_courses_in_range():
 
 
 #Route for getting course from selected courses database (probably doesnt need to be inputted into database)
-@app.route('/api/selected_course', methods=['POST', 'GET'])
+@courses_bp.route('/api/selected_course', methods=['POST', 'GET'])
 @login_required
 def get_selected_course():
     data = request.json
@@ -104,7 +105,7 @@ def get_selected_course():
 
 
 #Route for adding a course into selected courses table
-@app.route('/api/add_course', methods=['POST'])
+@courses_bp.route('/api/add_course', methods=['POST'])
 @login_required
 def add_course():
     data = request.json
@@ -128,7 +129,7 @@ def add_course():
     return jsonify({"success": True}), 201
 
 #Route for removing course from selected courses table
-@app.route('/api/remove_course', methods=['POST'])
+@courses_bp.route('/api/remove_course', methods=['POST'])
 @login_required
 def remove_course():
     data = request.json
@@ -140,7 +141,7 @@ def remove_course():
     return jsonify({"success": True}), 201
 
 #Route for removing all courses from row
-@app.route('/api/remove_all_courses', methods=['POST'])
+@courses_bp.route('/api/remove_all_courses', methods=['POST'])
 @login_required
 def remove_all_courses():
     data = request.json
@@ -161,7 +162,7 @@ def remove_all_courses():
 
 
 #Route for getting degree requirements 
-@app.route('/api/requirements', methods=['GET'])
+@courses_bp.route('/api/requirements', methods=['GET'])
 @login_required
 def get_requirements():
     degree = session.get('degree')

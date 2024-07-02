@@ -1,12 +1,11 @@
-from OSUDegreePlanner import app
 from functions import get_db_connection
-from flask import jsonify, request, render_template, redirect, url_for, session
+from flask import jsonify, request, render_template, redirect, url_for, session, Blueprint
 from flask_login import login_required, current_user
 
-
+schedule_bp = Blueprint('schedule', __name__, template_folder='templates')
 
 #Route for getting degree (probably should name it something else)
-@app.route('/load_schedule/<int:schedule_id>', methods=['GET'])
+@schedule_bp.route('/load_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def load_schedule(schedule_id):
     connection = get_db_connection('users')
@@ -25,7 +24,7 @@ def load_schedule(schedule_id):
         return 'Schedule not found', 404
     
 #Route for saving schdule 
-@app.route('/api/save_schedule', methods=['POST'])
+@schedule_bp.route('/api/save_schedule', methods=['POST'])
 @login_required
 def save_schedule():
     data = request.json
@@ -57,7 +56,7 @@ def save_schedule():
 
 
 #Route for getting all the schedules and their courses (could improve logic)
-@app.route('/api/get_schedules', methods=['GET'])
+@schedule_bp.route('/api/get_schedules', methods=['GET'])
 @login_required
 def get_schedules():
     user_id = current_user.id
@@ -94,7 +93,7 @@ def get_schedules():
 
 
 #Route for getting specifc schedule
-@app.route('/api/get_schedule/<int:schedule_id>', methods=['GET'])
+@schedule_bp.route('/api/get_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def get_schedule(schedule_id):
 
@@ -114,7 +113,7 @@ def get_schedule(schedule_id):
 
 
 #Route for deleting schedule
-@app.route('/api/delete_schedule/<int:schedule_id>', methods=['GET'])
+@schedule_bp.route('/api/delete_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def delete_schedule(schedule_id):
     user_id = current_user.id
@@ -135,7 +134,7 @@ def delete_schedule(schedule_id):
     return render_template('select_major.html')
 
 #Route for updating a schedule
-@app.route('/api/update_schedule/<int:schedule_id>', methods=['POST'])
+@schedule_bp.route('/api/update_schedule/<int:schedule_id>', methods=['POST'])
 @login_required
 def update_schedule(schedule_id):
     data = request.json

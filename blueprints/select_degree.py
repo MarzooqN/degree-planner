@@ -1,11 +1,12 @@
-from OSUDegreePlanner import app
 from functions import get_db_connection
-from flask import jsonify, request, render_template, redirect, url_for, session
+from flask import jsonify, request, render_template, redirect, url_for, session, Blueprint
 from flask_login import login_required
 
 
+select_degree_bp = Blueprint('select_degree', __name__, template_folder='templates')
+
 #Route for when they select only major
-@app.route('/select_major', methods=['GET', 'POST'])
+@select_degree_bp.route('/select_major', methods=['GET', 'POST'])
 @login_required
 def select_major():
     if request.method == 'POST':
@@ -20,7 +21,7 @@ def select_major():
     return render_template('select_major.html')
 
 
-@app.route('/compare_degrees', methods=['GET','POST'])
+@select_degree_bp.route('/compare_degrees', methods=['GET','POST'])
 @login_required
 def compare_degrees():
     if request.method =='POST':
@@ -63,7 +64,7 @@ def compare_degrees():
     return render_template('compare_degrees.html')
 
 
-@app.route('/api/majors', methods=['GET'])
+@select_degree_bp.route('/api/majors', methods=['GET'])
 @login_required
 def get_majors():
     college = request.args.get('college')
@@ -76,7 +77,7 @@ def get_majors():
     major_list = [{'value': major['MajorID'], 'label': major['MajorName']} for major in majors]
     return jsonify(major_list)
 
-@app.route('/api/programs', methods=['GET'])
+@select_degree_bp.route('/api/programs', methods=['GET'])
 @login_required
 def get_programs():
     major = request.args.get('major')
