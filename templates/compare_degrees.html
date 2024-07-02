@@ -18,7 +18,7 @@
 
         <section id="compare-degrees">
             <h2>Compare Degrees:</h2>
-            <form method="POST" action="{{ url_for('compare_degrees') }}">
+            <form method="POST" action="{{ url_for('select_degree.compare_degrees') }}">
                 <label for="degree-count">Number of Degrees to Compare:</label>
                 <select id="degree-count" name="degree_count" onchange="updateDegreeSelectionForms()">
                     <option value="2">2 Degrees</option>
