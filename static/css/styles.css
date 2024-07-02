@@ -7,7 +7,7 @@ body {
     margin: 0;
     padding: 20px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #ba0c2f, #646a6e); /* Gradient background */
+    background: linear-gradient(180deg, #ba0c2fe9, #646a6e); /* Gradient background */
 }
 
 header {
@@ -295,9 +295,7 @@ button:hover span:after {
 
 .modal-content img{
     display: block;
-    margin-right: auto;
-    margin-left: auto;
-    width: 50%;
+    width: 15%;
 }
 
 .modal-content input {

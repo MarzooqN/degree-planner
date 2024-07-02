@@ -1,0 +1,18 @@
+/* Additional styles for better appearance */
+.common-course-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 10px;
+    width: 90%;
+}
+.common-course-card h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #333;
+}
+.common-course-card p {
+    margin: 4px 0;
+    color: #555;
+}

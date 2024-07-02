@@ -207,9 +207,9 @@ function prereqModalFunctionality(){
 /*
 Function to display prerequisites for a given course
 */
-function displayPrerequisites(courseId) {
+function displayPrerequisites(courseId, div = null) {
     const course = courseData.find(course => course.CourseID === courseId);
-    const resultDiv = document.getElementById('prerequisiteResult');
+    const resultDiv = div || document.getElementById('prerequisiteResult');
     resultDiv.innerHTML = '';  // Clear previous results
 
     if (course) {
@@ -931,6 +931,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     //message modal and text
     const modal = document.getElementById('messageModal');
     const modalMessage = document.getElementById('message');
+    const modalDiv = document.getElementById('messageDiv');
     
     //Get selected course 
     const selectedCourseID = selectElement.value;
@@ -947,6 +948,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     if (parseFloat(header.dataset.credits) + selectedCourse.Credits > 18){
         selectElement.value = "Click to Select Course"; // Reset selection
         modalMessage.textContent = 'Cannot add course: exceeds 18 credit hour limit';
+        modalDiv.innerHTML = ''
         openModal(modal);
         return;
     }
@@ -960,6 +962,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     if(alreadySelected){
         selectElement.value = "Click to Select Course"; // Reset selection
         modalMessage.textContent = 'Cannot add course: Already selected in semester';
+        modalDiv.innerHTML = ''
         openModal(modal);
         return;
     }
@@ -996,6 +999,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
             allGroupsSatisfied = false;
             selectElement.value = "Click to Select Course"; // Reset selection
             modalMessage.textContent = `You have not met the prerequisites for ${selectedCourseID}`;
+            displayPrerequisites(selectedCourseID, modalDiv)
             openModal(modal);
             return;
         }
@@ -1117,7 +1121,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
             }
 
             const totalCreditsHeader = document.getElementById(`totalCredits`);
-            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
             totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             updateRequirementFulfillment();
