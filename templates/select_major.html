@@ -17,7 +17,7 @@
     <main>
         <section id = "major-selection">
 
-            <form method="POST" action="{{ url_for('select_major') }}">
+            <form method="POST" action="{{ url_for('select_degree.select_major') }}">
                 <h2>Select Degree:</h2>
                 {% include 'degree_selection.html' %}   
                 
@@ -31,7 +31,7 @@
         </section>
 
         <section id="compare-degrees">
-            <form method="GET" action="{{ url_for('compare_degrees')}}">
+            <form method="GET" action="{{ url_for('select_degree.compare_degrees')}}">
                 <h2>Compare Degrees: </h2>
                 <button type="submit">
                     <span>Go to Compare Degrees</span> 
