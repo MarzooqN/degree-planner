@@ -208,7 +208,8 @@ function prereqModalFunctionality(){
 Function to display prerequisites for a given course
 */
 function displayPrerequisites(courseId) {
-    const course = courseData.find(course => course.CourseID === courseId);
+    const inSensInput = courseId.toUpperCase();
+    const course = courseData.find(course => course.CourseID === inSensInput);
     const resultDiv = document.getElementById('prerequisiteResult');
     resultDiv.innerHTML = '';  // Clear previous results
 
