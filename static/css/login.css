@@ -6,12 +6,18 @@ Login page styling
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-} */
+}
 
 body {
+    font-family: Arial, sans-serif;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin: 0;
+    padding: 20px;
+    height: 100vh;
+    background: linear-gradient(180deg, #ba0c2f, #646a6e); /* Gradient background */
 }
 
 .container {
@@ -39,9 +45,9 @@ body {
 
 .login-form h2 {
     text-align: center;
-    margin-bottom: 0.25rem; /* Reduced gap */
+    margin-bottom: 1rem; /* Slightly increased gap */
     color: #333;
-    font-size: 2rem; /* Increased font size */
+    font-size: 1.8rem; /* Slightly reduced font size */
     animation: slideIn 1s ease-in-out;
 }
 
@@ -63,6 +69,8 @@ body {
 
 .input-container {
     position: relative;
+    display: flex;
+    flex-direction: column-reverse;
 }
 
 
@@ -86,7 +94,7 @@ body {
 .input-container label {
     position: absolute;
     top: 50%;
-    left: 0;
+    left: 5px; /* Align label with input text */
     transform: translateY(-50%);
     transition: all 0.3s;
     color: #aaa;
@@ -155,4 +163,18 @@ button:hover {
 
 .signup-link a:hover {
     text-decoration: underline;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.checkbox-container input {
+    margin-right: 5px;
+}
+
+.checkbox-container label {
+    margin-top: 0px;
 }
