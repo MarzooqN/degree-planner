@@ -204,15 +204,42 @@ function prereqModalFunctionality(){
 
 }
 
+
+// Function to normalize the input
+function normalizeInput(input) {
+    const numberToRoman = {
+        '1': 'I',
+        '2': 'II',
+        '3': 'III',
+        '4': 'IV',
+        '5': 'V',
+        '6': 'VI',
+        '7': 'VII',
+        '8': 'VIII',
+        '9': 'IX',
+        '10': 'X'
+    };
+
+    let normalized = input.toUpperCase();
+
+    // Replace Roman numerals with numbers
+    Object.keys(numberToRoman).forEach(number => {
+        normalized = normalized.replace(number, numberToRoman[number]);
+    });
+
+    return normalized;
+}
 /*
 Function to display prerequisites for a given course
 */
 function displayPrerequisites(courseId) {
-    const inSensInput = courseId.toUpperCase();
+
+    const inSensInput = normalizeInput(courseId);
+    console.log(inSensInput);
     let course = courseData.find(course => course.CourseID === inSensInput);
     
     if(!course){
-        course = courseData.find(course => course.CourseName.indexOf(courseId) !== -1 )
+        course = courseData.find(course => course.CourseName.toUpperCase().indexOf(inSensInput) !== -1 )
     }
 
     const resultDiv = document.getElementById('prerequisiteResult');
@@ -231,7 +258,7 @@ function displayPrerequisites(courseId) {
 
         // Gets only Prerequisites from list of requirements in course object
         const prerequisites = course.prerequisites.filter(req => req.type === 'prerequisite');
-
+        const corequisites = course.prerequisites.filter(req => req.type === 'corequisite');
         // Check prerequisite groups, for each requirement in prerequisites it checks if that requirement's group is in the groups dictionary if not then adds it 
         // in the end pushing the requirement to its specific group 
         const groups = {};
@@ -248,7 +275,29 @@ function displayPrerequisites(courseId) {
             groupElem.textContent = `Group ${group}: ${groupPrereqs.join(', ')}`;
             resultDiv.appendChild(groupElem);
         }
-        
+
+        const corequisitesElemHeader = document.createElement('h4');
+        corequisitesElemHeader.textContent = `Corequisites:`;
+        resultDiv.appendChild(corequisitesElemHeader);
+
+
+        const coreqElem = document.createElement('p');
+        let coreqString = "";
+        let count = 0;
+
+        corequisites.forEach(corequisite => {
+            count++;
+            if (count !== corequisites.length) {
+                coreqString += corequisite.prerequisiteID + ", "
+            }
+            else {
+                coreqString += corequisite.prerequisiteID
+            }
+
+        });
+        coreqElem.textContent = coreqString;
+        resultDiv.appendChild(coreqElem);
+
     } else {
         resultDiv.textContent = 'Course not found.';
     }
