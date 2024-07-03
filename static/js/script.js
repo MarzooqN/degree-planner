@@ -209,7 +209,12 @@ Function to display prerequisites for a given course
 */
 function displayPrerequisites(courseId) {
     const inSensInput = courseId.toUpperCase();
-    const course = courseData.find(course => course.CourseID === inSensInput);
+    let course = courseData.find(course => course.CourseID === inSensInput);
+    
+    if(!course){
+        course = courseData.find(course => course.CourseName.indexOf(courseId) !== -1 )
+    }
+
     const resultDiv = document.getElementById('prerequisiteResult');
     resultDiv.innerHTML = '';  // Clear previous results
 
