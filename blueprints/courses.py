@@ -1,10 +1,23 @@
 from functions import get_db_connection
-from flask import jsonify, request, session, Blueprint
+from flask import jsonify, request, session, Blueprint, render_template
 from flask_login import login_required, current_user
 
 courses_bp = Blueprint('courses', __name__, template_folder='templates')
 
 courses_selected = []
+
+
+
+@courses_bp.route('/planner', methods=['POST', 'GET'])
+@login_required
+def planner():
+    schedule_id = session.get('schedule_id')
+    global courses_selected
+    courses_selected = []
+    schedule_id = session.get('schedule_id')
+    return render_template('index.html', schedule_id=schedule_id )
+
+
 #Route for getting courses and their prerequisties 
 @courses_bp.route('/api/courses', methods=['GET'])
 @login_required

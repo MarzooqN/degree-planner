@@ -19,7 +19,7 @@ def load_schedule(schedule_id):
         session['schedule_id'] = schedule_id
         session['degree'] = schedule['degree']
         courses_selected = []
-        return redirect(url_for('index'))
+        return redirect(url_for('courses.planner'))
     else:
         return 'Schedule not found', 404
     
