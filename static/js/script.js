@@ -42,6 +42,8 @@ async function fetchAllData() {
     } else {
         closeModal(waitModal);
     }
+
+    updateRequirementFulfillment();
 }
 
 function openModal(modal){
@@ -314,6 +316,7 @@ async function fetchUserData(){
         const response = await fetch('/api/completed_courses');
         const courses = await response.json();
         completedCourses = courses;
+        console.log(completedCourses)
 
     } catch(e) {
         console.error('Error fetching user course data:', e);

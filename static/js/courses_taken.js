@@ -10,6 +10,8 @@ async function populateCourseOptions() {
     const response = await fetch('/api/courses');
     courseData = await response.json();
 
+    console.log(courseData)
+
     const initialCourseSelect = document.getElementById('course-select-0');
     populateCourseSelectOptions(initialCourseSelect, courseData);
 
@@ -35,22 +37,25 @@ function addCourseForm() {
     const newForm = document.createElement('div');
     newForm.className = 'course-form';
 
+    const courseDiv = document.createElement('div');
     const courseLabel = document.createElement('label');
     courseLabel.htmlFor = `course-select-${courseFormCount}`;
     courseLabel.textContent = 'Select Course:';
-    newForm.appendChild(courseLabel);
+    courseDiv.appendChild(courseLabel);
 
     const courseSelect = document.createElement('select');
     courseSelect.id = `course-select-${courseFormCount}`;
     courseSelect.name = `course-${courseFormCount}`;
     courseSelect.className = 'course-select';
     populateCourseSelectOptions(courseSelect, courseData);
-    newForm.appendChild(courseSelect);
+    courseDiv.appendChild(courseSelect);
+    newForm.appendChild(courseDiv);
 
+    const semesterDiv = document.createElement('div');
     const semesterLabel = document.createElement('label');
     semesterLabel.htmlFor = `semester-select-${courseFormCount}`;
     semesterLabel.textContent = 'Select Semester:';
-    newForm.appendChild(semesterLabel);
+    semesterDiv.appendChild(semesterLabel);
 
     const semesterSelect = document.createElement('select');
     semesterSelect.id = `semester-select-${courseFormCount}`;
@@ -60,12 +65,14 @@ function addCourseForm() {
         <option value="SP">Spring</option>
         <option value="SU">Summer</option>
     `;
-    newForm.appendChild(semesterSelect);
+    semesterDiv.appendChild(semesterSelect);
+    newForm.appendChild(semesterDiv);
 
+    const yearDiv = document.createElement('div');
     const yearLabel = document.createElement('label');
     yearLabel.htmlFor = `year-select-${courseFormCount}`;
     yearLabel.textContent = 'Select Year:';
-    newForm.appendChild(yearLabel);
+    yearDiv.appendChild(yearLabel);
 
     const yearInput = document.createElement('input');
     yearInput.type = 'number';
@@ -74,9 +81,15 @@ function addCourseForm() {
     yearInput.min = '18';
     yearInput.max = '24';
     yearInput.required = true;
-    newForm.appendChild(yearInput);
+    yearDiv.appendChild(yearInput);
+    newForm.appendChild(yearDiv);
 
+    
     container.appendChild(newForm);
+    
+    const hr = document.createElement('hr')
+    container.appendChild(hr);
+
 
     // Initialize Select2 on the newly added course select element
     $(`#course-select-${courseFormCount}`).select2({
