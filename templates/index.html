@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSU Degree Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <style>
+        .autocomplete-dropdown {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            z-index: 1000;
+            width: calc(100% - 2px); /* Ensure the width matches the input field */
+        }
+        .autocomplete-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .autocomplete-item:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
     <header>
