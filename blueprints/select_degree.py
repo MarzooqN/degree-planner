@@ -17,7 +17,7 @@ def select_major():
         session['schedule_id'] = 0
         courses_selected = []
 
-        return redirect(url_for('index'))
+        return redirect(url_for('courses.planner'))
     return render_template('select_major.html')
 
 

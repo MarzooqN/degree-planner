@@ -63,10 +63,8 @@ def login():
 @app.route('/', methods=['POST', 'GET'])
 @login_required
 def index():
-    schedule_id = session.get('schedule_id')
-    global courses_selected
-    courses_selected = []
-    return render_template('index.html', schedule_id=schedule_id)
+    return render_template('select_major.html')
+
 
 
 if __name__ == '__main__':
