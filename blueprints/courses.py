@@ -1,5 +1,5 @@
 from functions import get_db_connection
-from flask import jsonify, request, session, Blueprint
+from flask import jsonify, request, session, Blueprint, render_template
 from flask_login import login_required, current_user
 
 courses_bp = Blueprint('courses', __name__, template_folder='templates')
@@ -206,3 +206,48 @@ def get_requirements():
             })
     connection.close()
     return jsonify(requirements)
+
+#Route for getting all completed courses by the user
+@courses_bp.route('/api/completed_courses', methods=['GET'])
+@login_required
+def get_completed_courses():
+    user = current_user.id
+    connection = get_db_connection('users')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute(f'''
+        SELECT c.courseID, c.semester, c.year FROM CoursesTaken c WHERE userID= {user}
+    ''')
+    courses = cursor.fetchall()
+    connection.close()
+
+
+    return jsonify(courses)
+
+@courses_bp.route('/api/add_completed_courses', methods=['POST'])
+@login_required
+def add_completed_courses():
+    data = request.json
+    user_id = current_user.id
+
+    connection = get_db_connection('users')
+    cursor = connection.cursor()
+    try:
+        for course in data:
+            cursor.execute('''
+                INSERT INTO CoursesTaken (userID, courseID, semester, year)
+                VALUES (%s, %s, %s, %s)
+            ''', (user_id, course['courseID'], course['semester'], course['year']))
+        connection.commit()
+    except Exception as e:
+        print(f'Error adding completed courses: {e}')
+        return jsonify({"error": "Failed to add courses"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+    return jsonify({"success": True}), 201
+
+@courses_bp.route('/courses_taken', methods=['GET'])
+@login_required
+def courses_taken():
+    return render_template('courses_taken.html')

@@ -55,20 +55,3 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
-
-#Route for getting all completed courses by the user
-@login_bp.route('/api/completed_courses', methods=['GET'])
-@login_required
-def get_completed_courses():
-    user = current_user.id
-    connection = get_db_connection('users')
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute(f'''
-        SELECT c.courseID, c.semester, c.year FROM CoursesTaken c WHERE userID= {user}
-    ''')
-    courses = cursor.fetchall()
-    connection.close()
-
-
-    return jsonify(courses)

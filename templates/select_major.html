@@ -30,13 +30,28 @@
 
         </section>
 
-        <section id="compare-degrees">
-            <form method="GET" action="{{ url_for('select_degree.compare_degrees')}}">
-                <h2>Compare Degrees: </h2>
-                <button type="submit">
-                    <span>Go to Compare Degrees</span> 
-                </button>
-            </form>
+        <section id="middle-section">
+
+            <section id="compare-degrees">
+                <form method="GET" action="{{ url_for('select_degree.compare_degrees')}}">
+                    <h2>Compare Degrees: </h2>
+                    <button type="submit">
+                        <span>Go to Compare Degrees</span> 
+                    </button>
+                </form>
+            </section>
+
+
+            <section id="courses-taken">
+                <h2>Courses Taken: </h2>
+                <form method="GET" action="{{ url_for('courses.courses_taken')}}">
+                    <button type="submit">
+                        <span>Input Courses Taken Here</span> 
+                    </button>
+                </form>
+
+            </section>
+
         </section>
 
         <section id = "saved-schedules">
