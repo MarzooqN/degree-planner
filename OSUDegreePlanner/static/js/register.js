@@ -42,7 +42,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = "{{ url_for('login') }}";
+                    window.location.href = "/login";
                 } 
             });
         }
