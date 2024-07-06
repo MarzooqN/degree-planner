@@ -96,6 +96,7 @@ function addCourseForm() {
         placeholder: "Search for a course",
         allowClear: true
     });
+    console.log($(`#course-select-${courseFormCount}`))
 
     courseFormCount++;
 }

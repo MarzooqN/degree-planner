@@ -6,6 +6,7 @@ let courseData = [];
 let completedCourses = [];
 let requirementsData = {};
 const scheduleId = parseInt(document.getElementById('schedule-id').value);
+const selectListDict = {}
 
 let loadingSchedule = false;
 if(scheduleId > 0){
@@ -787,7 +788,8 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     selectList.id = `course-select-${semesterTerm}-${semesterNum}-${courseBoxNum}`;
     selectList.setAttribute('onchange', `courseChange(this, '${semesterTerm}', ${semesterNum}, '${courseBox.id}')`);
     selectList.dataset.firstSelected = 'false';
-    
+
+
     //Creates first option for list
     const option = document.createElement('option');
     option.textContent = "Click to Select Course";
@@ -814,16 +816,26 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
         option.dataset.prerequisites = JSON.stringify(course.prerequisites)
         selectList.appendChild(option);
     } 
+
+    
     courseBox.appendChild(selectList);
 
+    
     //Creates remove button
     const removeButton = document.createElement('div');
     removeButton.className = "remove-course";
     removeButton.setAttribute('onclick',`removeCourseBox('${courseBox.id}', '${semester.id}', '${semesterTerm}', ${semesterNum})`);
     removeButton.textContent = 'X'
     courseBox.appendChild(removeButton);
-
+    
     semester.appendChild(courseBox);
+
+    // Initialize Select2 on the newly added course select element
+    var options = {searchable: true, placeholder: 'Select Classes', searchtext: 'Start typing to search for class'}
+    newSelect = NiceSelect.bind(selectList, options)
+    selectListDict[selectList.id] = newSelect
+    console.log(selectListDict);
+
     courseBoxNum++;
 
     if(courseID){
@@ -837,6 +849,8 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
         }
         selectList.value = courseID;
         await courseChange(selectList, semesterTerm, semesterNum, courseBox.id)
+        newSelect.update();
+
     }
 
 
@@ -846,6 +860,9 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
 When course selection is changed, changes database and lists accordingly
 */
 async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxID){
+
+    selectInstance = selectListDict[selectElement.id];
+
     if (selectElement.value == "Click to Select Course"){
         await removeSelectedCourse(courseBoxID, semesterTerm, semesterNum);
     } else {
@@ -854,6 +871,9 @@ async function courseChange(selectElement, semesterTerm, semesterNum, courseBoxI
         }
         await checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID);
     }
+
+    selectInstance.update();
+
 }
 
 /*
@@ -935,6 +955,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     const modal = document.getElementById('messageModal');
     const modalMessage = document.getElementById('message');
     const modalDiv = document.getElementById('messageDiv');
+
     
     //Get selected course 
     const selectedCourseID = selectElement.value;

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSU Degree Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="static/nice-select2/dist/css/nice-select2.css" rel="stylesheet" />
+
 </head>
 <body>
     <header>
@@ -116,6 +119,10 @@
 
     <input type="hidden" id="schedule-id" value="{{ schedule_id }}">
 
+
+    <script src="static/nice-select2/dist/js/nice-select2.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="static/js/script.js"></script>
 </body>
 </html>

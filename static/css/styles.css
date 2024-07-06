@@ -136,6 +136,7 @@ input[type=text], input[type=password] {
     align-items: center;
 }
 
+
 .course-box {
     border: 1px solid #ddd;
     margin: 5px;
@@ -145,11 +146,11 @@ input[type=text], input[type=password] {
     display: flex;
     align-items: center;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    width: calc(33% - 11px); /* Makes two course-boxes fit in one row with some margin */
-    box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+    /* width: calc(33% - 11px); 
+    box-sizing: border-box;  */
 }
 
-.course-box select {
+/* .course-box select {
     flex: 1;
     margin-right: 10px;
     padding: 10px;
@@ -159,7 +160,7 @@ input[type=text], input[type=password] {
     box-sizing: border-box; 
     appearance: auto;
 
-}
+} */
 
 .add-course {
     cursor: pointer;
