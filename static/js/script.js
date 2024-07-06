@@ -705,6 +705,8 @@ async function removeSemester() {
 
     // Remove all courses in the semester
     const ableToRemove = await removeAllCourses(semesterTerm, semesterYear);
+    const credits = parseFloat(document.getElementById(`${semesterTerm} ${semesterYear}`).dataset.credits);
+
     
     if (!ableToRemove) {
         return;
@@ -742,6 +744,10 @@ async function removeSemester() {
     } 
 
     updateSemesterDropdown();
+
+    const totalCreditsHeader = document.getElementById(`totalCredits`);
+    totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
+    totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 }
 
 /*
@@ -1166,7 +1172,7 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
 /*
 Function that removes all courses at once when remove semester is pressed
 */
-async function removeAllCourses(semesterTerm, semesterYear) {
+async function removeAllCourses(semesterTerm, semesterYear) {    
     const removeCoursesPayload = {
         semester: semesterTerm,
         year: semesterYear
