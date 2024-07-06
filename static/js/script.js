@@ -204,49 +204,6 @@ function prereqModalFunctionality(){
 
 }
 
-document.addEventListener('DOMContentLoaded', initializeAutocomplete);
-
-function initializeAutocomplete() {
-    const manualCourseInput = document.getElementById('manualCourseInput');
-    const autocompleteDropdown = document.getElementById('autocompleteDropdown');
-
-    manualCourseInput.addEventListener('input', function () {
-        const query = manualCourseInput.value.trim().toUpperCase();
-
-        if (query.length > 0) {
-            fetch(`/api/class_suggestions?query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    autocompleteDropdown.innerHTML = '';
-                    if (data.suggestions.length > 0) {
-                        data.suggestions.forEach(suggestion => {
-                            const item = document.createElement('div');
-                            item.classList.add('autocomplete-item');
-                            item.textContent = suggestion;
-                            item.addEventListener('click', function () {
-                                manualCourseInput.value = suggestion;
-                                autocompleteDropdown.innerHTML = '';
-                                displayPrerequisites(suggestion);
-                            });
-                            autocompleteDropdown.appendChild(item);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching class suggestions:', error);
-                });
-        } else {
-            autocompleteDropdown.innerHTML = '';
-        }
-    });
-
-    document.addEventListener('click', function (event) {
-        if (event.target !== manualCourseInput) {
-            autocompleteDropdown.innerHTML = '';
-        }
-    });
-}
-
 // Function to normalize the input
 function normalizeInput(input) {
     const numberToRoman = {
