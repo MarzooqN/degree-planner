@@ -624,7 +624,6 @@ function removeSpringButtons(){
 
 
 function addInternship(){
-    console.log('adding internship')
 
     const semesterTerm = 'SU';
     const semesterYear = semesterNum;
@@ -840,7 +839,6 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     var options = {searchable: true, placeholder: 'Select Classes', searchtext: 'Start typing to search for class'}
     newSelect = NiceSelect.bind(selectList, options)
     selectListDict[selectList.id] = newSelect
-    console.log(selectListDict);
 
     courseBoxNum++;
 
