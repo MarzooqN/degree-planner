@@ -27,6 +27,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchAllData();
 });
 
+function populateCourseSelectOptions() {
+    const selectElement1 = document.getElementById('courseIDInput');
+    const selectElement2 = document.getElementById('manualCourseInput');
+
+    const option = document.createElement('option');
+    option.textContent = "Click to Select Course";
+    selectElement1.appendChild(option);
+    selectElement2.appendChild(option);
+
+
+
+    courseData.forEach(course => {
+        const option = document.createElement('option');
+        option.value = course.CourseID;
+        option.textContent = `${course.CourseID} - ${course.CourseName}`;
+        selectElement1.appendChild(option);
+        selectElement2.appendChild(option);
+    });
+
+    var options = {searchable: true, placeholder: 'Select Classes', searchtext: 'Start typing to search for class'}
+    newSelect = NiceSelect.bind(selectElement1, options)
+    newSelect = NiceSelect.bind(selectElement2, options)
+}
+
 async function fetchAllData() {
 
     const waitModal = document.getElementById('waitModal');
@@ -34,6 +58,8 @@ async function fetchAllData() {
 
     const scheduleId = parseInt(document.getElementById('schedule-id').value);
     await fetchCourseData();
+
+    populateCourseSelectOptions();
     await fetchUserData();
 
     await fetchRequirementsData();
@@ -188,12 +214,6 @@ function prereqModalFunctionality(){
         modal.style.display = 'none';
     }
 
-    //If you click outside of the modal the modal will go away
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    }
 
     //When course id is inputted it will make sure there is a course id present and display the prerequistes
     submitBtn.onclick = function() {
