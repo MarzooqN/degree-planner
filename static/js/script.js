@@ -1110,6 +1110,10 @@ async function removeSelectedCourse(courseBoxID, semesterTerm, semesterNum){
             
         });
 
+        if (response.status == 404){
+            return;
+        }
+
         const course = await response.json();
         if(course){
             courseID = course.courseID; 
