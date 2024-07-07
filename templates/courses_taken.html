@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/courses_taken.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="static/nice-select2/dist/css/nice-select2.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -23,7 +24,7 @@
                 <div id="course-forms-container">
                     <!-- Course input forms will be dynamically added here -->
                     <div class="course-form">
-                        <div>
+                        <div class="courseDiv">
                             <label for="course-select-0">Select Course:</label>
                             <select id="course-select-0" name="course-0" class="course-select">
                                 <!-- Options will be dynamically populated -->
@@ -64,6 +65,7 @@
     </main>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="static/nice-select2/dist/js/nice-select2.js"></script>
     <script src="static/js/courses_taken.js"></script>
 </body>
 </html>

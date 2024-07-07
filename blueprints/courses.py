@@ -260,6 +260,31 @@ def add_completed_courses():
 
     return jsonify({"success": True}), 201
 
+@courses_bp.route('/api/remove_completed_course', methods=['POST'])
+@login_required
+def remove_completed_course():
+    data = request.json
+    user_id = current_user.id
+
+    connection = get_db_connection('users')
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute('''
+            DELETE FROM CoursesTaken WHERE userID = %s AND courseID = %s AND semester = %s AND year=%s 
+        ''', (user_id, data['courseID'], data['semester'], data['year']))
+        connection.commit()
+    except Exception as e:
+        print(f'Error removing completed courses: {e}')
+        return jsonify({"error": "Failed to remove courses"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+    return jsonify({"success": True}), 201
+
+
+
 @courses_bp.route('/courses_taken', methods=['GET'])
 @login_required
 def courses_taken():

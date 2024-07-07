@@ -17,7 +17,7 @@
 }
 
 .course-form select, .course-form input {
-    flex: 2;
+    flex: 0;
     margin-right: 10px;
     width: auto;
     padding: 5px;
@@ -40,6 +40,10 @@
     border-radius: 5px;
 }
 
+#courses-taken-ul button {
+    margin: 10px;
+}
+
 hr {
     display: block;
     margin-top: 0.5em;
@@ -49,4 +53,18 @@ hr {
     border-style: inset;
     border-width: 1px;
   }
-  
+
+  .nice-select {
+    flex: 4;
+  }
+
+  .courseDiv {
+    display: flex;
+    align-items: center;
+  }
+
+  .course-taken-list{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  } 
