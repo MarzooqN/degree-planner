@@ -86,11 +86,65 @@ function displaySchedules(schedules) {
         deleteButton.appendChild(deleteSpan);
         deleteButton.onclick = () => deleteSchedule(scheduleId);
         buttonDiv.appendChild(deleteButton);
+
+        const exportButton = document.createElement('button');
+        const exportSpan = document.createElement('span');
+        exportSpan.textContent = 'Export Plan';
+        exportButton.appendChild(exportSpan);
+        exportButton.onclick = () => exportSchedule(scheduleId);
+        buttonDiv.appendChild(exportButton);
         
         scheduleDiv.appendChild(buttonDiv);
         scheduleContainer.appendChild(scheduleDiv);
     }
 }
+
+async function exportSchedule(scheduleId) {
+    if (scheduleId > 0) {
+        const response = await fetch(`/api/get_schedule/${scheduleId}`);
+        if (response.ok) {
+            const schedule = await response.json();
+            const blob = new Blob([JSON.stringify(schedule)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${schedule.schedule_name}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            alert('Failed to export schedule.');
+        }
+    } else {
+        alert('No schedule to export.');
+    }
+}
+
+
+async function importSchedule(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const importedSchedule = JSON.parse(e.target.result);
+            const response = await fetch('/api/import_schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(importedSchedule)
+            });
+
+            if (response.ok) {
+                alert('Schedule imported successfully');
+                location.reload(); // Reload to reflect the imported schedule
+            } else {
+                alert('Failed to import schedule.');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
 
 function loadSchedule(scheduleId) {
     window.location.href = `/load_schedule/${scheduleId}`;

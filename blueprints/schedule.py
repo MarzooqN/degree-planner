@@ -161,3 +161,37 @@ def update_schedule(schedule_id):
     
     connection.close()
     return jsonify({"success": True}), 200
+
+
+#Route for importing a schedule
+@schedule_bp.route('/api/import_schedule', methods=['POST'])
+@login_required
+def import_schedule():
+    data = request.json
+    schedule_name = data.get('schedule_name') + ' - Imported'
+    degree = data.get('degree')
+    courses = data.get('courses')
+    user_id = current_user.id
+
+    connection = get_db_connection('users')
+    cursor = connection.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO schedules (user_id, schedule_name, degree)
+            VALUES (%s, %s, %s)
+        ''', (user_id, schedule_name, degree))
+        schedule_id = cursor.lastrowid
+
+        for course in courses:
+            cursor.execute('''
+                INSERT INTO schedule_courses (schedule_id, course_id, semester, year)
+                VALUES (%s, %s, %s, %s)
+            ''', (schedule_id, course['course_id'], course['semester'], course['year']))
+
+        connection.commit()
+    except:
+        return jsonify({"error": "Failed to import schedule"}), 404
+    
+    connection.close()
+    return jsonify({"success": True}), 201
+
