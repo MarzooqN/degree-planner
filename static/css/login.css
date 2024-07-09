@@ -87,7 +87,7 @@ body {
 
 .input-container input:focus,
 .input-container input:valid {
-    border-color: #BB0000; /* Border color on focus and when input is valid */
+    border-color: #aaa; /* Border color on focus and when input is valid */
 }
 
 
@@ -107,7 +107,7 @@ body {
 .input-container input:valid + label {
     top: -1rem;
     left: 0;
-    color: #BB0000; /* Label color when input is focused or valid */
+    color: #aaa; /* Label color when input is focused or valid */
     font-size: 0.8rem; /* Adjusted font size */
 }
 
