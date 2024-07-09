@@ -218,13 +218,14 @@ function prereqModalFunctionality(){
     //When course id is inputted it will make sure there is a course id present and display the prerequistes
     submitBtn.onclick = function() {
         const courseId = document.getElementById('courseIDInput').value;
+        console.log(courseID);
         if (courseId) {
             displayPrerequisites(courseId);
         } else {
             alert('Please enter a course ID.');
         }
     }
-
+    
 }
 
 /*
