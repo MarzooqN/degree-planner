@@ -403,7 +403,42 @@ async function displayRequirements() {
                     const li = document.createElement('li');
                     li.textContent = `${course.CourseID} - ${course.CourseName}`;
                     li.setAttribute('data-course-id', course.CourseID); // Unique identifier
+                    li.style.cursor = 'pointer'; // Change cursor to pointer
                     ul.appendChild(li);
+
+                    // Add prerequisites header and list under the course item
+                    const prereqHeader = document.createElement('h4');
+                    prereqHeader.style.marginLeft = '20px'; // Indent the header
+                    prereqHeader.style.display = 'none'; // Initially hide the header
+                    prereqHeader.style.color = '#595959'; // Grey text color
+                    li.appendChild(prereqHeader);
+
+                    const prereqList = createPrerequisiteList(course.CourseID);
+                    prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+                    prereqList.style.marginBottom = '10px';
+                    prereqList.style.color = '#595959'; // Grey text color
+                    li.appendChild(prereqList);
+
+                    // Add event listener to toggle prerequisites and bold styling
+                    li.addEventListener('click', function() {
+                        const isHidden = prereqList.style.display === 'none';
+                        prereqHeader.style.display = isHidden ? 'block' : 'none';
+                        prereqList.style.display = isHidden ? 'block' : 'none';
+
+                        // Toggle bold style only on the course item
+                        if (isHidden) {
+                            li.style.fontWeight = 'bold';
+                        } else {
+                            li.style.fontWeight = 'normal';
+                        }
+
+                        // Ensure other list items are not bold
+                        ul.querySelectorAll('li').forEach(item => {
+                            if (item !== li) {
+                                item.style.fontWeight = 'normal';
+                            }
+                        });
+                    });
                 });
                 contentDiv.appendChild(ul);
             }
@@ -423,8 +458,44 @@ async function displayRequirements() {
                     const li = document.createElement('li');
                     li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
                     li.setAttribute('data-course-id', course.CourseID); // Unique identifier
+                    li.style.cursor = 'pointer'; // Change cursor to pointer
                     validCourses.appendChild(li);
+
+                    // Add prerequisites header and list under the course item
+                    const prereqHeader = document.createElement('h4');
+                    prereqHeader.style.marginLeft = '20px'; // Indent the header
+                    prereqHeader.style.display = 'none'; // Initially hide the header
+                    prereqHeader.style.color = '#595959'; // Grey text color
+                    li.appendChild(prereqHeader);
+
+                    const prereqList = createPrerequisiteList(course.CourseID);
+                    prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+                    prereqList.style.marginBottom = '10px';
+                    prereqList.style.color = '#595959'; // Grey text color
+                    li.appendChild(prereqList);
+
+                    // Add event listener to toggle prerequisites and bold styling
+                    li.addEventListener('click', function() {
+                        const isHidden = prereqList.style.display === 'none';
+                        prereqHeader.style.display = isHidden ? 'block' : 'none';
+                        prereqList.style.display = isHidden ? 'block' : 'none';
+
+                        // Toggle bold style only on the course item
+                        if (isHidden) {
+                            li.style.fontWeight = 'bold';
+                        } else {
+                            li.style.fontWeight = 'normal';
+                        }
+
+                        // Ensure other list items are not bold
+                        validCourses.querySelectorAll('li').forEach(item => {
+                            if (item !== li) {
+                                item.style.fontWeight = 'normal';
+                            }
+                        });
+                    });
                 });
+
                 openModal(modal);
                 
             };
@@ -436,7 +507,42 @@ async function displayRequirements() {
                 const li = document.createElement('li');
                 li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
                 li.setAttribute('data-course-id', course.CourseID); // Unique identifier
+                li.style.cursor = 'pointer'; // Change cursor to pointer
                 ul.appendChild(li);
+
+                // Add prerequisites header and list under the course item
+                const prereqHeader = document.createElement('h4');
+                prereqHeader.style.marginLeft = '20px'; // Indent the header
+                prereqHeader.style.display = 'none'; // Initially hide the header
+                prereqHeader.style.color = '#595959'; // Grey text color
+                li.appendChild(prereqHeader);
+
+                const prereqList = createPrerequisiteList(course.CourseID);
+                prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+                prereqList.style.marginBottom = '10px';
+                prereqList.style.color = '#595959'; // Grey text color
+                li.appendChild(prereqList);
+
+                // Add event listener to toggle prerequisites and bold styling
+                li.addEventListener('click', function() {
+                    const isHidden = prereqList.style.display === 'none';
+                    prereqHeader.style.display = isHidden ? 'block' : 'none';
+                    prereqList.style.display = isHidden ? 'block' : 'none';
+
+                    // Toggle bold style only on the course item
+                    if (isHidden) {
+                        li.style.fontWeight = 'bold';
+                    } else {
+                        li.style.fontWeight = 'normal';
+                    }
+
+                    // Ensure other list items are not bold
+                    ul.querySelectorAll('li').forEach(item => {
+                        if (item !== li) {
+                            item.style.fontWeight = 'normal';
+                        }
+                    });
+                });
             });
             contentDiv.appendChild(ul);
         } else {
@@ -445,7 +551,42 @@ async function displayRequirements() {
                 const li = document.createElement('li');
                 li.textContent = `${course.CourseID} - ${course.CourseName}`;
                 li.setAttribute('data-course-id', course.CourseID); // Unique identifier
+                li.style.cursor = 'pointer'; // Change cursor to pointer
                 ul.appendChild(li);
+
+                // Add prerequisites header and list under the course item
+                const prereqHeader = document.createElement('h4');
+                prereqHeader.style.marginLeft = '20px'; // Indent the header
+                prereqHeader.style.display = 'none'; // Initially hide the header
+                prereqHeader.style.color = '#595959'; // Grey text color
+                li.appendChild(prereqHeader);
+
+                const prereqList = createPrerequisiteList(course.CourseID);
+                prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+                prereqList.style.marginBottom = '10px';
+                prereqList.style.color = '#595959'; // Grey text color
+                li.appendChild(prereqList);
+
+                // Add event listener to toggle prerequisites and bold styling
+                li.addEventListener('click', function() {
+                    const isHidden = prereqList.style.display === 'none';
+                    prereqHeader.style.display = isHidden ? 'block' : 'none';
+                    prereqList.style.display = isHidden ? 'block' : 'none';
+
+                    // Toggle bold style only on the course item
+                    if (isHidden) {
+                        li.style.fontWeight = 'bold';
+                    } else {
+                        li.style.fontWeight = 'normal';
+                    }
+
+                    // Ensure other list items are not bold
+                    ul.querySelectorAll('li').forEach(item => {
+                        if (item !== li) {
+                            item.style.fontWeight = 'normal';
+                        }
+                    });
+                });
             });
             contentDiv.appendChild(ul);
         }
@@ -461,6 +602,53 @@ async function displayRequirements() {
     }
 }
 
+
+/* 
+function to create prerequisite list 
+*/
+function createPrerequisiteList(courseId) {
+    const course = courseData.find(course => course.CourseID === courseId);
+    const prereqList = document.createElement('ul');
+    prereqList.style.display = 'none'; // Initially hide the prerequisites list
+
+    if (course) {
+        const prerequisites = course.prerequisites.filter(req => req.type === 'prerequisite');
+        
+        if (prerequisites.length === 0) {
+            const noPrereqs = document.createElement('li');
+            noPrereqs.textContent = 'No Prerequisites';
+            prereqList.appendChild(noPrereqs);
+        } else {
+            // Add prerequisites header under the course item
+            const prereqHeader = document.createElement('h4');
+            prereqHeader.textContent = 'Prerequisites - Select 1 from each group:';
+            prereqHeader.style.color = '#595959'; // Grey text color
+            prereqHeader.style.display = 'block'; // Display the header
+            prereqList.appendChild(prereqHeader);
+
+            const groups = {};
+            prerequisites.forEach(req => {
+                if (!groups[req.group]) {
+                    groups[req.group] = [];
+                }
+                groups[req.group].push(req.prerequisiteID);
+            });
+
+            for (const group in groups) {
+                const groupElem = document.createElement('li');
+                const groupPrereqs = groups[group];
+                groupElem.textContent = `Group ${group}: ${groupPrereqs.join(', ')}`;
+                prereqList.appendChild(groupElem);
+            }
+        }
+    } else {
+        const noCourse = document.createElement('li');
+        noCourse.textContent = 'Course not found.';
+        prereqList.appendChild(noCourse);
+    }
+
+    return prereqList;
+}
 
 
 /*
