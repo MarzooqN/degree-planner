@@ -345,9 +345,18 @@ Function to get requirement data
 */
 async function fetchRequirementsData() {
     try {
+        prof = document.getElementById('prof').value;
         const response = await fetch(`/api/requirements`);
         const requirements = await response.json();
-        requirementsData = requirements;
+
+        if(prof != 'None'){
+            const response = await fetch(`/api/prof-requirements`)
+            const profReq = await response.json();
+            requirementsData = Object.assign({}, profReq, requirements)
+        } else {
+            requirementsData = requirements;
+        }
+
         console.log(requirementsData)
         await displayRequirements();
     } catch (e) {
@@ -666,7 +675,9 @@ function updateRequirementFulfillment() {
         });
 
         if (reqData.type === 'all_courses') {
-            coursesFulfilled = reqData.courses.every(course => {
+            
+            //Check every course and not just return false when 1 course not met
+            coursesFulfilled = reqData.courses.reduce((accumulator, course) => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
                 const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
                 if (isCourseSelected || isCourseCompleted) {
@@ -675,20 +686,28 @@ function updateRequirementFulfillment() {
                         courseLi.classList.add('completed-course');
                     }
                 }
-                return isCourseCompleted || isCourseSelected;
-            });
+                return accumulator && (isCourseCompleted || isCourseSelected); // Accumulate the result
+            }, true);
         } else if (reqData.type === 'credit_hours') {
             const totalCredits = reqData.courses.reduce((sum, course) => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
-                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
-                if (isCourseSelected || isCourseCompleted) {
+                
+                // Count occurrences of the course in the selectedCourses array
+                const selectedOccurrences = selectedCourses.filter(selectedCourse => selectedCourse.CourseID === course.CourseID).length;
+            
+                if (selectedOccurrences > 0 || isCourseCompleted) {
                     const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
                     if (courseLi) {
                         courseLi.classList.add('completed-course');
                     }
                 }
-                if (isCourseCompleted || isCourseSelected) {
+                
+                // Add credits for each instance of the selected course
+                if (isCourseCompleted) {
                     return sum + course.Credits;
+                }
+                if (selectedOccurrences > 0) {
+                    return sum + (course.Credits * selectedOccurrences);
                 }
                 return sum;
             }, 0);
@@ -931,6 +950,7 @@ async function removeSemester() {
     } 
 
     updateSemesterDropdown();
+    updateRequirementFulfillment();
 
     const totalCreditsHeader = document.getElementById(`totalCredits`);
     totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
@@ -1173,14 +1193,16 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     //Converts semester and year into value that can be compared 
     const currentSemesterValue = convertToComparableValue(semesterTerm, semesterNum);
 
-    //Checks if course is already selected in the semester
-    const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
-    if(alreadySelected){
-        selectElement.value = "Click to Select Course"; // Reset selection
-        modalMessage.textContent = 'Cannot add course: Already selected in semester';
-        modalDiv.innerHTML = ''
-        openModal(modal);
-        return;
+    //Checks if course is already selected in the semester (skipping general education courses)
+    if(selectedCourse.CourseID.indexOf('Credit Hour') == -1){
+        const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
+        if(alreadySelected){
+            selectElement.value = "Click to Select Course"; // Reset selection
+            modalMessage.textContent = 'Cannot add course: Already selected in semester';
+            modalDiv.innerHTML = ''
+            openModal(modal);
+            return;
+        }
     }
 
     //Get course prerequisites and check if prereq already completed

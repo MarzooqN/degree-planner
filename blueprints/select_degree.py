@@ -13,6 +13,9 @@ def select_major():
         college = request.form['college']
         major = request.form['major']
         program = request.form['program']
+
+        prof = request.form['prof']
+        session['prof'] = 'None' if prof == 'None' or prof == "" else prof 
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
         courses_selected = []
