@@ -12,10 +12,11 @@ courses_selected = []
 @login_required
 def planner():
     schedule_id = session.get('schedule_id')
+    prof = session.get('prof')
     global courses_selected
     courses_selected = []
     schedule_id = session.get('schedule_id')
-    return render_template('index.html', schedule_id=schedule_id )
+    return render_template('index.html', schedule_id=schedule_id, prof=prof) 
 
 
 #Route for getting courses and their prerequisties 
@@ -220,6 +221,42 @@ def get_requirements():
     connection.close()
     return jsonify(requirements)
 
+@courses_bp.route('/api/prof-requirements', methods=['GET'])
+@login_required
+def get_prof_requirements():
+    prof = session.get('prof')
+    connection = get_db_connection('DegreeData')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute(f'''
+        SELECT pp.RequirementName, pp.RequirementType, ppc.CourseID, c.CourseName
+        FROM PreProfessional pp 
+        LEFT JOIN PreProfessionalCourses ppc ON pp.RequirementID = ppc.RequirementID
+        LEFT JOIN Courses.Courses c ON ppc.CourseID = c.CourseID
+        WHERE profession = '{prof}'
+        ORDER BY pp.RequirementName
+    ''')
+    requirements = {}
+    for row in cursor:
+        req_name = row['RequirementName']
+
+        if req_name not in requirements:
+            requirements[req_name] = {
+                'type': row['RequirementType'],
+            }
+
+        if 'courses' not in requirements[req_name]:
+            requirements[req_name]['courses'] = []
+            
+        requirements[req_name]['courses'].append({
+            'CourseID': row['CourseID'],
+            'CourseName': row['CourseName'],
+        })
+
+    connection.close()
+    return jsonify(requirements)
+
+
+
 #Route for getting all completed courses by the user
 @courses_bp.route('/api/completed_courses', methods=['GET'])
 @login_required
@@ -259,6 +296,31 @@ def add_completed_courses():
         connection.close()
 
     return jsonify({"success": True}), 201
+
+@courses_bp.route('/api/remove_completed_course', methods=['POST'])
+@login_required
+def remove_completed_course():
+    data = request.json
+    user_id = current_user.id
+
+    connection = get_db_connection('users')
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute('''
+            DELETE FROM CoursesTaken WHERE userID = %s AND courseID = %s AND semester = %s AND year=%s 
+        ''', (user_id, data['courseID'], data['semester'], data['year']))
+        connection.commit()
+    except Exception as e:
+        print(f'Error removing completed courses: {e}')
+        return jsonify({"error": "Failed to remove courses"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+    return jsonify({"success": True}), 201
+
+
 
 @courses_bp.route('/courses_taken', methods=['GET'])
 @login_required

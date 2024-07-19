@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSU Degree Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="static/nice-select2/dist/css/nice-select2.css" rel="stylesheet" />
 
 </head>
@@ -112,7 +111,8 @@
 
         <section id="degree-requirements-container">
             <h2>Degree Requirements</h2>
-            <h3 data-credits="0" id="totalCredits">Total Credit Hours: 0</h3>
+            <h3 data-credits="0" id="totalCredits" style="margin: 1px;">Total Credit Hours: 0</h3>
+            <h5 style="margin-top: 5px;">Click on course to see prerequisites</h5>
             <div id="degree-requirements">
                 <!-- Degree requirements will be displayed here by JavaScript -->
             </div>
@@ -121,11 +121,10 @@
     </main>
 
     <input type="hidden" id="schedule-id" value="{{ schedule_id }}">
+    <input type ="hidden" id="prof" value="{{ prof }}">
 
 
     <script src="static/nice-select2/dist/js/nice-select2.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="static/js/script.js"></script>
 </body>
 </html>
