@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compare Plans</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/saved_schedules.css') }}">
 </head>
 <body>
     <header>
         <h1>Compare Plans</h1>
+        <div class="header-buttons">
+            <button onclick="logout()"><span>Logout</span></button>
+            <button onclick="homepage()"><span>Home Page</span></button>
+        </div>
     </header>
     <main class="comparison-container">
         <div class="schedule-container" id="schedule-1">
@@ -66,5 +71,6 @@
             });
         }
     </script>
+    <script src="static/js/compare_plans.js"></script>
 </body>
 </html>

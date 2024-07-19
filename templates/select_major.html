@@ -18,15 +18,7 @@
         <section id="major-selection">
             <form method="POST" action="{{ url_for('select_degree.select_major') }}">
                 <h2>Select Degree:</h2>
-                {% include 'degree_selection.html' %}   
-                
-                <select id="prof" name="prof">
-                    <option value="">Select Pre-Professional</option>
-                    <option value="None">None</option>
-                    <option value="law">Pre-Law</option>
-                    <option value="med">Pre-Med</option>
-                </select>
-
+                {% include 'degree_selection.html' %}
                 <button type="submit">
                     <span>Submit</span>
                 </button>

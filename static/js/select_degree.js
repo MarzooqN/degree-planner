@@ -6,6 +6,7 @@ async function fetchSchedules() {
     try {
         const response = await fetch('/api/get_schedules');
         const schedules = await response.json();
+        sessionStorage.setItem('schedules', JSON.stringify(schedules));
         displaySchedules(schedules);
     } catch (e) {
         console.error('Error fetching schedules:', e);
