@@ -45,9 +45,9 @@ def save_schedule():
 
         for course in data.get('courses'):
             cursor.execute('''
-                INSERT INTO schedule_courses (schedule_id, course_id, semester, year)
+                INSERT INTO schedule_courses (schedule_id, course_id, semester, year, course_name)
                 VALUES (%s, %s, %s, %s)
-            ''', (schedule_id, course['course_id'], course['semester'], course['year']))
+            ''', (schedule_id, course['course_id'], course['semester'], course['year'], course['course_name']))
 
         connection.commit()
     except:
@@ -65,7 +65,7 @@ def get_schedules():
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.degree, s.prof, sc.course_id, sc.semester, sc.year
+        SELECT s.schedule_id, s.schedule_name, s.degree, s.prof, sc.course_id, sc.course_name, sc.semester, sc.year
         FROM schedules s
         JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
         WHERE s.user_id = %s
@@ -85,6 +85,7 @@ def get_schedules():
         
         schedules_dict[row['schedule_id']]['courses'].append({
             'course_id': row['course_id'],
+            'course_name': row['course_name'],
             'semester': row['semester'],
             'year': row['year']
         })
@@ -155,9 +156,9 @@ def update_schedule(schedule_id):
         # Insert new courses for the schedule
         for course in data['courses']:
             cursor.execute('''
-                INSERT INTO schedule_courses (schedule_id, course_id, semester, year)
+                INSERT INTO schedule_courses (schedule_id, course_id, semester, year, course_name)
                 VALUES (%s, %s, %s, %s)
-            ''', (schedule_id, course['course_id'], course['semester'], course['year']))
+            ''', (schedule_id, course['course_id'], course['semester'], course['year'], course['course_name']))
 
         connection.commit()
     except Exception as e:
@@ -189,9 +190,9 @@ def import_schedule():
 
         for course in courses:
             cursor.execute('''
-                INSERT INTO schedule_courses (schedule_id, course_id, semester, year)
+                INSERT INTO schedule_courses (schedule_id, course_id, semester, year, course_name)
                 VALUES (%s, %s, %s, %s)
-            ''', (schedule_id, course['course_id'], course['semester'], course['year']))
+            ''', (schedule_id, course['course_id'], course['semester'], course['year'], course['course_name']))
 
         connection.commit()
     except:

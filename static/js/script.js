@@ -1409,6 +1409,7 @@ async function saveSchedule() {
 async function updateSchedule(scheduleId) {
     const courses = selectedCourses.map(course => ({
         course_id: course.CourseID,
+        course_name: course.CourseName,
         semester: course.semester,
         year: course.year
     }));
@@ -1442,6 +1443,7 @@ async function createNewSchedule(scheduleName) {
 
     const courses = selectedCourses.map(course => ({
         course_id: course.CourseID,
+        course_name: course.CourseName,
         semester: course.semester,
         year: course.year
     }));
