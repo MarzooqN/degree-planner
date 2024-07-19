@@ -474,16 +474,13 @@ async function displayRequirements() {
         for (const [group, courses] of Object.entries(groups)) {
             const groupHeader = document.createElement('h5');
             groupHeader.textContent = `Group ${group} - Select 1 from this group`;
-            groupHeader.classList.add('requirement-header');
+            // groupHeader.classList.add('requirement-header');
             contentDiv.appendChild(groupHeader);
 
             const ul = document.createElement('ul');
             appendCoursesList(ul, courses);
             contentDiv.appendChild(ul);
 
-            groupHeader.addEventListener('click', () => {
-                ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
-            });
         }
     };
 
