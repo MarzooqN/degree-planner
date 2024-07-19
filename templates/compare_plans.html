@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Plans</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saved_schedules.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Compare Plans</h1>
+    </header>
+    <main class="comparison-container">
+        <div class="schedule-container" id="schedule-1">
+            <h2 id="schedule-1-title"></h2>
+            <div id="schedule-content-1">
+                <!-- Schedule 1 semesters and courses will be dynamically inserted here -->
+            </div>
+        </div>
+        <div class="schedule-container" id="schedule-2">
+            <h2 id="schedule-2-title"></h2>
+            <div id="schedule-content-2">
+                <!-- Schedule 2 semesters and courses will be dynamically inserted here -->
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const schedule1 = JSON.parse(sessionStorage.getItem('schedule1'));
+            const schedule2 = JSON.parse(sessionStorage.getItem('schedule2'));
+            document.getElementById('schedule-1-title').textContent = schedule1.schedule_name || 'Schedule 1';
+            document.getElementById('schedule-2-title').textContent = schedule2.schedule_name || 'Schedule 2';
+            populateScheduleWithContainer(schedule1, 'schedule-content-1');
+            populateScheduleWithContainer(schedule2, 'schedule-content-2');
+        });
+
+        function populateScheduleWithContainer(schedule, containerId) {
+            const container = document.getElementById(containerId);
+
+            const semesters = {};
+
+            schedule.courses.forEach(course => {
+                const semesterKey = `${course.semester}-${course.year}`;
+                if (!semesters[semesterKey]) {
+                    semesters[semesterKey] = [];
+                }
+                semesters[semesterKey].push(course);
+            });
+
+            Object.keys(semesters).sort().forEach(semesterKey => {
+                const [semester, year] = semesterKey.split('-');
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'semester';
+                const semesterTitle = document.createElement('h3');
+                semesterTitle.textContent = `${semester} ${year}`;
+                semesterDiv.appendChild(semesterTitle);
+
+                semesters[semesterKey].forEach(course => {
+                    const courseBox = document.createElement('div');
+                    courseBox.className = 'course-box';
+                    courseBox.textContent = `${course.course_id}: ${course.course_name}`;
+                    semesterDiv.appendChild(courseBox);
+                });
+
+                container.appendChild(semesterDiv);
+            });
+        }
+    </script>
+</body>
+</html>
