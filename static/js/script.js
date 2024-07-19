@@ -455,9 +455,19 @@ async function displayRequirements() {
             });
         } else if (reqData.type === 'credit_hours') {
             header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`;
-            appendCoursesList(contentDiv, reqData.courses);
+            if (reqData.courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(reqData.courses);
+                contentDiv.appendChild(courseBtn);
+            } else {
+                appendCoursesList(contentDiv, reqData.courses);
+            }
         } else {
-            appendCoursesList(contentDiv, reqData.courses);
+            if (reqData.courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(reqData.courses);
+                contentDiv.appendChild(courseBtn);
+            } else {
+                appendCoursesList(contentDiv, reqData.courses);
+            }
         }
 
         contentDiv.style.display = 'none'; // Initially hide the content
@@ -478,7 +488,12 @@ async function displayRequirements() {
             contentDiv.appendChild(groupHeader);
 
             const ul = document.createElement('ul');
-            appendCoursesList(ul, courses);
+            if (courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(courses);
+                ul.appendChild(courseBtn);
+            } else {
+                appendCoursesList(ul, courses);
+            }
             contentDiv.appendChild(ul);
 
         }
