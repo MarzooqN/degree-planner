@@ -38,6 +38,12 @@ section {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     margin: 20px;
     flex: 1;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 strong{
@@ -250,16 +256,15 @@ button:hover span:after {
 .schedule button {
     margin-right: 10px;
 }
-
-/* #schedule-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+/* 
+#schedule-container {
+    animation: fadeIn 1s ease-in-out;
 } */
 
 .schedule div {
     align-items: center;
     display: flex;
+    animation: fadeIn 1s ease-in-out;
 }
 
 .menu {

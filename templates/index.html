@@ -108,7 +108,8 @@
 
         <section id="degree-requirements-container">
             <h2>Degree Requirements</h2>
-            <h3 data-credits="0" id="totalCredits">Total Credit Hours: 0</h3>
+            <h3 data-credits="0" id="totalCredits" style="margin: 1px;">Total Credit Hours: 0</h3>
+            <h5 style="margin-top: 5px;">Click on course to see prerequisites</h5>
             <div id="degree-requirements">
                 <!-- Degree requirements will be displayed here by JavaScript -->
             </div>
@@ -117,6 +118,7 @@
     </main>
 
     <input type="hidden" id="schedule-id" value="{{ schedule_id }}">
+    <input type ="hidden" id="prof" value="{{ prof }}">
 
 
     <script src="static/nice-select2/dist/js/nice-select2.js"></script>
