@@ -28,27 +28,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function populateCourseSelectOptions() {
-    const selectElement1 = document.getElementById('courseIDInput');
-    const selectElement2 = document.getElementById('manualCourseInput');
+    const selectElement = document.getElementById('manualCourseDataList');
 
     const option = document.createElement('option');
     option.textContent = "Click to Select Course";
-    selectElement1.appendChild(option);
-    selectElement2.appendChild(option);
-
-
+    selectElement.appendChild(option);
 
     courseData.forEach(course => {
         const option = document.createElement('option');
         option.value = course.CourseID;
         option.textContent = `${course.CourseID} - ${course.CourseName}`;
-        selectElement1.appendChild(option);
-        selectElement2.appendChild(option);
+        selectElement.appendChild(option);
     });
-
-    var options = {searchable: true, placeholder: 'Select Classes', searchtext: 'Start typing to search for class'}
-    newSelect = NiceSelect.bind(selectElement1, options)
-    newSelect = NiceSelect.bind(selectElement2, options)
 }
 
 async function fetchAllData() {
@@ -218,7 +209,7 @@ function prereqModalFunctionality(){
     //When course id is inputted it will make sure there is a course id present and display the prerequistes
     submitBtn.onclick = function() {
         const courseId = document.getElementById('courseIDInput').value;
-        console.log(courseID);
+        console.log(courseId);
         if (courseId) {
             displayPrerequisites(courseId);
         } else {

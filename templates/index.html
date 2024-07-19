@@ -23,11 +23,8 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Lookup Class Prerequisite</h2>
-            <!-- <input type="text" id="courseIDInput" placeholder="Enter Course ID"> -->
-            <div>
-                <select id="courseIDInput"></select>
-                <button id="lookupPrereqSubmit">Submit</button>
-            </div>
+            <input list="manualCourseDataList" id="courseIDInput" name="courseIDInput" placeholder="Enter Course ID">
+            <button id="lookupPrereqSubmit">Submit</button>
             <div id="prerequisiteResult"></div>
         </div>
     </div>
@@ -91,7 +88,10 @@
             <h2>Semester Planner</h2>
             <div>
                 <h5 id="manualCourseHeading">Manually Add Course</h5>
-                <input type="text" id="manualCourseInput" placeholder="Enter Course ID">
+                <input list="manualCourseDataList" id="manualCourseInput" name="manualCourseInput">
+                <datalist id="manualCourseDataList" placeholder="Enter Course ID">
+                    <!-- Options will be dynamically populated -->
+                </datalist>
                 <select id="manualSemesterSelect">
                     <!-- Options will be dynamically populated -->
                 </select>
