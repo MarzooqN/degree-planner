@@ -10,67 +10,65 @@
     <header>
         <h1>Select Degree</h1>
         <h5> Home Page </h5>
-        <div class = "header-buttons">
+        <div class="header-buttons">
             <button onclick="logout()"><span>Logout</span></button>
-           
         </div>
     </header>
     <main>
-        <section id = "major-selection">
-
+        <section id="major-selection">
             <form method="POST" action="{{ url_for('select_degree.select_major') }}">
                 <h2>Select Degree:</h2>
-                {% include 'degree_selection.html' %}   
-                
+                {% include 'degree_selection.html' %}
                 <button type="submit">
-                    <span>Submit</span> 
+                    <span>Submit</span>
                 </button>
             </form>
-
-            
-
         </section>
 
         <section id="middle-section">
-
             <section id="compare-degrees">
                 <form method="GET" action="{{ url_for('select_degree.compare_degrees')}}">
                     <h2>Compare Degrees: </h2>
                     <button type="submit">
-                        <span>Go to Compare Degrees</span> 
+                        <span>Go to Compare Degrees</span>
                     </button>
                 </form>
             </section>
-
 
             <section id="courses-taken">
                 <h2>Courses Taken: </h2>
                 <form method="GET" action="{{ url_for('courses.courses_taken')}}">
                     <button type="submit">
-                        <span>Input Courses Taken Here</span> 
+                        <span>Input Courses Taken Here</span>
                     </button>
                 </form>
-
             </section>
-
         </section>
 
-        <section id = "saved-schedules">
-            <div style="display: flex; justify-content: space-between; align-items: center">
-                <h2> Your Saved Degree Plans </h2>
-                <button onclick="document.getElementById('importScheduleInput').click();" style="margin: 0px;"><span>Import Plan</span></button>
+        <section id="saved-schedules">
+            <h2>Your Saved Degree Plans</h2>
+            <div class="buttons-container">
+                <button class="resize-button" onclick="document.getElementById('importScheduleInput').click();"><span>Import Plan</span></button>
+                <button class="resize-button" onclick="openComparePlansModal()"><span>Compare Saved Plans</span></button>
                 <input type="file" id="importScheduleInput" style="display:none" onchange="importSchedule(event)">
             </div>
-
             <div id="schedule-container">
                 <!-- Schedules will be displayed here dynamically -->
             </div>
-
         </section>
     </main>
 
-    <script src="static/js/select_degree.js"></script>
-
-    </script>
+    <div id="comparePlansModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeComparePlansModal()">&times;</span>
+            <h2>Select Two Plans to Compare</h2>
+            <div id="plans-selection">
+                <!-- Plans selection checkboxes will be populated here -->
+            </div>
+            <button id="compare-button">Compare</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/compare_plans.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/select_degree.js') }}"></script>
 </body>
 </html>

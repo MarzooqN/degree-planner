@@ -1,5 +1,3 @@
-
-
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchSchedules();
 });
@@ -60,7 +58,7 @@ async function fetchPrograms(major, programElementId) {
 
 function displaySchedules(schedules) {
     const scheduleContainer = document.getElementById('schedule-container');
-    scheduleContainer.innerHTML = '';  // Clear any existing content
+    scheduleContainer.innerHTML = '';  
 
     for (const [scheduleId, schedule] of Object.entries(schedules)) {
         const scheduleDiv = document.createElement('div');
@@ -136,7 +134,7 @@ async function importSchedule(event) {
 
             if (response.ok) {
                 alert('Schedule imported successfully');
-                location.reload(); // Reload to reflect the imported schedule
+                location.reload(); 
             } else {
                 alert('Failed to import schedule.');
             }

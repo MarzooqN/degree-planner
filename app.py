@@ -65,9 +65,10 @@ def login():
 def index():
     return render_template('select_major.html')
 
-
+@app.route('/compare_plans')
+@login_required
+def compare_plans():
+    return render_template('compare_plans.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
