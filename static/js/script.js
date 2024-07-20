@@ -27,6 +27,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchAllData();
 });
 
+//Creates event listners for manual inputs to only show datalist after 4 characters to reduce lag
+const prereqInput = document.getElementById('courseIDInput')
+const manualCourseInput = document.getElementById('manualCourseInput')
+prereqInput.addEventListener("keyup", (e) =>{
+    // If input value is longer or equal than 4 chars shows courses 
+    if (e.target.value.length >= 4) {
+        prereqInput.setAttribute("list", "manualCourseDataList");
+    } else {
+        prereqInput.setAttribute("list", "");
+    }
+});
+manualCourseInput.addEventListener("keyup", (e) =>{
+    // If input value is longer or equal than 3 chars shows courses 
+    if (e.target.value.length >= 3) {
+        manualCourseInput.setAttribute("list", "manualCourseDataList");
+    } else {
+        manualCourseInput.setAttribute("list", "");
+    }
+});
+
+
 function populateCourseSelectOptions() {
     const selectElement = document.getElementById('manualCourseDataList');
 
