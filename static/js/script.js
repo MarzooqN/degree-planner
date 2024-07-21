@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchAllData();
 });
 
-//Creates event listners for manual inputs to only show datalist after 4 characters to reduce lag
+/*
+Creates event listners for manual inputs to only show datalist after 4 characters to reduce lag
+*/
 const prereqInput = document.getElementById('courseIDInput')
 const manualCourseInput = document.getElementById('manualCourseInput')
 prereqInput.addEventListener("keyup", (e) =>{
@@ -442,6 +444,7 @@ async function displayRequirements() {
     const createGroupedSection = (sectionName, sectionData) => {
         const sectionDiv = document.createElement('div');
         sectionDiv.className = 'requirement';
+        sectionDiv.id = `requirement-group-${sectionName}`
         const sectionHeader = document.createElement('h4');
         sectionHeader.textContent = sectionName;
         sectionHeader.classList.add('requirement-header');
@@ -619,9 +622,6 @@ function createPrerequisiteList(courseID) {
     return prereqList;
 }
 
-
-
-
 /* 
 function to create prerequisite list 
 */
@@ -674,6 +674,8 @@ function createPrerequisiteList(courseId) {
 Function to update requirements section 
 */
 function updateRequirementFulfillment() {
+    let foundationsCount = 0
+    let themeCount = 0
     for (const [reqName, reqData] of Object.entries(requirementsData)) {
         const reqDiv = document.getElementById(`requirement-${reqName.replace(/ /g, '-')}`);
         let coursesFulfilled = false;
@@ -740,8 +742,34 @@ function updateRequirementFulfillment() {
 
         if (coursesFulfilled) {
             reqDiv.classList.add('fulfilled');
+
+            if (reqName.includes('Foundations')) {
+                foundationsCount++;
+                foundationsGroupDiv = document.getElementById('requirement-group-Foundations');
+                if(foundationsCount == foundationsGroupDiv.children[1].children.length){
+                    foundationsGroupDiv.classList.add('fulfilled');
+                }
+            } else if (reqName.includes('Themes')) {
+                themeCount++;
+                themesGroupDiv = document.getElementById('requirement-group-Themes');
+                if(themeCount == themesGroupDiv.children[1].children.length){
+                    themesGroupDiv.classList.add('fulfilled');
+                }
+            }
+
+
         } else {
             reqDiv.classList.remove('fulfilled');
+
+            if (reqName.includes('Foundations')) {
+                foundationsCount--;
+                foundationsGroupDiv = document.getElementById('requirement-group-Foundations');
+                foundationsGroupDiv.classList.remove('fulfilled');
+            } else if (reqName.includes('Themes')) {
+                themeCount--;
+                themesGroupDiv = document.getElementById('requirement-group-Themes');
+                themesGroupDiv.classList.remove('fulfilled');
+            }
         }
     }
 }
