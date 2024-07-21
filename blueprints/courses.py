@@ -26,7 +26,7 @@ def get_courses():
     connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
+        SELECT c.CourseID, c.CourseName, c.Credits, c.available_semesters, p.RequirementID, p.PrerequisiteGroup, p.Type
         FROM Courses c
         LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
     ''')
@@ -41,6 +41,7 @@ def get_courses():
                 'CourseID': course_id,
                 'CourseName': row['CourseName'],
                 'Credits': row['Credits'],
+                'available_semesters': row['available_semesters'] if row['available_semesters'] else 'AU,SP,SU',
                 'prerequisites': []
             }
         if row['RequirementID']:
@@ -59,7 +60,7 @@ def get_course(course_id):
     connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
+        SELECT c.CourseID, c.CourseName, c.Credits, c.available_semesters, p.RequirementID, p.PrerequisiteGroup, p.Type
         FROM Courses c
         LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
         WHERE c.CourseID = %s
@@ -72,6 +73,7 @@ def get_course(course_id):
             'CourseID': course['CourseID'],
             'CourseName': course['CourseName'],
             'Credits': course['Credits'],
+            'available_semesters': course['available_semesters'] if course['available_semesters'] else 'AU,SP,SU',
             'prerequisites': []
         }
         if course['RequirementID']:

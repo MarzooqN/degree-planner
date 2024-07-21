@@ -1043,12 +1043,10 @@ function updateSemesterDropdown() {
     });
 }
 
-
 function skipSummer(){
     semesterCount = 0;
     addSemester();
 }
-
 
 /*
 Function to create course list/box
@@ -1056,6 +1054,17 @@ Function to create course list/box
 let courseBoxNum = 0;
 async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     const semester = document.getElementById(`${semesterTerm}-${semesterNum}`);
+
+    const selectedCourse = courseData.find(course => course.CourseID === courseID);
+
+    // Check if the course is available in the selected semester
+    if (courseID){
+        const availableSemesters = selectedCourse.available_semesters.split(',');
+        if (!availableSemesters.includes(semesterTerm)) {
+            alert('Course is not available in the selected semester.');
+            return;
+        }
+    }
    
     // Check if the course is already selected in this semester, so drag and drop feature doesnt create box if course already in 
     if (selectedCourses.some(course => course.CourseID === courseID && course.semester === semesterTerm && course.year === semesterNum)) {
@@ -1081,18 +1090,20 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     option.textContent = "Click to Select Course";
     selectList.appendChild(option);
 
-    // Filters courses based on requirements
+    // Filters courses based on requirements and available semesters
     const filteredCourses = courseData.filter(course => {
-        return Object.values(requirementsData).some(req => {
-            if (req.type === 'credit_hours' || req.type === 'all_courses') {
-                return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
-            } else if (req.type === 'some_courses') {
-                return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
-            }
-            return false;
-        });
+        const availableSemesters = course.available_semesters.split(',');
+        return availableSemesters.includes(semesterTerm) && (
+            Object.values(requirementsData).some(req => {
+                if (req.type === 'credit_hours' || req.type === 'all_courses') {
+                    return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
+                } else if (req.type === 'some_courses') {
+                    return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
+                }
+                return false;
+            })
+        );
     });
-
 
     //Loops through each course in courseData and adds them to list, specifiying course prerequisites in dataset
     for (const course of filteredCourses){
@@ -1125,7 +1136,6 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
 
     if(courseID){
         if(!filteredCourses.some(course => course.CourseID == courseID)){
-            const selectedCourse = courseData.find(course => course.CourseID === courseID);
             const option = document.createElement('option');
             option.value = selectedCourse.CourseID;
             option.textContent = `${selectedCourse.CourseID} - ${selectedCourse.CourseName} - Manually Added`;
@@ -1189,6 +1199,13 @@ async function addManualCourse() {
         return;
     }
 
+    // Check if the course is available in the selected semester
+    const availableSemesters = course.available_semesters.split(',');
+    if (!availableSemesters.includes(semesterTerm)) {
+        alert('Course is not available in the selected semester.');
+        return;
+    }
+
     // Check if the course is already selected
     if (selectedCourses.some(c => c.CourseID === course.CourseID)) {
         alert('Course already selected.');
@@ -1199,8 +1216,6 @@ async function addManualCourse() {
     // Add the course to the UI (you can reuse addCourseBox logic if needed)
     addCourseBox(semesterTerm, parseInt(semesterYear), course.CourseID);
 }
-
-
 
 // Mapping of terms to numerical values for comparison
 const termOrder = {
