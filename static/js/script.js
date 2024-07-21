@@ -1190,20 +1190,6 @@ async function addManualCourse() {
         return;
     }
 
-    // Check if the course is available in the selected semester
-    const availableSemesters = course.available_semesters.split(',');
-    if (!availableSemesters.includes(semesterTerm)) {
-        alert('Course is not available in the selected semester.');
-        return;
-    }
-
-    // Check if the course is already selected
-    if (selectedCourses.some(c => c.CourseID === course.CourseID)) {
-        alert('Course already selected.');
-        return;
-    }
-
-
     // Add the course to the UI (you can reuse addCourseBox logic if needed)
     addCourseBox(semesterTerm, parseInt(semesterYear), course.CourseID);
 }
