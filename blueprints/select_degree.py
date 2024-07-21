@@ -55,6 +55,8 @@ def compare_degrees():
             courses_checked = {}
             for course in courses:
                 course_id = course['CourseID']
+                if 'Credit' in course_id:
+                    continue
                 if course_id not in courses_checked:
                     if course_id not in all_courses:
                         all_courses[course_id] = 0
