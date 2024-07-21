@@ -1057,20 +1057,11 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
 
     const selectedCourse = courseData.find(course => course.CourseID === courseID);
 
-    // Check if the course is available in the selected semester
+    // Check if the course allowed in that specified place
     if (courseID){
-        const availableSemesters = selectedCourse.available_semesters.split(',');
-        if (!availableSemesters.includes(semesterTerm)) {
-            alert('Course is not available in the selected semester.');
-            return;
-        }
+        if(!checkCourse(courseID, semesterTerm, semesterNum)){return}
     }
    
-    // Check if the course is already selected in this semester, so drag and drop feature doesnt create box if course already in 
-    if (selectedCourses.some(course => course.CourseID === courseID && course.semester === semesterTerm && course.year === semesterNum)) {
-        alert('Course already selected in this semester.');
-        return;
-    }
     
     //Creates course box divder
     const courseBox = document.createElement('div');
@@ -1229,7 +1220,6 @@ function convertToComparableValue(term, year) {
     return year * 10 + termOrder[term];
 }
 
-
 /*
 Function to check if user already selected course in the semester 
 */
@@ -1245,12 +1235,7 @@ function checkSemesterForCourse(currentSemesterValue, selectedCourseID){
     return false;
 }
 
-
-/*
-Function to check if user can take this a course and updating database if they can 
-*/
-async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID){
-    
+function checkCourse(courseID, semesterTerm, semesterNum, selectElement){
     //message modal and text
     const modal = document.getElementById('messageModal');
     const modalMessage = document.getElementById('message');
@@ -1258,7 +1243,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
     
     //Get selected course 
-    const selectedCourseID = selectElement.value;
+    const selectedCourseID = courseID;
     const selectedCourse = courseData.find(course => course.CourseID === selectedCourseID);
     const newSelectedCourseInstance = {
         CourseID: selectedCourse.CourseID,
@@ -1267,14 +1252,23 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
         Credits: selectedCourse.Credits,
     }
 
+    // Check if the course is available in the selected semester
+    const availableSemesters = selectedCourse.available_semesters.split(',');
+    if (!availableSemesters.includes(semesterTerm)) {
+        modalMessage.textContent = `${selectedCourse.CourseID} only available in ${availableSemesters}`;
+        modalDiv.innerHTML = ''
+        openModal(modal);
+        return false;
+    }
+
     //Check if total credit hours less than 18 
     header = document.getElementById(`${semesterTerm} ${semesterNum}`);
     if (parseFloat(header.dataset.credits) + selectedCourse.Credits > 18){
-        selectElement.value = "Click to Select Course"; // Reset selection
+        if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
         modalMessage.textContent = 'Cannot add course: exceeds 18 credit hour limit';
         modalDiv.innerHTML = ''
         openModal(modal);
-        return;
+        return false;
     }
 
 
@@ -1285,16 +1279,17 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
     if(selectedCourse.CourseID.indexOf('Credit Hour') == -1){
         const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
         if(alreadySelected){
-            selectElement.value = "Click to Select Course"; // Reset selection
+            if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
             modalMessage.textContent = 'Cannot add course: Already selected in semester';
             modalDiv.innerHTML = ''
             openModal(modal);
-            return;
+            return false;
         }
     }
 
     //Get course prerequisites and check if prereq already completed
-    const requirements = JSON.parse(selectElement.options[selectElement.selectedIndex].dataset.prerequisites);
+    const requirements = selectedCourse.prerequisites;
+    console.log(requirements);
 
     // Separate prerequisites and corequisites
     const prerequisites = requirements.filter(req => req.type === 'prerequisite');
@@ -1323,21 +1318,32 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
         if (!groupSatisfied) {
             allGroupsSatisfied = false;
-            selectElement.value = "Click to Select Course"; // Reset selection
+            if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
             modalMessage.textContent = `You have not met the prerequisites for ${selectedCourseID}`;
             displayPrerequisites(selectedCourseID, modalDiv)
             openModal(modal);
-            return;
+            return false;
         }
     }
+    return newSelectedCourseInstance;
+}
 
-    //Creates course object to send to database
+/*
+Function to check if user can take this a course and updating database if they can 
+*/
+async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID){
+    
+    const newSelectedCourseInstance = checkCourse(selectElement.value, semesterTerm, semesterNum, selectElement);
+
+    if (!newSelectedCourseInstance){return}
+
+    //Creates course object to send to backend
     const courseSelected = {
         course_box_id: courseBoxID,
-        course_id: selectedCourseID,
+        course_id: newSelectedCourseInstance.CourseID,
         semester: semesterTerm,
         year: semesterNum,
-        credits: selectedCourse.Credits
+        credits: newSelectedCourseInstance.Credits
     };
 
     try {
@@ -1356,15 +1362,15 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
             newSelectedCourseInstance.year = semesterNum;
             selectedCourses.push(newSelectedCourseInstance)
 
-            selectElement.value = selectedCourseID;
+            selectElement.value = newSelectedCourseInstance.CourseID;
 
             const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseFloat(header.dataset.credits) + selectedCourse.Credits;
+            header.dataset.credits = parseFloat(header.dataset.credits) + newSelectedCourseInstance.Credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
 
 
             const totalCreditsHeader = document.getElementById(`totalCredits`);
-            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + newSelectedCourseInstance.Credits;
             totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             selectElement.dataset.firstSelected = 'true';
