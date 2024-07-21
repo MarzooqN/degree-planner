@@ -101,6 +101,7 @@ async function fetchAllData() {
         closeModal(waitModal);
     }
 
+    fetchUserMajor();
     updateRequirementFulfillment();
 }
 
@@ -360,6 +361,20 @@ async function populateSchedule(schedule) {
 }
 
 
+async function fetchUserMajor() {
+    try {
+        const response = await fetch('/api/get_major');
+        const data = await response.json();
+        console.log(data)
+        if (data.major) {
+            window.userMajor = data.major;
+        } else {
+            console.error('Major not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching user major:', error);
+    }
+}
 
 /*
 Function to get user data
@@ -934,6 +949,25 @@ function addInternship(){
     
     //Creates Big Text saying summer internship 
     addInternshipText(`${semesterTerm}`, semesterYear);
+
+    const major = window.userMajor;
+
+    const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
+    const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
+
+    const indeedButton = document.createElement('button');
+    indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
+    indeedButton.onclick = () => {
+        window.open(indeedUrl, '_blank');
+    };
+    semesterRow.appendChild(indeedButton);
+
+    const linkedinButton = document.createElement('button');
+    linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
+    linkedinButton.onclick = () => {
+        window.open(linkedinUrl, '_blank');
+    };
+    semesterRow.appendChild(linkedinButton);
 
     removeSpringButtons();
 
