@@ -24,31 +24,48 @@ document.addEventListener('DOMContentLoaded', (event) => {
     loadedScheduleModalFunctionality();
     newScheduleModalFunctionality();
     prereqModalFunctionality();
+    courseInputEventListeners();
     fetchAllData();
 });
 
-/*
-Creates event listners for manual inputs to only show datalist after 4 characters to reduce lag
-*/
-const prereqInput = document.getElementById('courseIDInput')
-const manualCourseInput = document.getElementById('manualCourseInput')
-prereqInput.addEventListener("keyup", (e) =>{
-    // If input value is longer or equal than 4 chars shows courses 
-    if (e.target.value.length >= 4) {
-        prereqInput.setAttribute("list", "manualCourseDataList");
-    } else {
-        prereqInput.setAttribute("list", "");
-    }
-});
-manualCourseInput.addEventListener("keyup", (e) =>{
-    // If input value is longer or equal than 3 chars shows courses 
-    if (e.target.value.length >= 3) {
-        manualCourseInput.setAttribute("list", "manualCourseDataList");
-    } else {
-        manualCourseInput.setAttribute("list", "");
-    }
-});
+function handleDragOver(e) {
+    e.preventDefault(); // Necessary to allow a drop
+    e.dataTransfer.dropEffect = 'move';
+}
 
+async function handleDrop(e) {
+    e.preventDefault();
+    const courseId = e.dataTransfer.getData('text/plain');
+    const semesterId = e.target.id;
+    const semesterTerm = semesterId.split('-').slice(-2)[0];
+    const semesterYear = semesterId.split('-').slice(-1)[0];
+    
+    if (courseId && semesterId) {
+        await addCourseBox(semesterTerm, parseInt(semesterYear), courseId);
+    }
+}
+
+function courseInputEventListeners(){
+    const prereqInput = document.getElementById('courseIDInput')
+    const manualCourseInput = document.getElementById('manualCourseInput')
+    prereqInput.addEventListener("keyup", (e) =>{
+        // If input value is longer or equal than 4 chars shows courses 
+        if (e.target.value.length >= 4) {
+            prereqInput.setAttribute("list", "manualCourseDataList");
+        } else {
+            prereqInput.setAttribute("list", "");
+        }
+    });
+
+    manualCourseInput.addEventListener("keyup", (e) =>{
+        // If input value is longer or equal than 3 chars shows courses 
+        if (e.target.value.length >= 3) {
+            manualCourseInput.setAttribute("list", "manualCourseDataList");
+        } else {
+            manualCourseInput.setAttribute("list", "");
+        }
+    });
+}
 
 function populateCourseSelectOptions() {
     const selectElement = document.getElementById('manualCourseDataList');
@@ -555,31 +572,36 @@ async function displayRequirements() {
             li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
             li.setAttribute('data-course-id', course.CourseID); // Unique identifier
             li.style.cursor = 'pointer'; // Change cursor to pointer
+            li.draggable = true; // Make the item draggable
+    
+            // Add drag event listeners
+            li.addEventListener('dragstart', handleDragStart);
+    
             ul.appendChild(li);
-
+    
             const prereqHeader = document.createElement('h4');
             prereqHeader.style.marginLeft = '20px'; // Indent the header
             prereqHeader.style.display = 'none'; // Initially hide the header
             prereqHeader.style.color = '#595959'; // Grey text color
             li.appendChild(prereqHeader);
-
+    
             const prereqList = createPrerequisiteList(course.CourseID);
             prereqList.style.marginLeft = '20px'; // Indent the prerequisites
             prereqList.style.marginBottom = '10px';
             prereqList.style.color = '#595959'; // Grey text color
             li.appendChild(prereqList);
-
+    
             li.addEventListener('click', function() {
                 const isHidden = prereqList.style.display === 'none';
                 prereqHeader.style.display = isHidden ? 'block' : 'none';
                 prereqList.style.display = isHidden ? 'block' : 'none';
-
+    
                 if (isHidden) {
                     li.style.fontWeight = 'bold';
                 } else {
                     li.style.fontWeight = 'normal';
                 }
-
+    
                 ul.querySelectorAll('li').forEach(item => {
                     if (item !== li) {
                         item.style.fontWeight = 'normal';
@@ -589,6 +611,11 @@ async function displayRequirements() {
         });
         parentElement.appendChild(ul);
     };
+    
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.getAttribute('data-course-id'));
+    }
+    
 
     const { foundations, themes, otherRequirements } = groupRequirements(requirementsData);
 
@@ -804,6 +831,8 @@ function addSemester(term = null, year = null) {
     const semester = document.createElement('div');
     semester.classList.add('semester');
     semester.id = `${semesterTerm}-${semesterYear}`
+    semester.addEventListener('dragover', handleDragOver);
+    semester.addEventListener('drop', handleDrop);
     
     //Creates button to add courses
     const addCourseButton = document.createElement('div');
@@ -1028,6 +1057,12 @@ let courseBoxNum = 0;
 async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     const semester = document.getElementById(`${semesterTerm}-${semesterNum}`);
    
+    // Check if the course is already selected in this semester, so drag and drop feature doesnt create box if course already in 
+    if (selectedCourses.some(course => course.CourseID === courseID && course.semester === semesterTerm && course.year === semesterNum)) {
+        alert('Course already selected in this semester.');
+        return;
+    }
+    
     //Creates course box divder
     const courseBox = document.createElement('div');
     courseBox.id = `${semesterTerm}-${semesterNum}-${courseBoxNum}`;
