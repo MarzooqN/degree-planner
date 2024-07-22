@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from flask_login import LoginManager, login_required, UserMixin, login_user
 from functions import get_db_connection
 from werkzeug.security import check_password_hash
-from blueprints import courses, login_file, schedule, select_degree
+from blueprints import courses, login_file, schedule, select_degree, advisor
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'abc123'
@@ -15,7 +15,7 @@ app.register_blueprint(courses.courses_bp)
 app.register_blueprint(login_file.login_bp)
 app.register_blueprint(schedule.schedule_bp)
 app.register_blueprint(select_degree.select_degree_bp)
-
+app.register_blueprint(advisor.advisor_bp)
 
 #Class for User
 class User(UserMixin):
