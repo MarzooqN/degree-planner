@@ -185,7 +185,7 @@ def get_requirements():
     connection = get_db_connection(degree)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
+        SELECT r.RequirementName, r.RequirementType, r.required_count, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
         FROM Requirements r
         LEFT JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
         LEFT JOIN Courses.Courses c ON rc.CourseID = c.CourseID
@@ -198,6 +198,7 @@ def get_requirements():
             requirements[req_name] = {
                 'type': row['RequirementType'],
                 'required_credits': row['RequiredCredits'],
+                'required_count': row['required_count'],
                 'course_prefix': row['CoursePrefix'],
                 'min_course_number': row['MinCourseNumber'],
                 'max_course_number': row['MaxCourseNumber'],
