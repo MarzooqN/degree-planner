@@ -11,13 +11,15 @@ select_degree_bp = Blueprint('select_degree', __name__, template_folder='templat
 def select_major():
     if request.method == 'POST':
         college = request.form['college']
-        major = request.form['major']
+        major = request.form['major'].split()[0]
+        major_name = request.form['major'].split("-")[-1]
         program = request.form['program']
 
         prof = request.form['prof']
         session['prof'] = 'None' if prof == 'None' or prof == "" else prof 
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
+        session['major_name'] = major_name
         courses_selected = []
 
         return redirect(url_for('courses.planner'))
@@ -94,3 +96,9 @@ def get_programs():
 
     program_list = [{'value': program['ProgramID'], 'label': program['ProgramName']} for program in programs]
     return jsonify(program_list)
+
+@select_degree_bp.route('/api/get_major', methods=['GET'])
+@login_required
+def get_selected_major():
+    major = session.get('major_name')
+    return jsonify({"major": major})

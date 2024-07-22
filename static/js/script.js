@@ -101,6 +101,7 @@ async function fetchAllData() {
         closeModal(waitModal);
     }
 
+    fetchUserMajor();
     updateRequirementFulfillment();
 }
 
@@ -360,6 +361,20 @@ async function populateSchedule(schedule) {
 }
 
 
+async function fetchUserMajor() {
+    try {
+        const response = await fetch('/api/get_major');
+        const data = await response.json();
+        console.log(data)
+        if (data.major) {
+            window.userMajor = data.major;
+        } else {
+            console.error('Major not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching user major:', error);
+    }
+}
 
 /*
 Function to get user data
@@ -432,7 +447,6 @@ async function fetchCoursesInRange(prefix, min, max) {
 }
 
 
-
 /*
 Function to create requirements section 
 */
@@ -499,6 +513,9 @@ async function displayRequirements() {
 
         if (reqData.type === 'some_courses') {
             appendGroupCourses(contentDiv, reqData.groups);
+        } else if (reqData.type === 'pick_courses'){
+            header.textContent += ` - Pick ${reqData.required_count} Courses`;
+            appendCoursesList(contentDiv, reqData.courses);
         } else if (reqData.type === 'credit_hours' && reqData.course_prefix && reqData.min_course_number && reqData.max_course_number) {
             fetchCoursesInRange(reqData.course_prefix, reqData.min_course_number, reqData.max_course_number).then(courses => {
                 reqData.courses = courses;
@@ -573,6 +590,7 @@ async function displayRequirements() {
             li.setAttribute('data-course-id', course.CourseID); // Unique identifier
             li.style.cursor = 'pointer'; // Change cursor to pointer
             li.draggable = true; // Make the item draggable
+            li.style.paddingBlock = '5px'
     
             // Add drag event listeners
             li.addEventListener('dragstart', handleDragStart);
@@ -631,22 +649,6 @@ async function displayRequirements() {
         const reqDiv = createRequirementDiv(reqName, reqData);
         requirementsDiv.appendChild(reqDiv);
     }
-}
-
-function createPrerequisiteList(courseID) {
-    const course = courseData.find(c => c.CourseID === courseID);
-    const prereqList = document.createElement('ul');
-    prereqList.style.display = 'none'; // Initially hide the list
-
-    if (course && course.prerequisites) {
-        course.prerequisites.forEach(prereq => {
-            const prereqItem = document.createElement('li');
-            prereqItem.textContent = `${prereq.prerequisiteID}`;
-            prereqList.appendChild(prereqItem);
-        });
-    }
-
-    return prereqList;
 }
 
 /* 
@@ -765,7 +767,21 @@ function updateRequirementFulfillment() {
                     return isCourseCompleted || isCourseSelected;
                 })
             );
+        } else if (reqData.type === 'pick_courses') {
+            const pickedCourses = reqData.courses.filter(course => {
+                const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
+                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
+                if (isCourseSelected || isCourseCompleted) {
+                    const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
+                    if (courseLi) {
+                        courseLi.classList.add('completed-course');
+                    }
+                }
+                return isCourseCompleted || isCourseSelected;
+            });
+            coursesFulfilled = pickedCourses.length >= reqData.required_count;
         }
+
 
         if (coursesFulfilled) {
             reqDiv.classList.add('fulfilled');
@@ -935,6 +951,25 @@ function addInternship(){
     //Creates Big Text saying summer internship 
     addInternshipText(`${semesterTerm}`, semesterYear);
 
+    const major = window.userMajor;
+
+    const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
+    const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
+
+    const indeedButton = document.createElement('button');
+    indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
+    indeedButton.onclick = () => {
+        window.open(indeedUrl, '_blank');
+    };
+    semesterRow.appendChild(indeedButton);
+
+    const linkedinButton = document.createElement('button');
+    linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
+    linkedinButton.onclick = () => {
+        window.open(linkedinUrl, '_blank');
+    };
+    semesterRow.appendChild(linkedinButton);
+
     removeSpringButtons();
 
     semesterCount = 0;
@@ -1086,7 +1121,7 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
         const availableSemesters = course.available_semesters.split(',');
         return availableSemesters.includes(semesterTerm) && (
             Object.values(requirementsData).some(req => {
-                if (req.type === 'credit_hours' || req.type === 'all_courses') {
+                if (req.type === 'credit_hours' || req.type === 'all_courses' || req.type === 'pick_courses') {
                     return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
                 } else if (req.type === 'some_courses') {
                     return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
