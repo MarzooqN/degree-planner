@@ -6,6 +6,7 @@
     <title>Compare Plans</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/saved_schedules.css') }}">
+    <link rel="stylesheet" href="static/nice-select2/dist/css/nice-select2.css"/>
 </head>
 <body>
     <header>
@@ -40,37 +41,38 @@
         });
 
         function populateScheduleWithContainer(schedule, containerId) {
-            const container = document.getElementById(containerId);
+    const container = document.getElementById(containerId);
 
-            const semesters = {};
+    const semesters = {};
 
-            schedule.courses.forEach(course => {
-                const semesterKey = `${course.semester}-${course.year}`;
-                if (!semesters[semesterKey]) {
-                    semesters[semesterKey] = [];
-                }
-                semesters[semesterKey].push(course);
-            });
-
-            Object.keys(semesters).sort().forEach(semesterKey => {
-                const [semester, year] = semesterKey.split('-');
-                const semesterDiv = document.createElement('div');
-                semesterDiv.className = 'semester';
-                const semesterTitle = document.createElement('h3');
-                semesterTitle.textContent = `${semester} ${year}`;
-                semesterDiv.appendChild(semesterTitle);
-
-                semesters[semesterKey].forEach(course => {
-                    const courseBox = document.createElement('div');
-                    courseBox.className = 'course-box';
-                    courseBox.textContent = `${course.course_id}: ${course.course_name}`;
-                    semesterDiv.appendChild(courseBox);
-                });
-
-                container.appendChild(semesterDiv);
-            });
+    schedule.courses.forEach(course => {
+        const semesterKey = `${course.semester}-${course.year}`;
+        if (!semesters[semesterKey]) {
+            semesters[semesterKey] = [];
         }
+        semesters[semesterKey].push(course);
+    });
+
+    Object.keys(semesters).sort().forEach(semesterKey => {
+        const [semester, year] = semesterKey.split('-');
+        const semesterDiv = document.createElement('div');
+        semesterDiv.className = 'semester nice-select2/dist/css/nice-select2';
+        const semesterTitle = document.createElement('h3');
+        semesterTitle.textContent = `${semester} ${year}`;
+        semesterTitle.className = 'nice-select2/dist/css/nice-select2';
+        semesterDiv.appendChild(semesterTitle);
+
+        semesters[semesterKey].forEach(course => {
+            const courseBox = document.createElement('div');
+            courseBox.className = 'course-box nice-select2/dist/css/nice-select2';
+            courseBox.textContent = `${course.course_id}: ${course.course_name}`;
+            semesterDiv.appendChild(courseBox);
+        });
+
+        container.appendChild(semesterDiv);
+    });
+}
+                
     </script>
-    <script src="static/js/compare_plans.js"></script>
 </body>
 </html>

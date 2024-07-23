@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('compare-button').addEventListener('click', comparePlans);
+    document.getElementById('plans-selection').addEventListener('change', checkboxChange);
 });
+
+function checkboxChange(event) {
+    if (event.target.type === 'checkbox' && event.target.name === 'compare-schedules') {
+        const checkedCheckboxes = document.querySelectorAll('input[name="compare-schedules"]:checked');
+        if (checkedCheckboxes.length > 2) {
+            event.target.checked = false;
+            alert('You can only select up to two plans.');
+        }
+    }
+}
 
 function checkAndOpenComparePlansModal() {
     const numberOfPlans = document.getElementById('schedule-container').children.length;
@@ -22,9 +33,14 @@ function closeComparePlansModal() {
 
 async function populatePlansSelection() {
     try {
-        const response = await fetch('/api/get_schedules');
-        const schedules = await response.json();
-        sessionStorage.setItem('schedules', JSON.stringify(schedules)); // Store schedules in sessionStorage
+        let schedules = sessionStorage.getItem('schedules');
+        if (!schedules) {
+            const response = await fetch('/api/get_schedules');
+            schedules = await response.json();
+            sessionStorage.setItem('schedules', JSON.stringify(schedules)); 
+        } else {
+            schedules = JSON.parse(schedules);
+        }
 
         const plansSelection = document.getElementById('plans-selection');
         plansSelection.innerHTML = '';
@@ -38,7 +54,6 @@ async function populatePlansSelection() {
             checkbox.value = scheduleId;
             checkbox.id = `schedule-checkbox-${scheduleId}`;
             checkbox.name = 'compare-schedules';
-            checkbox.addEventListener('change', limitCheckboxSelection); // Add event listener to limit selection
 
             const label = document.createElement('label');
             label.htmlFor = `schedule-checkbox-${scheduleId}`;
@@ -50,16 +65,6 @@ async function populatePlansSelection() {
         });
     } catch (e) {
         console.error('Error populating plans selection:', e);
-    }
-}
-
-function limitCheckboxSelection() {
-    const checkboxes = document.querySelectorAll('input[name="compare-schedules"]');
-    const checkedCheckboxes = document.querySelectorAll('input[name="compare-schedules"]:checked');
-
-    if (checkedCheckboxes.length > 2) {
-        alert('You can only select up to 2 plans.');
-        this.checked = false; 
     }
 }
 
@@ -78,43 +83,12 @@ async function comparePlans() {
     const schedule2 = schedules[scheduleId2];
 
     if (schedule1 && schedule2) {
-        displayComparison(schedule1, schedule2);
-        closeComparePlansModal();
+        sessionStorage.setItem('schedule1', JSON.stringify(schedule1));
+        sessionStorage.setItem('schedule2', JSON.stringify(schedule2));
+        window.location.href = '/compare_plans';
     } else {
         alert('One or both schedules not found.');
     }
-}
-
-function displayComparison(schedule1, schedule2) {
-    const schedule1Container = document.getElementById('schedule-1');
-    const schedule2Container = document.getElementById('schedule-2');
-
-    if (!schedule1Container || !schedule2Container) {
-        console.error('Schedule container elements not found');
-        return;
-    }
-
-    schedule1Container.innerHTML = `<h2>${schedule1.schedule_name}</h2>`;
-    schedule2Container.innerHTML = `<h2>${schedule2.schedule_name}</h2>`;
-
-    const createScheduleList = (schedule) => {
-        const list = document.createElement('ul');
-        for (const semester in schedule.courses) {
-            const semesterItem = document.createElement('li');
-            semesterItem.textContent = `Semester: ${semester}`;
-            list.appendChild(semesterItem);
-
-            schedule.courses[semester].forEach(course => {
-                const courseItem = document.createElement('li');
-                courseItem.textContent = course;
-                list.appendChild(courseItem);
-            });
-        }
-        return list;
-    };
-
-    schedule1Container.appendChild(createScheduleList(schedule1));
-    schedule2Container.appendChild(createScheduleList(schedule2));
 }
 
 function logout() {
