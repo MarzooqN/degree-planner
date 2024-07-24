@@ -12,10 +12,12 @@ courses_selected = []
 @login_required
 def planner():
     schedule_id = session.get('schedule_id')
+    sample_schedule_id = session.get('sample_schedule_id')
     global courses_selected
     courses_selected = []
     schedule_id = session.get('schedule_id')
-    return render_template('index.html', schedule_id=schedule_id )
+    sample_schedule_id = session.get('sample_schedule_id')
+    return render_template('index.html', schedule_id=schedule_id, sample_schedule_id=sample_schedule_id, )
 
 
 #Route for getting courses and their prerequisties 

@@ -15,6 +15,7 @@ def select_major():
         program = request.form['program']
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
+        session['sample_schedule_id'] = 0
         courses_selected = []
 
         return redirect(url_for('courses.planner'))

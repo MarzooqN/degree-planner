@@ -2,6 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchSchedules();
+    fetchSampleSchedules();
+    setupProgramChangeListener();
 });
 
 async function fetchSchedules() {
@@ -163,4 +165,82 @@ async function deleteSchedule(scheduleId){
 
 function logout() {
     window.location.href = '/logout';
+}
+
+async function fetchSampleSchedules() {
+    try {
+        const response = await fetch('/api/get_sample_schedules');
+        const schedules = await response.json();
+        displaySampleSchedules(schedules);
+    } catch (e) {
+        console.error('Error fetching sample schedules:', e);
+    }
+}
+
+function displaySampleSchedules(schedules) {
+    const sampleScheduleContainer = document.getElementById('sample-schedule-container');
+    sampleScheduleContainer.innerHTML = '';  // Clear any existing content
+
+    for (const [sampleScheduleId, schedule] of Object.entries(schedules)) {
+        const loadButton = document.createElement('button');
+        const loadSpan = document.createElement('span');
+        loadSpan.textContent = 'Sample Schedule';
+        loadButton.appendChild(loadSpan);
+        loadButton.style.display = 'none'; // Hide the button initially
+        loadButton.onclick = () => loadSampleSchedule(sampleScheduleId);
+
+        sampleScheduleContainer.appendChild(loadButton);
+    }
+}
+
+function loadSampleSchedule(sampleScheduleId) {
+    window.location.href = `/load_sample_schedule/${sampleScheduleId}`;
+}
+
+function setupProgramChangeListener() {
+    document.querySelectorAll('[id^="program"]').forEach(programSelect => {
+        programSelect.addEventListener('change', async (event) => {
+            if (event.target.value !== '') {
+                // Submit the form via AJAX
+                const form = event.target.closest('form');
+                if (form) {
+                    const formData = new FormData(form);
+                    await submitFormViaAjax(form.action, formData);
+                    
+                    // Fetch and display the sample schedules
+                    await fetchSampleSchedules();
+
+                    // Show the sample schedule buttons
+                    const sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+                    for (let button of sampleButtons) {
+                        button.style.display = 'block'; // Show the buttons when a valid program is selected
+                    }
+                }
+            } else {
+                // Hide the sample schedule buttons if no program is selected
+                const sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+                for (let button of sampleButtons) {
+                    button.style.display = 'none'; // Hide the buttons if no program is selected
+                }
+            }
+        });
+    });
+}
+
+async function submitFormViaAjax(url, formData) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' // Optional: Helps identify AJAX requests
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Form submission failed');
+        }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+    }
 }

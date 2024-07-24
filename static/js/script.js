@@ -6,11 +6,17 @@ let courseData = [];
 let completedCourses = [];
 let requirementsData = {};
 const scheduleId = parseInt(document.getElementById('schedule-id').value);
+const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
 const selectListDict = {}
 
 let loadingSchedule = false;
 if(scheduleId > 0){
     loadingSchedule = true;
+}
+
+let loadingSampleSchedule = false;
+if(sampleScheduleId > 0){
+    loadingSampleSchedule = true;
 }
 
 
@@ -33,6 +39,8 @@ async function fetchAllData() {
     openModal(waitModal);
 
     const scheduleId = parseInt(document.getElementById('schedule-id').value);
+    const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
+
     await fetchCourseData();
     await fetchUserData();
 
@@ -40,6 +48,8 @@ async function fetchAllData() {
 
     if (scheduleId > 0){
         await loadSavedSchedule(scheduleId);
+    } else if (sampleScheduleId > 0) {
+        await loadSampleSchedule(sampleScheduleId);
     } else {
         closeModal(waitModal);
     }
@@ -265,6 +275,19 @@ async function loadSavedSchedule(scheduleId) {
     }
 }
 
+/*
+Function to load a sample schedule
+*/
+async function loadSampleSchedule(sampleScheduleId) {
+    try {
+        const response = await fetch(`/api/get_sample_schedule/${sampleScheduleId}`);
+        const schedule = await response.json();
+        populateSampleSchedule(schedule);
+    } catch (e) {
+        console.error('Error loading sample schedule:', e);
+    }
+}
+
 async function populateSchedule(schedule) {
 
     const waitModal = document.getElementById('waitModal');
@@ -307,6 +330,44 @@ async function populateSchedule(schedule) {
     loadingSchedule = false;
 }
 
+async function populateSampleSchedule(schedule) {
+    const waitModal = document.getElementById('waitModal');
+    openModal(waitModal);
+
+    const semestersNeeded = new Set();
+
+    for (const course of schedule.courses) {
+        const { semester, year } = course;
+        semestersNeeded.add(`${semester}-${year}`);
+    }
+
+    // Sort semesters needed by their comparable values and create necessary semesters
+    const sortedSemesters = Array.from(semestersNeeded).sort((a, b) => {
+        const [semA, yearA] = a.split('-');
+        const [semB, yearB] = b.split('-');
+        const valueA = convertToComparableValue(semA, parseInt(yearA));
+        const valueB = convertToComparableValue(semB, parseInt(yearB));
+        return valueA - valueB;
+    });
+
+    sortedSemesters.forEach(semYear => {
+        const [semester, year] = semYear.split('-');
+        addSemester(semester, parseInt(year));
+    });
+
+    // Add courses and their specified semesters
+    for (const course of schedule.courses) {
+        const { course_id, semester, year } = course;
+        if (course_id === 'Internship' && semester === 'SU') {
+            addInternshipText(semester, year);
+        } else {
+            await addCourseBox(semester, year, course_id);
+        }
+    }
+
+    closeModal(waitModal);
+    loadingSampleSchedule = false;
+}
 
 
 /*
@@ -406,39 +467,8 @@ async function displayRequirements() {
                     li.style.cursor = 'pointer'; // Change cursor to pointer
                     ul.appendChild(li);
 
-                    // Add prerequisites header and list under the course item
-                    const prereqHeader = document.createElement('h4');
-                    prereqHeader.style.marginLeft = '20px'; // Indent the header
-                    prereqHeader.style.display = 'none'; // Initially hide the header
-                    prereqHeader.style.color = '#595959'; // Grey text color
-                    li.appendChild(prereqHeader);
-
-                    const prereqList = createPrerequisiteList(course.CourseID);
-                    prereqList.style.marginLeft = '20px'; // Indent the prerequisites
-                    prereqList.style.marginBottom = '10px';
-                    prereqList.style.color = '#595959'; // Grey text color
-                    li.appendChild(prereqList);
-
-                    // Add event listener to toggle prerequisites and bold styling
-                    li.addEventListener('click', function() {
-                        const isHidden = prereqList.style.display === 'none';
-                        prereqHeader.style.display = isHidden ? 'block' : 'none';
-                        prereqList.style.display = isHidden ? 'block' : 'none';
-
-                        // Toggle bold style only on the course item
-                        if (isHidden) {
-                            li.style.fontWeight = 'bold';
-                        } else {
-                            li.style.fontWeight = 'normal';
-                        }
-
-                        // Ensure other list items are not bold
-                        ul.querySelectorAll('li').forEach(item => {
-                            if (item !== li) {
-                                item.style.fontWeight = 'normal';
-                            }
-                        });
-                    });
+                    // Add prerequisites
+                    createPrerequisiteList(course.CourseID, li, ul);
                 });
                 contentDiv.appendChild(ul);
             }
@@ -461,39 +491,8 @@ async function displayRequirements() {
                     li.style.cursor = 'pointer'; // Change cursor to pointer
                     validCourses.appendChild(li);
 
-                    // Add prerequisites header and list under the course item
-                    const prereqHeader = document.createElement('h4');
-                    prereqHeader.style.marginLeft = '20px'; // Indent the header
-                    prereqHeader.style.display = 'none'; // Initially hide the header
-                    prereqHeader.style.color = '#595959'; // Grey text color
-                    li.appendChild(prereqHeader);
-
-                    const prereqList = createPrerequisiteList(course.CourseID);
-                    prereqList.style.marginLeft = '20px'; // Indent the prerequisites
-                    prereqList.style.marginBottom = '10px';
-                    prereqList.style.color = '#595959'; // Grey text color
-                    li.appendChild(prereqList);
-
-                    // Add event listener to toggle prerequisites and bold styling
-                    li.addEventListener('click', function() {
-                        const isHidden = prereqList.style.display === 'none';
-                        prereqHeader.style.display = isHidden ? 'block' : 'none';
-                        prereqList.style.display = isHidden ? 'block' : 'none';
-
-                        // Toggle bold style only on the course item
-                        if (isHidden) {
-                            li.style.fontWeight = 'bold';
-                        } else {
-                            li.style.fontWeight = 'normal';
-                        }
-
-                        // Ensure other list items are not bold
-                        validCourses.querySelectorAll('li').forEach(item => {
-                            if (item !== li) {
-                                item.style.fontWeight = 'normal';
-                            }
-                        });
-                    });
+                    // Add prerequisites
+                    createPrerequisiteList(course.CourseID, li, validCourses);
                 });
 
                 openModal(modal);
@@ -510,39 +509,8 @@ async function displayRequirements() {
                 li.style.cursor = 'pointer'; // Change cursor to pointer
                 ul.appendChild(li);
 
-                // Add prerequisites header and list under the course item
-                const prereqHeader = document.createElement('h4');
-                prereqHeader.style.marginLeft = '20px'; // Indent the header
-                prereqHeader.style.display = 'none'; // Initially hide the header
-                prereqHeader.style.color = '#595959'; // Grey text color
-                li.appendChild(prereqHeader);
-
-                const prereqList = createPrerequisiteList(course.CourseID);
-                prereqList.style.marginLeft = '20px'; // Indent the prerequisites
-                prereqList.style.marginBottom = '10px';
-                prereqList.style.color = '#595959'; // Grey text color
-                li.appendChild(prereqList);
-
-                // Add event listener to toggle prerequisites and bold styling
-                li.addEventListener('click', function() {
-                    const isHidden = prereqList.style.display === 'none';
-                    prereqHeader.style.display = isHidden ? 'block' : 'none';
-                    prereqList.style.display = isHidden ? 'block' : 'none';
-
-                    // Toggle bold style only on the course item
-                    if (isHidden) {
-                        li.style.fontWeight = 'bold';
-                    } else {
-                        li.style.fontWeight = 'normal';
-                    }
-
-                    // Ensure other list items are not bold
-                    ul.querySelectorAll('li').forEach(item => {
-                        if (item !== li) {
-                            item.style.fontWeight = 'normal';
-                        }
-                    });
-                });
+                // Add prerequisites
+                createPrerequisiteList(course.CourseID, li, ul);
             });
             contentDiv.appendChild(ul);
         } else {
@@ -554,39 +522,8 @@ async function displayRequirements() {
                 li.style.cursor = 'pointer'; // Change cursor to pointer
                 ul.appendChild(li);
 
-                // Add prerequisites header and list under the course item
-                const prereqHeader = document.createElement('h4');
-                prereqHeader.style.marginLeft = '20px'; // Indent the header
-                prereqHeader.style.display = 'none'; // Initially hide the header
-                prereqHeader.style.color = '#595959'; // Grey text color
-                li.appendChild(prereqHeader);
-
-                const prereqList = createPrerequisiteList(course.CourseID);
-                prereqList.style.marginLeft = '20px'; // Indent the prerequisites
-                prereqList.style.marginBottom = '10px';
-                prereqList.style.color = '#595959'; // Grey text color
-                li.appendChild(prereqList);
-
-                // Add event listener to toggle prerequisites and bold styling
-                li.addEventListener('click', function() {
-                    const isHidden = prereqList.style.display === 'none';
-                    prereqHeader.style.display = isHidden ? 'block' : 'none';
-                    prereqList.style.display = isHidden ? 'block' : 'none';
-
-                    // Toggle bold style only on the course item
-                    if (isHidden) {
-                        li.style.fontWeight = 'bold';
-                    } else {
-                        li.style.fontWeight = 'normal';
-                    }
-
-                    // Ensure other list items are not bold
-                    ul.querySelectorAll('li').forEach(item => {
-                        if (item !== li) {
-                            item.style.fontWeight = 'normal';
-                        }
-                    });
-                });
+                // Add prerequisites
+                createPrerequisiteList(course.CourseID, li, ul);
             });
             contentDiv.appendChild(ul);
         }
@@ -604,9 +541,9 @@ async function displayRequirements() {
 
 
 /* 
-function to create prerequisite list 
+Function to create prerequisite list and add to course item
 */
-function createPrerequisiteList(courseId) {
+function createPrerequisiteList(courseId, courseItem) {
     const course = courseData.find(course => course.CourseID === courseId);
     const prereqList = document.createElement('ul');
     prereqList.style.display = 'none'; // Initially hide the prerequisites list
@@ -641,6 +578,32 @@ function createPrerequisiteList(courseId) {
                 prereqList.appendChild(groupElem);
             }
         }
+
+        // Append prerequisites list and header to course item
+        const prereqHeader = document.createElement('h4');
+        prereqHeader.style.marginLeft = '20px'; // Indent the header
+        prereqHeader.style.display = 'none'; // Initially hide the header
+        prereqHeader.style.color = '#595959'; // Grey text color
+        courseItem.appendChild(prereqHeader);
+        prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+        prereqList.style.marginBottom = '10px';
+        prereqList.style.color = '#595959'; // Grey text color
+        courseItem.appendChild(prereqList);
+
+        // Add event listener to toggle prerequisites and bold styling
+        courseItem.addEventListener('click', function () {
+            const isHidden = prereqList.style.display === 'none';
+            prereqHeader.style.display = isHidden ? 'block' : 'none';
+            prereqList.style.display = isHidden ? 'block' : 'none';
+
+            // Toggle bold style only on the course item
+            if (isHidden) {
+                courseItem.style.fontWeight = 'bold';
+                prereqList.style.fontWeight = 'normal';
+            } else {
+                courseItem.style.fontWeight = 'normal';
+            }
+        });
     } else {
         const noCourse = document.createElement('li');
         noCourse.textContent = 'Course not found.';
