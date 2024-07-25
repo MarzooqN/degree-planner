@@ -19,6 +19,23 @@ header {
     border-radius: 10px;
 }
 
+main {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    /* max-width: 1200px; */
+    padding: 10px;
+}
+
+section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    flex: 1;
+}
+
 .schedule {
     border: 1px solid #ccc;
     border-radius: 8px;
