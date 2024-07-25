@@ -2,7 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchSchedules();
-    fetchSampleSchedules();
     setupProgramChangeListener();
 });
 
@@ -167,9 +166,9 @@ function logout() {
     window.location.href = '/logout';
 }
 
-async function fetchSampleSchedules() {
+async function fetchSampleSchedules(degree) {
     try {
-        const response = await fetch('/api/get_sample_schedules');
+        const response = await fetch(`/api/get_sample_schedules?degree=${degree}`);
         const schedules = await response.json();
         displaySampleSchedules(schedules);
     } catch (e) {
@@ -205,10 +204,13 @@ function setupProgramChangeListener() {
                 const form = event.target.closest('form');
                 if (form) {
                     const formData = new FormData(form);
-                    await submitFormViaAjax(form.action, formData);
+                    const college = formData.get('college');
+                    const major = formData.get('major');
+                    const program = formData.get('program');
                     
+                    const degree = `${college}_${major}_${program}`
                     // Fetch and display the sample schedules
-                    await fetchSampleSchedules();
+                    await fetchSampleSchedules(degree);
 
                     // Show the sample schedule buttons
                     const sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
@@ -227,20 +229,3 @@ function setupProgramChangeListener() {
     });
 }
 
-async function submitFormViaAjax(url, formData) {
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Optional: Helps identify AJAX requests
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Form submission failed');
-        }
-    } catch (error) {
-        console.error('Error submitting form:', error);
-    }
-}

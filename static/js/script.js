@@ -282,7 +282,7 @@ async function loadSampleSchedule(sampleScheduleId) {
     try {
         const response = await fetch(`/api/get_sample_schedule/${sampleScheduleId}`);
         const schedule = await response.json();
-        populateSampleSchedule(schedule);
+        populateSchedule(schedule);
     } catch (e) {
         console.error('Error loading sample schedule:', e);
     }
@@ -328,45 +328,6 @@ async function populateSchedule(schedule) {
 
     closeModal(waitModal);
     loadingSchedule = false;
-}
-
-async function populateSampleSchedule(schedule) {
-    const waitModal = document.getElementById('waitModal');
-    openModal(waitModal);
-
-    const semestersNeeded = new Set();
-
-    for (const course of schedule.courses) {
-        const { semester, year } = course;
-        semestersNeeded.add(`${semester}-${year}`);
-    }
-
-    // Sort semesters needed by their comparable values and create necessary semesters
-    const sortedSemesters = Array.from(semestersNeeded).sort((a, b) => {
-        const [semA, yearA] = a.split('-');
-        const [semB, yearB] = b.split('-');
-        const valueA = convertToComparableValue(semA, parseInt(yearA));
-        const valueB = convertToComparableValue(semB, parseInt(yearB));
-        return valueA - valueB;
-    });
-
-    sortedSemesters.forEach(semYear => {
-        const [semester, year] = semYear.split('-');
-        addSemester(semester, parseInt(year));
-    });
-
-    // Add courses and their specified semesters
-    for (const course of schedule.courses) {
-        const { course_id, semester, year } = course;
-        if (course_id === 'Internship' && semester === 'SU') {
-            addInternshipText(semester, year);
-        } else {
-            await addCourseBox(semester, year, course_id);
-        }
-    }
-
-    closeModal(waitModal);
-    loadingSampleSchedule = false;
 }
 
 

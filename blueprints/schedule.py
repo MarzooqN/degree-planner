@@ -196,7 +196,7 @@ def import_schedule():
     return jsonify({"success": True}), 201
 
 
-# Route for getting sample degree
+# Route for loading degree and sample schedule id into session variables
 @schedule_bp.route('/load_sample_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def load_sample_schedule(schedule_id):
@@ -222,7 +222,7 @@ def load_sample_schedule(schedule_id):
 @schedule_bp.route('/api/get_sample_schedules', methods=['GET'])
 @login_required
 def get_sample_schedules():
-    degree = session.get('degree')
+    degree = request.args.get('degree')
     connection = get_db_connection(degree)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''

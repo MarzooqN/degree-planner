@@ -12,7 +12,6 @@ courses_selected = []
 @login_required
 def planner():
     schedule_id = session.get('schedule_id')
-    sample_schedule_id = session.get('sample_schedule_id')
     global courses_selected
     courses_selected = []
     schedule_id = session.get('schedule_id')
