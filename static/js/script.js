@@ -897,18 +897,24 @@ function addSemester(term = null, year = null) {
         removeSpringButtons();
     }
     
-    if(semesterCount == 0){
-        semesterNum++;
-    }
-
     if (year){
         semesterNum = year;
+    }
+
+    if (term){
+        semesterCount = semesters.indexOf(term);
+    }
+
+    if(semesterCount == 0){
+        semesterNum++;
     }
 
     semesterCount++;
     if(semesterCount % 3 == 0){
         semesterCount = 0;
     }
+
+
 
 }
 
@@ -1200,10 +1206,7 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
         selectList.value = courseID;
         await courseChange(selectList, semesterTerm, semesterNum, courseBox.id)
         newSelect.update();
-
     }
-
-
 }
 
 /*
