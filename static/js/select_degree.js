@@ -170,7 +170,8 @@ async function fetchSampleSchedules(degree) {
     try {
         const response = await fetch(`/api/get_sample_schedules?degree=${degree}`);
         const schedules = await response.json();
-        displaySampleSchedules(schedules);
+        console.log(schedules)
+        return schedules;
     } catch (e) {
         console.error('Error fetching sample schedules:', e);
     }
@@ -183,10 +184,10 @@ function displaySampleSchedules(schedules) {
     for (const [sampleScheduleId, schedule] of Object.entries(schedules)) {
         const loadButton = document.createElement('button');
         const loadSpan = document.createElement('span');
-        loadSpan.textContent = 'Sample Schedule';
+        loadSpan.textContent = schedule.schedule_name;
         loadButton.appendChild(loadSpan);
-        loadButton.style.display = 'none'; // Hide the button initially
-        loadButton.onclick = () => loadSampleSchedule(sampleScheduleId);
+        loadButton.style.display = 'block'; 
+        loadButton.onclick = () => loadSampleSchedule(schedule.schedule_id);
 
         sampleScheduleContainer.appendChild(loadButton);
     }
@@ -199,8 +200,15 @@ function loadSampleSchedule(sampleScheduleId) {
 function setupProgramChangeListener() {
     document.querySelectorAll('[id^="program"]').forEach(programSelect => {
         programSelect.addEventListener('change', async (event) => {
+
+            // Hide the sample schedule buttons 
+            let sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+            for (let button of sampleButtons) {
+                button.style.display = 'none'; // Hide the buttons if no program is selected
+            }
+
             if (event.target.value !== '') {
-                // Submit the form via AJAX
+
                 const form = event.target.closest('form');
                 if (form) {
                     const formData = new FormData(form);
@@ -210,21 +218,20 @@ function setupProgramChangeListener() {
                     
                     const degree = `${college}_${major}_${program}`
                     // Fetch and display the sample schedules
-                    await fetchSampleSchedules(degree);
+                    const schedules = await fetchSampleSchedules(degree);
 
-                    // Show the sample schedule buttons
-                    const sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
-                    for (let button of sampleButtons) {
-                        button.style.display = 'block'; // Show the buttons when a valid program is selected
+                    if (!schedules.error){
+                        displaySampleSchedules(schedules);
+                    } else {
+                        // Show the sample schedule buttons
+                        sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+                        for (let button of sampleButtons) {
+                            button.style.display = 'none'; // Hide the buttons if no program is selected
+                        }
                     }
+
                 }
-            } else {
-                // Hide the sample schedule buttons if no program is selected
-                const sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
-                for (let button of sampleButtons) {
-                    button.style.display = 'none'; // Hide the buttons if no program is selected
-                }
-            }
+            } 
         });
     });
 }

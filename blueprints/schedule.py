@@ -196,42 +196,57 @@ def import_schedule():
     return jsonify({"success": True}), 201
 
 
-# Route for loading degree and sample schedule id into session variables
+# Route for loading degree and sample schedule id into session variables and redirecting to planning page
 @schedule_bp.route('/load_sample_schedule/<int:schedule_id>', methods=['GET'])
 @login_required
 def load_sample_schedule(schedule_id):
     degree = session.get('degree')
-    connection = get_db_connection(degree)
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT degree FROM sample_schedules WHERE schedule_id = %s', (schedule_id,))
-    schedule = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    if schedule:
-        session['schedule_id'] = 0
-        session['sample_schedule_id'] = schedule_id
-        session['degree'] = schedule['degree']
-        courses_selected = []
-        return redirect(url_for('courses.planner'))
-    else:
-        return 'Sample Schedule not found', 404
+    session['schedule_id'] = 0
+    session['sample_schedule_id'] = schedule_id
+    session['degree'] = degree
+    global courses_selected
+    courses_selected = []
+    return redirect(url_for('courses.planner'))
 
 
-# Route for getting all the sample schedules and their courses
+
+# Route for getting all the sample schedules of a specific degree
 @schedule_bp.route('/api/get_sample_schedules', methods=['GET'])
 @login_required
 def get_sample_schedules():
     degree = request.args.get('degree')
-    connection = get_db_connection(degree)
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
-        FROM sample_schedules s
-        JOIN sample_schedule_courses sc ON s.schedule_id = sc.schedule_id
-    ''')
-    schedules = cursor.fetchall()
-    connection.close()
+    try:
+        connection = get_db_connection(degree)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute('''
+            SELECT s.schedule_id, s.schedule_name, s.degree
+            FROM sample_schedules s
+        ''')
+        schedules = cursor.fetchall()
+        connection.close()
+    except:
+        return jsonify({"error": "sample schedule not available"}), 404
+
+    return jsonify(schedules)
+
+
+# Route for getting specific sample schedule used in script.js for populating schedule
+@schedule_bp.route('/api/get_sample_schedule/<int:schedule_id>', methods=['GET'])
+@login_required
+def get_sample_schedule(schedule_id):
+    degree = session.get('degree')
+    try:
+        connection = get_db_connection(degree)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute('''
+            SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
+            FROM sample_schedules s
+            JOIN sample_schedule_courses sc ON s.schedule_id = sc.schedule_id
+        ''')
+        schedules = cursor.fetchall()
+        connection.close()
+    except:
+        return jsonify({"error": "sample schedule not available"}), 404
 
     schedules_dict = {}
     for row in schedules:
@@ -248,25 +263,11 @@ def get_sample_schedules():
             'year': row['year']
         })
 
-        session[f'sample_schedule {row['schedule_id']}'] = schedules_dict[row['schedule_id']]
-
-    return jsonify(schedules_dict)
-
-
-# Route for getting specific sample schedule
-@schedule_bp.route('/api/get_sample_schedule/<int:schedule_id>', methods=['GET'])
-@login_required
-def get_sample_schedule(schedule_id):
-    schedule = session.get(f'sample_schedule {schedule_id}')
-
-    if not schedule:
-        return jsonify({"error": "Sample Schedule not found"}), 404
-
     schedule_data = {
         'sample_schedule_id': schedule_id,
-        'schedule_name': schedule['schedule_name'],
-        'degree': schedule['degree'],
-        'courses': schedule['courses']
+        'schedule_name': schedules_dict[schedule_id]['schedule_name'],
+        'degree': schedules_dict[schedule_id]['degree'],
+        'courses': schedules_dict[schedule_id]['courses']
     }
 
     return jsonify(schedule_data)
