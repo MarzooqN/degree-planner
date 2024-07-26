@@ -16,7 +16,8 @@ def planner():
     global courses_selected
     courses_selected = []
     schedule_id = session.get('schedule_id')
-    return render_template('index.html', schedule_id=schedule_id, prof=prof) 
+    sample_schedule_id = session.get('sample_schedule_id')
+    return render_template('index.html', schedule_id=schedule_id, sample_schedule_id=sample_schedule_id, prof=prof) 
 
 
 #Route for getting courses and their prerequisties 

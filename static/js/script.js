@@ -5,12 +5,19 @@ let selectedCourses = [];
 let courseData = [];
 let completedCourses = [];
 let requirementsData = {};
+let userMajor;
 const scheduleId = parseInt(document.getElementById('schedule-id').value);
+const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
 const selectListDict = {}
 
 let loadingSchedule = false;
 if(scheduleId > 0){
     loadingSchedule = true;
+}
+
+let loadingSampleSchedule = false;
+if(sampleScheduleId > 0){
+    loadingSampleSchedule = true;
 }
 
 
@@ -88,6 +95,8 @@ async function fetchAllData() {
     openModal(waitModal);
 
     const scheduleId = parseInt(document.getElementById('schedule-id').value);
+    const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
+
     await fetchCourseData();
 
     populateCourseSelectOptions();
@@ -97,6 +106,8 @@ async function fetchAllData() {
 
     if (scheduleId > 0){
         await loadSavedSchedule(scheduleId);
+    } else if (sampleScheduleId > 0) {
+        await loadSampleSchedule(sampleScheduleId);
     } else {
         closeModal(waitModal);
     }
@@ -318,6 +329,19 @@ async function loadSavedSchedule(scheduleId) {
     }
 }
 
+/*
+Function to load a sample schedule
+*/
+async function loadSampleSchedule(sampleScheduleId) {
+    try {
+        const response = await fetch(`/api/get_sample_schedule/${sampleScheduleId}`);
+        const schedule = await response.json();
+        populateSchedule(schedule);
+    } catch (e) {
+        console.error('Error loading sample schedule:', e);
+    }
+}
+
 async function populateSchedule(schedule) {
 
     const waitModal = document.getElementById('waitModal');
@@ -367,7 +391,7 @@ async function fetchUserMajor() {
         const data = await response.json();
         console.log(data)
         if (data.major) {
-            window.userMajor = data.major;
+            userMajor = data.major;
         } else {
             console.error('Major not found.');
         }
@@ -699,6 +723,7 @@ function createPrerequisiteList(courseId) {
 }
 
 
+
 /*
 Function to update requirements section 
 */
@@ -872,18 +897,24 @@ function addSemester(term = null, year = null) {
         removeSpringButtons();
     }
     
-    if(semesterCount == 0){
-        semesterNum++;
-    }
-
     if (year){
         semesterNum = year;
+    }
+
+    if (term){
+        semesterCount = semesters.indexOf(term);
+    }
+
+    if(semesterCount == 0){
+        semesterNum++;
     }
 
     semesterCount++;
     if(semesterCount % 3 == 0){
         semesterCount = 0;
     }
+
+
 
 }
 
@@ -951,24 +982,26 @@ function addInternship(){
     //Creates Big Text saying summer internship 
     addInternshipText(`${semesterTerm}`, semesterYear);
 
-    const major = window.userMajor;
-
-    const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
-    const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
-
-    const indeedButton = document.createElement('button');
-    indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
-    indeedButton.onclick = () => {
-        window.open(indeedUrl, '_blank');
-    };
-    semesterRow.appendChild(indeedButton);
-
-    const linkedinButton = document.createElement('button');
-    linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
-    linkedinButton.onclick = () => {
-        window.open(linkedinUrl, '_blank');
-    };
-    semesterRow.appendChild(linkedinButton);
+    if(userMajor){
+        const major = userMajor;
+    
+        const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
+        const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
+    
+        const indeedButton = document.createElement('button');
+        indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
+        indeedButton.onclick = () => {
+            window.open(indeedUrl, '_blank');
+        };
+        semesterRow.appendChild(indeedButton);
+    
+        const linkedinButton = document.createElement('button');
+        linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
+        linkedinButton.onclick = () => {
+            window.open(linkedinUrl, '_blank');
+        };
+        semesterRow.appendChild(linkedinButton);
+    }
 
     removeSpringButtons();
 
@@ -1054,9 +1087,11 @@ async function removeSemester() {
     updateSemesterDropdown();
     updateRequirementFulfillment();
 
-    const totalCreditsHeader = document.getElementById(`totalCredits`);
-    totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
-    totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
+    if (credits){
+        const totalCreditsHeader = document.getElementById(`totalCredits`);
+        totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
+        totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
+    }
 }
 
 /*
@@ -1171,10 +1206,7 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
         selectList.value = courseID;
         await courseChange(selectList, semesterTerm, semesterNum, courseBox.id)
         newSelect.update();
-
     }
-
-
 }
 
 /*
@@ -1310,7 +1342,6 @@ function checkCourse(courseID, semesterTerm, semesterNum, selectElement){
 
     //Get course prerequisites and check if prereq already completed
     const requirements = selectedCourse.prerequisites;
-    console.log(requirements);
 
     // Separate prerequisites and corequisites
     const prerequisites = requirements.filter(req => req.type === 'prerequisite');

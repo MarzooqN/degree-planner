@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchSchedules();
+    setupProgramChangeListener();
 });
 
 async function fetchSchedules() {
@@ -164,3 +165,74 @@ async function deleteSchedule(scheduleId){
 function logout() {
     window.location.href = '/logout';
 }
+
+async function fetchSampleSchedules(degree) {
+    try {
+        const response = await fetch(`/api/get_sample_schedules?degree=${degree}`);
+        const schedules = await response.json();
+        console.log(schedules)
+        return schedules;
+    } catch (e) {
+        console.error('Error fetching sample schedules:', e);
+    }
+}
+
+function displaySampleSchedules(schedules) {
+    const sampleScheduleContainer = document.getElementById('sample-schedule-container');
+    sampleScheduleContainer.innerHTML = '';  // Clear any existing content
+
+    for (const [sampleScheduleId, schedule] of Object.entries(schedules)) {
+        const loadButton = document.createElement('button');
+        const loadSpan = document.createElement('span');
+        loadSpan.textContent = schedule.schedule_name;
+        loadButton.appendChild(loadSpan);
+        loadButton.style.display = 'block'; 
+        loadButton.onclick = () => loadSampleSchedule(schedule.schedule_id);
+
+        sampleScheduleContainer.appendChild(loadButton);
+    }
+}
+
+function loadSampleSchedule(sampleScheduleId) {
+    window.location.href = `/load_sample_schedule/${sampleScheduleId}`;
+}
+
+function setupProgramChangeListener() {
+    document.querySelectorAll('[id^="program"]').forEach(programSelect => {
+        programSelect.addEventListener('change', async (event) => {
+
+            // Hide the sample schedule buttons 
+            let sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+            for (let button of sampleButtons) {
+                button.style.display = 'none'; // Hide the buttons initially
+            }
+
+            if (event.target.value !== '') {
+
+                const form = event.target.closest('form');
+                if (form) {
+                    const formData = new FormData(form);
+                    const college = formData.get('college');
+                    const major = formData.get('major').split(" ")[0];
+                    const program = formData.get('program');
+
+                    const degree = `${college}_${major}_${program}`;
+                    // Fetch and display the sample schedules
+                    const schedules = await fetchSampleSchedules(degree);
+
+                    if (!schedules.error){
+                        displaySampleSchedules(schedules);
+                    } else {
+                        // Show the sample schedule buttons
+                        sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
+                        for (let button of sampleButtons) {
+                            button.style.display = 'none'; // Hide the buttons if no program is selected
+                        }
+                    }
+
+                }
+            } 
+        });
+    });
+}
+

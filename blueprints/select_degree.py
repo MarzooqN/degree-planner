@@ -20,6 +20,7 @@ def select_major():
         session['degree'] = f'{college}_{major}_{program}'
         session['schedule_id'] = 0
         session['major_name'] = major_name
+        session['sample_schedule_id'] = 0
         courses_selected = []
 
         return redirect(url_for('courses.planner'))
@@ -101,4 +102,8 @@ def get_programs():
 @login_required
 def get_selected_major():
     major = session.get('major_name')
-    return jsonify({"major": major})
+    
+    if major != "None":
+        return jsonify({"major": major})
+    
+    return jsonify({"error": "No major avaliable"})
