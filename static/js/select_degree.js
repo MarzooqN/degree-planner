@@ -204,7 +204,7 @@ function setupProgramChangeListener() {
             // Hide the sample schedule buttons 
             let sampleButtons = document.getElementById('sample-schedule-container').getElementsByTagName('button');
             for (let button of sampleButtons) {
-                button.style.display = 'none'; // Hide the buttons if no program is selected
+                button.style.display = 'none'; // Hide the buttons initially
             }
 
             if (event.target.value !== '') {
@@ -213,10 +213,10 @@ function setupProgramChangeListener() {
                 if (form) {
                     const formData = new FormData(form);
                     const college = formData.get('college');
-                    const major = formData.get('major');
+                    const major = formData.get('major').split(" ")[0];
                     const program = formData.get('program');
-                    
-                    const degree = `${college}_${major}_${program}`
+
+                    const degree = `${college}_${major}_${program}`;
                     // Fetch and display the sample schedules
                     const schedules = await fetchSampleSchedules(degree);
 

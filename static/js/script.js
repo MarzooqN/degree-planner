@@ -5,6 +5,7 @@ let selectedCourses = [];
 let courseData = [];
 let completedCourses = [];
 let requirementsData = {};
+let userMajor;
 const scheduleId = parseInt(document.getElementById('schedule-id').value);
 const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
 const selectListDict = {}
@@ -390,7 +391,7 @@ async function fetchUserMajor() {
         const data = await response.json();
         console.log(data)
         if (data.major) {
-            window.userMajor = data.major;
+            userMajor = data.major;
         } else {
             console.error('Major not found.');
         }
@@ -675,9 +676,9 @@ async function displayRequirements() {
 }
 
 /* 
-Function to create prerequisite list and add to course item
+function to create prerequisite list 
 */
-function createPrerequisiteList(courseId, courseItem) {
+function createPrerequisiteList(courseId) {
     const course = courseData.find(course => course.CourseID === courseId);
     const prereqList = document.createElement('ul');
     prereqList.style.display = 'none'; // Initially hide the prerequisites list
@@ -712,32 +713,6 @@ function createPrerequisiteList(courseId, courseItem) {
                 prereqList.appendChild(groupElem);
             }
         }
-
-        // Append prerequisites list and header to course item
-        const prereqHeader = document.createElement('h4');
-        prereqHeader.style.marginLeft = '20px'; // Indent the header
-        prereqHeader.style.display = 'none'; // Initially hide the header
-        prereqHeader.style.color = '#595959'; // Grey text color
-        courseItem.appendChild(prereqHeader);
-        prereqList.style.marginLeft = '20px'; // Indent the prerequisites
-        prereqList.style.marginBottom = '10px';
-        prereqList.style.color = '#595959'; // Grey text color
-        courseItem.appendChild(prereqList);
-
-        // Add event listener to toggle prerequisites and bold styling
-        courseItem.addEventListener('click', function () {
-            const isHidden = prereqList.style.display === 'none';
-            prereqHeader.style.display = isHidden ? 'block' : 'none';
-            prereqList.style.display = isHidden ? 'block' : 'none';
-
-            // Toggle bold style only on the course item
-            if (isHidden) {
-                courseItem.style.fontWeight = 'bold';
-                prereqList.style.fontWeight = 'normal';
-            } else {
-                courseItem.style.fontWeight = 'normal';
-            }
-        });
     } else {
         const noCourse = document.createElement('li');
         noCourse.textContent = 'Course not found.';
@@ -746,6 +721,7 @@ function createPrerequisiteList(courseId, courseItem) {
 
     return prereqList;
 }
+
 
 
 /*
@@ -1000,24 +976,26 @@ function addInternship(){
     //Creates Big Text saying summer internship 
     addInternshipText(`${semesterTerm}`, semesterYear);
 
-    const major = window.userMajor;
-
-    const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
-    const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
-
-    const indeedButton = document.createElement('button');
-    indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
-    indeedButton.onclick = () => {
-        window.open(indeedUrl, '_blank');
-    };
-    semesterRow.appendChild(indeedButton);
-
-    const linkedinButton = document.createElement('button');
-    linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
-    linkedinButton.onclick = () => {
-        window.open(linkedinUrl, '_blank');
-    };
-    semesterRow.appendChild(linkedinButton);
+    if(userMajor){
+        const major = userMajor;
+    
+        const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
+        const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
+    
+        const indeedButton = document.createElement('button');
+        indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
+        indeedButton.onclick = () => {
+            window.open(indeedUrl, '_blank');
+        };
+        semesterRow.appendChild(indeedButton);
+    
+        const linkedinButton = document.createElement('button');
+        linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
+        linkedinButton.onclick = () => {
+            window.open(linkedinUrl, '_blank');
+        };
+        semesterRow.appendChild(linkedinButton);
+    }
 
     removeSpringButtons();
 
@@ -1103,9 +1081,11 @@ async function removeSemester() {
     updateSemesterDropdown();
     updateRequirementFulfillment();
 
-    const totalCreditsHeader = document.getElementById(`totalCredits`);
-    totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
-    totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
+    if (credits){
+        const totalCreditsHeader = document.getElementById(`totalCredits`);
+        totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
+        totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
+    }
 }
 
 /*
@@ -1373,7 +1353,6 @@ function checkCourse(courseID, semesterTerm, semesterNum, selectElement){
 
     //Get course prerequisites and check if prereq already completed
     const requirements = selectedCourse.prerequisites;
-    console.log(requirements);
 
     // Separate prerequisites and corequisites
     const prerequisites = requirements.filter(req => req.type === 'prerequisite');

@@ -102,4 +102,8 @@ def get_programs():
 @login_required
 def get_selected_major():
     major = session.get('major_name')
-    return jsonify({"major": major})
+    
+    if major != "None":
+        return jsonify({"major": major})
+    
+    return jsonify({"error": "No major avaliable"})

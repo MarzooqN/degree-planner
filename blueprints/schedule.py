@@ -20,6 +20,7 @@ def load_schedule(schedule_id):
         session['degree'] = schedule['degree']
         session['prof'] = schedule['prof']
         courses_selected = []
+        session['major_name'] = "None"
         return redirect(url_for('courses.planner'))
     else:
         return 'Schedule not found', 404
@@ -211,6 +212,7 @@ def load_sample_schedule(schedule_id):
     session['degree'] = degree
     global courses_selected
     courses_selected = []
+    session['major_name'] = "None"
     return redirect(url_for('courses.planner'))
 
 
