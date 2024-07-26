@@ -12,11 +12,12 @@ courses_selected = []
 @login_required
 def planner():
     schedule_id = session.get('schedule_id')
+    prof = session.get('prof')
     global courses_selected
     courses_selected = []
     schedule_id = session.get('schedule_id')
     sample_schedule_id = session.get('sample_schedule_id')
-    return render_template('index.html', schedule_id=schedule_id, sample_schedule_id=sample_schedule_id, )
+    return render_template('index.html', schedule_id=schedule_id, sample_schedule_id=sample_schedule_id, prof=prof) 
 
 
 #Route for getting courses and their prerequisties 
@@ -26,7 +27,7 @@ def get_courses():
     connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
+        SELECT c.CourseID, c.CourseName, c.Credits, c.available_semesters, p.RequirementID, p.PrerequisiteGroup, p.Type
         FROM Courses c
         LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
     ''')
@@ -41,6 +42,7 @@ def get_courses():
                 'CourseID': course_id,
                 'CourseName': row['CourseName'],
                 'Credits': row['Credits'],
+                'available_semesters': row['available_semesters'] if row['available_semesters'] else 'AU,SP,SU',
                 'prerequisites': []
             }
         if row['RequirementID']:
@@ -59,7 +61,7 @@ def get_course(course_id):
     connection = get_db_connection('Courses')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT c.CourseID, c.CourseName, c.Credits, p.RequirementID, p.PrerequisiteGroup, p.Type
+        SELECT c.CourseID, c.CourseName, c.Credits, c.available_semesters, p.RequirementID, p.PrerequisiteGroup, p.Type
         FROM Courses c
         LEFT JOIN Prerequisites p ON c.CourseID = p.CourseID
         WHERE c.CourseID = %s
@@ -72,6 +74,7 @@ def get_course(course_id):
             'CourseID': course['CourseID'],
             'CourseName': course['CourseName'],
             'Credits': course['Credits'],
+            'available_semesters': course['available_semesters'] if course['available_semesters'] else 'AU,SP,SU',
             'prerequisites': []
         }
         if course['RequirementID']:
@@ -183,7 +186,7 @@ def get_requirements():
     connection = get_db_connection(degree)
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT r.RequirementName, r.RequirementType, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
+        SELECT r.RequirementName, r.RequirementType, r.required_count, r.RequiredCredits, r.CoursePrefix, r.MinCourseNumber, r.MaxCourseNumber, rc.CourseID, c.CourseName, rc.Credits, rc.CourseGroup
         FROM Requirements r
         LEFT JOIN RequirementCourses rc ON r.RequirementID = rc.RequirementID
         LEFT JOIN Courses.Courses c ON rc.CourseID = c.CourseID
@@ -196,6 +199,7 @@ def get_requirements():
             requirements[req_name] = {
                 'type': row['RequirementType'],
                 'required_credits': row['RequiredCredits'],
+                'required_count': row['required_count'],
                 'course_prefix': row['CoursePrefix'],
                 'min_course_number': row['MinCourseNumber'],
                 'max_course_number': row['MaxCourseNumber'],
@@ -220,6 +224,42 @@ def get_requirements():
             })
     connection.close()
     return jsonify(requirements)
+
+@courses_bp.route('/api/prof-requirements', methods=['GET'])
+@login_required
+def get_prof_requirements():
+    prof = session.get('prof')
+    connection = get_db_connection('DegreeData')
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute(f'''
+        SELECT pp.RequirementName, pp.RequirementType, ppc.CourseID, c.CourseName
+        FROM PreProfessional pp 
+        LEFT JOIN PreProfessionalCourses ppc ON pp.RequirementID = ppc.RequirementID
+        LEFT JOIN Courses.Courses c ON ppc.CourseID = c.CourseID
+        WHERE profession = '{prof}'
+        ORDER BY pp.RequirementName
+    ''')
+    requirements = {}
+    for row in cursor:
+        req_name = row['RequirementName']
+
+        if req_name not in requirements:
+            requirements[req_name] = {
+                'type': row['RequirementType'],
+            }
+
+        if 'courses' not in requirements[req_name]:
+            requirements[req_name]['courses'] = []
+            
+        requirements[req_name]['courses'].append({
+            'CourseID': row['CourseID'],
+            'CourseName': row['CourseName'],
+        })
+
+    connection.close()
+    return jsonify(requirements)
+
+
 
 #Route for getting all completed courses by the user
 @courses_bp.route('/api/completed_courses', methods=['GET'])

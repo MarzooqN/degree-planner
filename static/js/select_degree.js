@@ -28,7 +28,7 @@ async function fetchMajors(college, majorElementId, programElementId) {
 
         majors.forEach(major => {
             const option = document.createElement('option');
-            option.value = major.value;
+            option.value = `${major.value} - ${major.label}`;
             option.textContent = `${major.value} - ${major.label}`;
             majorSelect.appendChild(option);
         });
@@ -43,7 +43,7 @@ async function fetchMajors(college, majorElementId, programElementId) {
 async function fetchPrograms(major, programElementId) {
     const programSelect = document.getElementById(programElementId);
     if (major) {
-        const response = await fetch(`/api/programs?major=${major}`);
+        const response = await fetch(`/api/programs?major=${major.split("-")[0]}`);
         const programs = await response.json();
         programSelect.innerHTML = '<option value="">Select Program</option>';
         programs.forEach(program => {

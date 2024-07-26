@@ -23,7 +23,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Lookup Class Prerequisite</h2>
-            <input type="text" id="courseIDInput" placeholder="Enter Course ID">
+            <input id="courseIDInput" name="courseIDInput" placeholder="Enter Course ID">
             <button id="lookupPrereqSubmit">Submit</button>
             <div id="prerequisiteResult"></div>
         </div>
@@ -88,7 +88,10 @@
             <h2>Semester Planner</h2>
             <div>
                 <h5 id="manualCourseHeading">Manually Add Course</h5>
-                <input type="text" id="manualCourseInput" placeholder="Enter Course ID">
+                <input placeholder="Enter Course ID"id="manualCourseInput" name="manualCourseInput">
+                <datalist id="manualCourseDataList" placeholder="Enter Course ID">
+                    <!-- Options will be dynamically populated -->
+                </datalist>
                 <select id="manualSemesterSelect">
                     <!-- Options will be dynamically populated -->
                 </select>
@@ -108,7 +111,9 @@
 
         <section id="degree-requirements-container">
             <h2>Degree Requirements</h2>
-            <h3 data-credits="0" id="totalCredits">Total Credit Hours: 0</h3>
+            <h3 data-credits="0" id="totalCredits" style="margin: 1px;">Total Credit Hours: 0</h3>
+            <h5 style="margin-top: 5px; ">Click on course to see prerequisites; Drag and Drop course into planner</h5>
+            <!-- <h5 style="margin-top: 5px;">Drag and Drop course into planner</h5> -->
             <div id="degree-requirements">
                 <!-- Degree requirements will be displayed here by JavaScript -->
             </div>
@@ -117,6 +122,7 @@
     </main>
 
     <input type="hidden" id="schedule-id" value="{{ schedule_id }}">
+    <input type ="hidden" id="prof" value="{{ prof }}">
     <input type="hidden" id="sample-schedule-id" value="{{ sample_schedule_id }}">
 
 

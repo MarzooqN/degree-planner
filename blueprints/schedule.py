@@ -10,7 +10,7 @@ schedule_bp = Blueprint('schedule', __name__, template_folder='templates')
 def load_schedule(schedule_id):
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT degree FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
+    cursor.execute('SELECT degree, prof FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
     schedule = cursor.fetchone()
     cursor.close()
     connection.close()
@@ -18,6 +18,7 @@ def load_schedule(schedule_id):
     if schedule:
         session['schedule_id'] = schedule_id
         session['degree'] = schedule['degree']
+        session['prof'] = schedule['prof']
         courses_selected = []
         return redirect(url_for('courses.planner'))
     else:
@@ -30,15 +31,16 @@ def save_schedule():
     data = request.json
     schedule_name = data.get('schedule_name')
     degree = session.get('degree')
+    prof = session.get('prof')
     user_id = current_user.id
 
     connection = get_db_connection('users')
     cursor = connection.cursor()
     try:
         cursor.execute('''
-            INSERT INTO schedules (user_id, schedule_name, degree)
-            VALUES (%s, %s, %s)
-        ''', (user_id, schedule_name, degree))
+            INSERT INTO schedules (user_id, schedule_name, degree, prof)
+            VALUES (%s, %s, %s, %s)
+        ''', (user_id, schedule_name, degree, prof))
         schedule_id = cursor.lastrowid
 
         for course in data.get('courses'):
@@ -63,7 +65,7 @@ def get_schedules():
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
     cursor.execute('''
-        SELECT s.schedule_id, s.schedule_name, s.degree, sc.course_id, sc.semester, sc.year
+        SELECT s.schedule_id, s.schedule_name, s.degree, s.prof, sc.course_id, sc.semester, sc.year
         FROM schedules s
         JOIN schedule_courses sc ON s.schedule_id = sc.schedule_id
         WHERE s.user_id = %s
@@ -77,6 +79,7 @@ def get_schedules():
             schedules_dict[row['schedule_id']] = {
                 'schedule_name': row['schedule_name'],
                 'degree': row['degree'],
+                'prof': row['prof'],
                 'courses': []
             }
         
@@ -106,6 +109,7 @@ def get_schedule(schedule_id):
         'schedule_id': schedule_id,
         'schedule_name': schedule['schedule_name'],
         'degree': schedule['degree'],
+        'prof': schedule['prof'],
         'courses': schedule['courses']
     }
 
@@ -170,6 +174,7 @@ def import_schedule():
     data = request.json
     schedule_name = data.get('schedule_name') + ' - Imported'
     degree = data.get('degree')
+    prof = data.get('prof')
     courses = data.get('courses')
     user_id = current_user.id
 
@@ -177,9 +182,9 @@ def import_schedule():
     cursor = connection.cursor()
     try:
         cursor.execute('''
-            INSERT INTO schedules (user_id, schedule_name, degree)
-            VALUES (%s, %s, %s)
-        ''', (user_id, schedule_name, degree))
+            INSERT INTO schedules (user_id, schedule_name, degree, prof)
+            VALUES (%s, %s, %s, %s)
+        ''', (user_id, schedule_name, degree, prof))
         schedule_id = cursor.lastrowid
 
         for course in courses:

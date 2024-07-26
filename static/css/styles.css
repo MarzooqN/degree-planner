@@ -38,6 +38,12 @@ section {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     margin: 20px;
     flex: 1;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 strong{
@@ -68,6 +74,11 @@ input[type=text], input[type=password] {
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 5px;
+}
+
+#courseIDInput{
+    padding: 10px;
+    border: 1px solid #ccc;
 }
 
 .register-link{
@@ -250,16 +261,15 @@ button:hover span:after {
 .schedule button {
     margin-right: 10px;
 }
-
-/* #schedule-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+/* 
+#schedule-container {
+    animation: fadeIn 1s ease-in-out;
 } */
 
 .schedule div {
     align-items: center;
     display: flex;
+    animation: fadeIn 1s ease-in-out;
 }
 
 .menu {
@@ -374,7 +384,7 @@ button:hover span:after {
 }
 
 #manualCourseInput {
-    width: 100px;
+    width: auto;
 }
 
 #manualCourseBtn {
@@ -405,3 +415,8 @@ button:hover span:after {
     margin-top: 10px;
     padding-left: 20px;
 }
+
+input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}  

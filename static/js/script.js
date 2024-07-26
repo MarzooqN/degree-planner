@@ -30,8 +30,63 @@ document.addEventListener('DOMContentLoaded', (event) => {
     loadedScheduleModalFunctionality();
     newScheduleModalFunctionality();
     prereqModalFunctionality();
+    courseInputEventListeners();
     fetchAllData();
 });
+
+function handleDragOver(e) {
+    e.preventDefault(); // Necessary to allow a drop
+    e.dataTransfer.dropEffect = 'move';
+}
+
+async function handleDrop(e) {
+    e.preventDefault();
+    const courseId = e.dataTransfer.getData('text/plain');
+    const semesterId = e.target.id;
+    const semesterTerm = semesterId.split('-').slice(-2)[0];
+    const semesterYear = semesterId.split('-').slice(-1)[0];
+    
+    if (courseId && semesterId) {
+        await addCourseBox(semesterTerm, parseInt(semesterYear), courseId);
+    }
+}
+
+function courseInputEventListeners(){
+    const prereqInput = document.getElementById('courseIDInput')
+    const manualCourseInput = document.getElementById('manualCourseInput')
+    prereqInput.addEventListener("keyup", (e) =>{
+        // If input value is longer or equal than 4 chars shows courses 
+        if (e.target.value.length >= 4) {
+            prereqInput.setAttribute("list", "manualCourseDataList");
+        } else {
+            prereqInput.setAttribute("list", "");
+        }
+    });
+
+    manualCourseInput.addEventListener("keyup", (e) =>{
+        // If input value is longer or equal than 3 chars shows courses 
+        if (e.target.value.length >= 3) {
+            manualCourseInput.setAttribute("list", "manualCourseDataList");
+        } else {
+            manualCourseInput.setAttribute("list", "");
+        }
+    });
+}
+
+function populateCourseSelectOptions() {
+    const selectElement = document.getElementById('manualCourseDataList');
+
+    const option = document.createElement('option');
+    option.textContent = "Click to Select Course";
+    selectElement.appendChild(option);
+
+    courseData.forEach(course => {
+        const option = document.createElement('option');
+        option.value = course.CourseID;
+        option.textContent = `${course.CourseID} - ${course.CourseName}`;
+        selectElement.appendChild(option);
+    });
+}
 
 async function fetchAllData() {
 
@@ -42,6 +97,8 @@ async function fetchAllData() {
     const sampleScheduleId = parseInt(document.getElementById('sample-schedule-id').value);
 
     await fetchCourseData();
+
+    populateCourseSelectOptions();
     await fetchUserData();
 
     await fetchRequirementsData();
@@ -54,6 +111,7 @@ async function fetchAllData() {
         closeModal(waitModal);
     }
 
+    fetchUserMajor();
     updateRequirementFulfillment();
 }
 
@@ -198,23 +256,18 @@ function prereqModalFunctionality(){
         modal.style.display = 'none';
     }
 
-    //If you click outside of the modal the modal will go away
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    }
 
     //When course id is inputted it will make sure there is a course id present and display the prerequistes
     submitBtn.onclick = function() {
         const courseId = document.getElementById('courseIDInput').value;
+        console.log(courseId);
         if (courseId) {
             displayPrerequisites(courseId);
         } else {
             alert('Please enter a course ID.');
         }
     }
-
+    
 }
 
 /*
@@ -331,6 +384,21 @@ async function populateSchedule(schedule) {
 }
 
 
+async function fetchUserMajor() {
+    try {
+        const response = await fetch('/api/get_major');
+        const data = await response.json();
+        console.log(data)
+        if (data.major) {
+            window.userMajor = data.major;
+        } else {
+            console.error('Major not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching user major:', error);
+    }
+}
+
 /*
 Function to get user data
 */
@@ -367,9 +435,18 @@ Function to get requirement data
 */
 async function fetchRequirementsData() {
     try {
+        prof = document.getElementById('prof').value;
         const response = await fetch(`/api/requirements`);
         const requirements = await response.json();
-        requirementsData = requirements;
+
+        if(prof != 'None'){
+            const response = await fetch(`/api/prof-requirements`)
+            const profReq = await response.json();
+            requirementsData = Object.assign({}, profReq, requirements)
+        } else {
+            requirementsData = requirements;
+        }
+
         console.log(requirementsData)
         await displayRequirements();
     } catch (e) {
@@ -393,7 +470,6 @@ async function fetchCoursesInRange(prefix, min, max) {
 }
 
 
-
 /*
 Function to create requirements section 
 */
@@ -401,11 +477,55 @@ async function displayRequirements() {
     const requirementsDiv = document.getElementById('degree-requirements');
     requirementsDiv.innerHTML = '';  // Clear any existing content
 
-    for (const [reqName, reqData] of Object.entries(requirementsData)) {
+    const groupRequirements = (requirements) => {
+        const foundations = {};
+        const themes = {};
+        const otherRequirements = {};
+
+        for (const [reqName, reqData] of Object.entries(requirements)) {
+            if (reqName.includes('Foundations')) {
+                foundations[reqName] = reqData;
+            } else if (reqName.includes('Themes')) {
+                themes[reqName] = reqData;
+            } else {
+                otherRequirements[reqName] = reqData;
+            }
+        }
+
+        return { foundations, themes, otherRequirements };
+    };
+
+    const createGroupedSection = (sectionName, sectionData) => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'requirement';
+        sectionDiv.id = `requirement-group-${sectionName}`
+        const sectionHeader = document.createElement('h4');
+        sectionHeader.textContent = sectionName;
+        sectionHeader.classList.add('requirement-header');
+        sectionDiv.appendChild(sectionHeader);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'requirement-content';
+        contentDiv.style.display = 'none'; // Initially hide the content
+
+        for (const [reqName, reqData] of Object.entries(sectionData)) {
+            const reqDiv = createRequirementDiv(reqName, reqData);
+            contentDiv.appendChild(reqDiv);
+        }
+
+        sectionDiv.appendChild(contentDiv);
+        sectionHeader.addEventListener('click', () => {
+            contentDiv.style.display = contentDiv.style.display === 'none' ? 'block' : 'none';
+        });
+
+        requirementsDiv.appendChild(sectionDiv);
+    };
+
+    const createRequirementDiv = (reqName, reqData) => {
         const reqDiv = document.createElement('div');
         reqDiv.className = 'requirement';
         reqDiv.id = `requirement-${reqName.replace(/ /g, '-')}`;
-        
+
         const header = document.createElement('h4');
         header.textContent = reqName;
         header.classList.add('requirement-header');
@@ -415,91 +535,144 @@ async function displayRequirements() {
         contentDiv.className = 'requirement-content';
 
         if (reqData.type === 'some_courses') {
-            for (const [group, courses] of Object.entries(reqData.groups)) {
-                const groupHeader = document.createElement('h5');
-                groupHeader.textContent = `Group ${group} - Select 1 from this group`;
-                contentDiv.appendChild(groupHeader);
-
-                const ul = document.createElement('ul');
-                courses.forEach(course => {
-                    const li = document.createElement('li');
-                    li.textContent = `${course.CourseID} - ${course.CourseName}`;
-                    li.setAttribute('data-course-id', course.CourseID); // Unique identifier
-                    li.style.cursor = 'pointer'; // Change cursor to pointer
-                    ul.appendChild(li);
-
-                    // Add prerequisites
-                    createPrerequisiteList(course.CourseID, li, ul);
-                });
-                contentDiv.appendChild(ul);
-            }
+            appendGroupCourses(contentDiv, reqData.groups);
+        } else if (reqData.type === 'pick_courses'){
+            header.textContent += ` - Pick ${reqData.required_count} Courses`;
+            appendCoursesList(contentDiv, reqData.courses);
         } else if (reqData.type === 'credit_hours' && reqData.course_prefix && reqData.min_course_number && reqData.max_course_number) {
-            const courses = await fetchCoursesInRange(reqData.course_prefix, reqData.min_course_number, reqData.max_course_number);
-            reqData.courses = courses
-            header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
-            const dynamicCoursesBtn = document.createElement('button');
-            dynamicCoursesBtn.textContent = 'View Eligible Courses';
-            dynamicCoursesBtn.onclick = () => {
-                //TODO: Change this to modal 
-
-                const modal = document.getElementById('validCoursesModal');
-                const validCourses = document.getElementById('validCourses');
-                validCourses.innerHTML = ''
-                courses.forEach(course => {
-                    const li = document.createElement('li');
-                    li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
-                    li.setAttribute('data-course-id', course.CourseID); // Unique identifier
-                    li.style.cursor = 'pointer'; // Change cursor to pointer
-                    validCourses.appendChild(li);
-
-                    // Add prerequisites
-                    createPrerequisiteList(course.CourseID, li, validCourses);
-                });
-
-                openModal(modal);
-                
-            };
-            contentDiv.appendChild(dynamicCoursesBtn);
+            fetchCoursesInRange(reqData.course_prefix, reqData.min_course_number, reqData.max_course_number).then(courses => {
+                reqData.courses = courses;
+                header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`;
+                const dynamicCoursesBtn = createDynamicCoursesButton(courses);
+                contentDiv.appendChild(dynamicCoursesBtn);
+            });
         } else if (reqData.type === 'credit_hours') {
-            header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`
-            const ul = document.createElement('ul');
-            reqData.courses.forEach(course => {
-                const li = document.createElement('li');
-                li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
-                li.setAttribute('data-course-id', course.CourseID); // Unique identifier
-                li.style.cursor = 'pointer'; // Change cursor to pointer
-                ul.appendChild(li);
-
-                // Add prerequisites
-                createPrerequisiteList(course.CourseID, li, ul);
-            });
-            contentDiv.appendChild(ul);
+            header.textContent += ` - Complete ${reqData.required_credits} Credit Hours`;
+            if (reqData.courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(reqData.courses);
+                contentDiv.appendChild(courseBtn);
+            } else {
+                appendCoursesList(contentDiv, reqData.courses);
+            }
         } else {
-            const ul = document.createElement('ul');
-            reqData.courses.forEach(course => {
-                const li = document.createElement('li');
-                li.textContent = `${course.CourseID} - ${course.CourseName}`;
-                li.setAttribute('data-course-id', course.CourseID); // Unique identifier
-                li.style.cursor = 'pointer'; // Change cursor to pointer
-                ul.appendChild(li);
-
-                // Add prerequisites
-                createPrerequisiteList(course.CourseID, li, ul);
-            });
-            contentDiv.appendChild(ul);
+            if (reqData.courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(reqData.courses);
+                contentDiv.appendChild(courseBtn);
+            } else {
+                appendCoursesList(contentDiv, reqData.courses);
+            }
         }
 
         contentDiv.style.display = 'none'; // Initially hide the content
         reqDiv.appendChild(contentDiv);
 
-        requirementsDiv.appendChild(reqDiv);
-
         header.addEventListener('click', () => {
             contentDiv.style.display = contentDiv.style.display === 'none' ? 'block' : 'none';
         });
+
+        return reqDiv;
+    };
+
+    const appendGroupCourses = (contentDiv, groups) => {
+        for (const [group, courses] of Object.entries(groups)) {
+            const groupHeader = document.createElement('h5');
+            groupHeader.textContent = `Group ${group} - Select 1 from this group`;
+            // groupHeader.classList.add('requirement-header');
+            contentDiv.appendChild(groupHeader);
+
+            const ul = document.createElement('ul');
+            if (courses.length > 10){
+                const courseBtn = createDynamicCoursesButton(courses);
+                ul.appendChild(courseBtn);
+            } else {
+                appendCoursesList(ul, courses);
+            }
+            contentDiv.appendChild(ul);
+
+        }
+    };
+
+    const createDynamicCoursesButton = (courses) => {
+        const dynamicCoursesBtn = document.createElement('button');
+        dynamicCoursesBtn.textContent = 'View Eligible Courses';
+        dynamicCoursesBtn.onclick = () => {
+            const modal = document.getElementById('validCoursesModal');
+            const validCourses = document.getElementById('validCourses');
+            validCourses.innerHTML = '';
+            appendCoursesList(validCourses, courses);
+            openModal(modal);
+        };
+        return dynamicCoursesBtn;
+    };
+
+    const appendCoursesList = (parentElement, courses) => {
+        const ul = document.createElement('ul');
+        courses.forEach(course => {
+            const li = document.createElement('li');
+            li.textContent = `${course.CourseID} - ${course.CourseName} (${course.Credits} Credits)`;
+            li.setAttribute('data-course-id', course.CourseID); // Unique identifier
+            li.style.cursor = 'pointer'; // Change cursor to pointer
+            li.draggable = true; // Make the item draggable
+            li.style.paddingBlock = '5px'
+    
+            // Add drag event listeners
+            li.addEventListener('dragstart', handleDragStart);
+    
+            ul.appendChild(li);
+    
+            const prereqHeader = document.createElement('h4');
+            prereqHeader.style.marginLeft = '20px'; // Indent the header
+            prereqHeader.style.display = 'none'; // Initially hide the header
+            prereqHeader.style.color = '#595959'; // Grey text color
+            li.appendChild(prereqHeader);
+    
+            const prereqList = createPrerequisiteList(course.CourseID);
+            prereqList.style.marginLeft = '20px'; // Indent the prerequisites
+            prereqList.style.marginBottom = '10px';
+            prereqList.style.color = '#595959'; // Grey text color
+            li.appendChild(prereqList);
+    
+            li.addEventListener('click', function() {
+                const isHidden = prereqList.style.display === 'none';
+                prereqHeader.style.display = isHidden ? 'block' : 'none';
+                prereqList.style.display = isHidden ? 'block' : 'none';
+    
+                if (isHidden) {
+                    li.style.fontWeight = 'bold';
+                } else {
+                    li.style.fontWeight = 'normal';
+                }
+    
+                ul.querySelectorAll('li').forEach(item => {
+                    if (item !== li) {
+                        item.style.fontWeight = 'normal';
+                    }
+                });
+            });
+        });
+        parentElement.appendChild(ul);
+    };
+    
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.getAttribute('data-course-id'));
+    }
+    
+
+    const { foundations, themes, otherRequirements } = groupRequirements(requirementsData);
+
+    if (Object.keys(foundations).length > 0) {
+        createGroupedSection('Foundations', foundations);
+    }
+
+    if (Object.keys(themes).length > 0) {
+        createGroupedSection('Themes', themes);
+    }
+
+    for (const [reqName, reqData] of Object.entries(otherRequirements)) {
+        const reqDiv = createRequirementDiv(reqName, reqData);
+        requirementsDiv.appendChild(reqDiv);
     }
 }
-
 
 /* 
 Function to create prerequisite list and add to course item
@@ -579,6 +752,8 @@ function createPrerequisiteList(courseId, courseItem) {
 Function to update requirements section 
 */
 function updateRequirementFulfillment() {
+    let foundationsCount = 0
+    let themeCount = 0
     for (const [reqName, reqData] of Object.entries(requirementsData)) {
         const reqDiv = document.getElementById(`requirement-${reqName.replace(/ /g, '-')}`);
         let coursesFulfilled = false;
@@ -590,7 +765,9 @@ function updateRequirementFulfillment() {
         });
 
         if (reqData.type === 'all_courses') {
-            coursesFulfilled = reqData.courses.every(course => {
+            
+            //Check every course and not just return false when 1 course not met
+            coursesFulfilled = reqData.courses.reduce((accumulator, course) => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
                 const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
                 if (isCourseSelected || isCourseCompleted) {
@@ -599,20 +776,28 @@ function updateRequirementFulfillment() {
                         courseLi.classList.add('completed-course');
                     }
                 }
-                return isCourseCompleted || isCourseSelected;
-            });
+                return accumulator && (isCourseCompleted || isCourseSelected); // Accumulate the result
+            }, true);
         } else if (reqData.type === 'credit_hours') {
             const totalCredits = reqData.courses.reduce((sum, course) => {
                 const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
-                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
-                if (isCourseSelected || isCourseCompleted) {
+                
+                // Count occurrences of the course in the selectedCourses array
+                const selectedOccurrences = selectedCourses.filter(selectedCourse => selectedCourse.CourseID === course.CourseID).length;
+            
+                if (selectedOccurrences > 0 || isCourseCompleted) {
                     const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
                     if (courseLi) {
                         courseLi.classList.add('completed-course');
                     }
                 }
-                if (isCourseCompleted || isCourseSelected) {
+                
+                // Add credits for each instance of the selected course
+                if (isCourseCompleted) {
                     return sum + course.Credits;
+                }
+                if (selectedOccurrences > 0) {
+                    return sum + (course.Credits * selectedOccurrences);
                 }
                 return sum;
             }, 0);
@@ -631,12 +816,52 @@ function updateRequirementFulfillment() {
                     return isCourseCompleted || isCourseSelected;
                 })
             );
+        } else if (reqData.type === 'pick_courses') {
+            const pickedCourses = reqData.courses.filter(course => {
+                const isCourseCompleted = completedCourses.some(completedCourse => completedCourse.courseID === course.CourseID);
+                const isCourseSelected = selectedCourses.some(selectedCourse => selectedCourse.CourseID === course.CourseID);
+                if (isCourseSelected || isCourseCompleted) {
+                    const courseLi = reqDiv.querySelector(`[data-course-id="${course.CourseID}"]`);
+                    if (courseLi) {
+                        courseLi.classList.add('completed-course');
+                    }
+                }
+                return isCourseCompleted || isCourseSelected;
+            });
+            coursesFulfilled = pickedCourses.length >= reqData.required_count;
         }
+
 
         if (coursesFulfilled) {
             reqDiv.classList.add('fulfilled');
+
+            if (reqName.includes('Foundations')) {
+                foundationsCount++;
+                foundationsGroupDiv = document.getElementById('requirement-group-Foundations');
+                if(foundationsCount == foundationsGroupDiv.children[1].children.length){
+                    foundationsGroupDiv.classList.add('fulfilled');
+                }
+            } else if (reqName.includes('Themes')) {
+                themeCount++;
+                themesGroupDiv = document.getElementById('requirement-group-Themes');
+                if(themeCount == themesGroupDiv.children[1].children.length){
+                    themesGroupDiv.classList.add('fulfilled');
+                }
+            }
+
+
         } else {
             reqDiv.classList.remove('fulfilled');
+
+            if (reqName.includes('Foundations')) {
+                foundationsCount--;
+                foundationsGroupDiv = document.getElementById('requirement-group-Foundations');
+                foundationsGroupDiv.classList.remove('fulfilled');
+            } else if (reqName.includes('Themes')) {
+                themeCount--;
+                themesGroupDiv = document.getElementById('requirement-group-Themes');
+                themesGroupDiv.classList.remove('fulfilled');
+            }
         }
     }
 }
@@ -671,6 +896,8 @@ function addSemester(term = null, year = null) {
     const semester = document.createElement('div');
     semester.classList.add('semester');
     semester.id = `${semesterTerm}-${semesterYear}`
+    semester.addEventListener('dragover', handleDragOver);
+    semester.addEventListener('drop', handleDrop);
     
     //Creates button to add courses
     const addCourseButton = document.createElement('div');
@@ -773,6 +1000,25 @@ function addInternship(){
     //Creates Big Text saying summer internship 
     addInternshipText(`${semesterTerm}`, semesterYear);
 
+    const major = window.userMajor;
+
+    const indeedUrl = `https://www.indeed.com/jobs?q=20${semesterYear}+${major}+internships&l=`;
+    const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${semesterYear}%20year%20${major}%20internships`;
+
+    const indeedButton = document.createElement('button');
+    indeedButton.textContent = `Click here for ${semesterYear} year ${major} internships on Indeed`;
+    indeedButton.onclick = () => {
+        window.open(indeedUrl, '_blank');
+    };
+    semesterRow.appendChild(indeedButton);
+
+    const linkedinButton = document.createElement('button');
+    linkedinButton.textContent = `Click here for 20${semesterYear} ${major} internships on LinkedIn`;
+    linkedinButton.onclick = () => {
+        window.open(linkedinUrl, '_blank');
+    };
+    semesterRow.appendChild(linkedinButton);
+
     removeSpringButtons();
 
     semesterCount = 0;
@@ -855,6 +1101,7 @@ async function removeSemester() {
     } 
 
     updateSemesterDropdown();
+    updateRequirementFulfillment();
 
     const totalCreditsHeader = document.getElementById(`totalCredits`);
     totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) - credits;
@@ -880,12 +1127,10 @@ function updateSemesterDropdown() {
     });
 }
 
-
 function skipSummer(){
     semesterCount = 0;
     addSemester();
 }
-
 
 /*
 Function to create course list/box
@@ -893,7 +1138,15 @@ Function to create course list/box
 let courseBoxNum = 0;
 async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     const semester = document.getElementById(`${semesterTerm}-${semesterNum}`);
+
+    const selectedCourse = courseData.find(course => course.CourseID === courseID);
+
+    // Check if the course allowed in that specified place
+    if (courseID){
+        if(!checkCourse(courseID, semesterTerm, semesterNum)){return}
+    }
    
+    
     //Creates course box divder
     const courseBox = document.createElement('div');
     courseBox.id = `${semesterTerm}-${semesterNum}-${courseBoxNum}`;
@@ -912,18 +1165,20 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
     option.textContent = "Click to Select Course";
     selectList.appendChild(option);
 
-    // Filters courses based on requirements
+    // Filters courses based on requirements and available semesters
     const filteredCourses = courseData.filter(course => {
-        return Object.values(requirementsData).some(req => {
-            if (req.type === 'credit_hours' || req.type === 'all_courses') {
-                return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
-            } else if (req.type === 'some_courses') {
-                return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
-            }
-            return false;
-        });
+        const availableSemesters = course.available_semesters.split(',');
+        return availableSemesters.includes(semesterTerm) && (
+            Object.values(requirementsData).some(req => {
+                if (req.type === 'credit_hours' || req.type === 'all_courses' || req.type === 'pick_courses') {
+                    return req.courses.some(reqCourse => reqCourse.CourseID === course.CourseID);
+                } else if (req.type === 'some_courses') {
+                    return Object.values(req.groups).some(group => group.some(reqCourse => reqCourse.CourseID === course.CourseID));
+                }
+                return false;
+            })
+        );
     });
-
 
     //Loops through each course in courseData and adds them to list, specifiying course prerequisites in dataset
     for (const course of filteredCourses){
@@ -956,7 +1211,6 @@ async function addCourseBox(semesterTerm, semesterNum, courseID = null) {
 
     if(courseID){
         if(!filteredCourses.some(course => course.CourseID == courseID)){
-            const selectedCourse = courseData.find(course => course.CourseID === courseID);
             const option = document.createElement('option');
             option.value = selectedCourse.CourseID;
             option.textContent = `${selectedCourse.CourseID} - ${selectedCourse.CourseName} - Manually Added`;
@@ -1020,6 +1274,13 @@ async function addManualCourse() {
         return;
     }
 
+    // Check if the course is available in the selected semester
+    const availableSemesters = course.available_semesters.split(',');
+    if (!availableSemesters.includes(semesterTerm)) {
+        alert('Course is not available in the selected semester.');
+        return;
+    }
+
     // Check if the course is already selected
     if (selectedCourses.some(c => c.CourseID === course.CourseID)) {
         alert('Course already selected.');
@@ -1030,8 +1291,6 @@ async function addManualCourse() {
     // Add the course to the UI (you can reuse addCourseBox logic if needed)
     addCourseBox(semesterTerm, parseInt(semesterYear), course.CourseID);
 }
-
-
 
 // Mapping of terms to numerical values for comparison
 const termOrder = {
@@ -1044,7 +1303,6 @@ const termOrder = {
 function convertToComparableValue(term, year) {
     return year * 10 + termOrder[term];
 }
-
 
 /*
 Function to check if user already selected course in the semester 
@@ -1061,12 +1319,7 @@ function checkSemesterForCourse(currentSemesterValue, selectedCourseID){
     return false;
 }
 
-
-/*
-Function to check if user can take this a course and updating database if they can 
-*/
-async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID){
-    
+function checkCourse(courseID, semesterTerm, semesterNum, selectElement){
     //message modal and text
     const modal = document.getElementById('messageModal');
     const modalMessage = document.getElementById('message');
@@ -1074,7 +1327,7 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
     
     //Get selected course 
-    const selectedCourseID = selectElement.value;
+    const selectedCourseID = courseID;
     const selectedCourse = courseData.find(course => course.CourseID === selectedCourseID);
     const newSelectedCourseInstance = {
         CourseID: selectedCourse.CourseID,
@@ -1083,32 +1336,44 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
         Credits: selectedCourse.Credits,
     }
 
+    // Check if the course is available in the selected semester
+    const availableSemesters = selectedCourse.available_semesters.split(',');
+    if (!availableSemesters.includes(semesterTerm)) {
+        modalMessage.textContent = `${selectedCourse.CourseID} only available in ${availableSemesters}`;
+        modalDiv.innerHTML = ''
+        openModal(modal);
+        return false;
+    }
+
     //Check if total credit hours less than 18 
     header = document.getElementById(`${semesterTerm} ${semesterNum}`);
     if (parseFloat(header.dataset.credits) + selectedCourse.Credits > 18){
-        selectElement.value = "Click to Select Course"; // Reset selection
+        if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
         modalMessage.textContent = 'Cannot add course: exceeds 18 credit hour limit';
         modalDiv.innerHTML = ''
         openModal(modal);
-        return;
+        return false;
     }
 
 
     //Converts semester and year into value that can be compared 
     const currentSemesterValue = convertToComparableValue(semesterTerm, semesterNum);
 
-    //Checks if course is already selected in the semester
-    const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
-    if(alreadySelected){
-        selectElement.value = "Click to Select Course"; // Reset selection
-        modalMessage.textContent = 'Cannot add course: Already selected in semester';
-        modalDiv.innerHTML = ''
-        openModal(modal);
-        return;
+    //Checks if course is already selected in the semester (skipping general education courses)
+    if(selectedCourse.CourseID.indexOf('Credit Hour') == -1){
+        const alreadySelected = checkSemesterForCourse(currentSemesterValue, selectedCourseID)
+        if(alreadySelected){
+            if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
+            modalMessage.textContent = 'Cannot add course: Already selected in semester';
+            modalDiv.innerHTML = ''
+            openModal(modal);
+            return false;
+        }
     }
 
     //Get course prerequisites and check if prereq already completed
-    const requirements = JSON.parse(selectElement.options[selectElement.selectedIndex].dataset.prerequisites);
+    const requirements = selectedCourse.prerequisites;
+    console.log(requirements);
 
     // Separate prerequisites and corequisites
     const prerequisites = requirements.filter(req => req.type === 'prerequisite');
@@ -1137,21 +1402,32 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
 
         if (!groupSatisfied) {
             allGroupsSatisfied = false;
-            selectElement.value = "Click to Select Course"; // Reset selection
+            if(selectElement) {selectElement.value = "Click to Select Course"}; // Reset selection
             modalMessage.textContent = `You have not met the prerequisites for ${selectedCourseID}`;
             displayPrerequisites(selectedCourseID, modalDiv)
             openModal(modal);
-            return;
+            return false;
         }
     }
+    return newSelectedCourseInstance;
+}
 
-    //Creates course object to send to database
+/*
+Function to check if user can take this a course and updating database if they can 
+*/
+async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, courseBoxID){
+    
+    const newSelectedCourseInstance = checkCourse(selectElement.value, semesterTerm, semesterNum, selectElement);
+
+    if (!newSelectedCourseInstance){return}
+
+    //Creates course object to send to backend
     const courseSelected = {
         course_box_id: courseBoxID,
-        course_id: selectedCourseID,
+        course_id: newSelectedCourseInstance.CourseID,
         semester: semesterTerm,
         year: semesterNum,
-        credits: selectedCourse.Credits
+        credits: newSelectedCourseInstance.Credits
     };
 
     try {
@@ -1170,15 +1446,15 @@ async function checkAndAddCourse(selectElement, semesterTerm, semesterNum, cours
             newSelectedCourseInstance.year = semesterNum;
             selectedCourses.push(newSelectedCourseInstance)
 
-            selectElement.value = selectedCourseID;
+            selectElement.value = newSelectedCourseInstance.CourseID;
 
             const header = document.getElementById(`${semesterTerm} ${semesterNum}`);
-            header.dataset.credits = parseFloat(header.dataset.credits) + selectedCourse.Credits;
+            header.dataset.credits = parseFloat(header.dataset.credits) + newSelectedCourseInstance.Credits;
             header.textContent = `${semesterTerm} ${semesterNum}: ${header.dataset.credits} Credit Hours`;
 
 
             const totalCreditsHeader = document.getElementById(`totalCredits`);
-            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + selectedCourse.Credits;
+            totalCreditsHeader.dataset.credits = parseFloat(totalCreditsHeader.dataset.credits) + newSelectedCourseInstance.Credits;
             totalCreditsHeader.textContent = `Total Credit Hours: ${totalCreditsHeader.dataset.credits}`;
 
             selectElement.dataset.firstSelected = 'true';
