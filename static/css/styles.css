@@ -22,7 +22,6 @@ header {
     
 }
 
-
 main {
     display: flex;
     justify-content: center;
@@ -41,6 +40,23 @@ section {
     animation: fadeIn 1s ease-in-out;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    main {
+        flex-direction: column;
+    }
+
+    header {
+        padding: 20px;
+    }
+
+    .header-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -55,6 +71,7 @@ form {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
 }
 
 form h2 {
