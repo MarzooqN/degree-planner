@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advisor Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/courses_taken.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/advisor.css') }}">
+    
+</head>
+<body>
+    <header>
+        <h1>Advisor Portal</h1>
+        <div class="header-buttons">
+            <button onclick="logout()"><span>Logout</span></button>
+            <button onclick="homepage()"><span>Home Page</span></button>
+        </div>
+    </header>
+    <main>
+
+        <section id="compare-degrees">
+            <h2>Search for student information</h2>
+            <div id="student-search">
+                <label for="student-username">Student Search:</label>
+                <input type="text" id="username-input" placeholder="Input Student Username">
+                <button type="submit" id="search-username-button"><span>Search</span></button>
+            </div>
+       
+
+            <div id="courses-taken-list">
+                <h3>Courses Taken by Student:</h3>
+                <ul id="courses-taken-ul">
+                    <!-- List of courses taken will be displayed here -->
+                </ul>
+            </div>
+
+        </section>
+
+
+        <section id = "student-schedules">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h2> Students Saved Degree Plans </h2>
+            </div>
+
+            <div id="schedule-container">
+                <!-- Schedules will be displayed here dynamically -->
+            </div>
+
+        </section>
+    </main>
+    <script src="static/js/advisor_portal.js"></script>
+</body>
+</html>

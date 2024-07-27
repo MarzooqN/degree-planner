@@ -1,0 +1,13 @@
+#student-search{
+    display: flex;
+    justify-content: center;
+}
+
+#student-search input{
+    margin-bottom: 0;
+}
+
+#student-search button{
+    margin-top: 0;
+    margin-left: 5px;
+}

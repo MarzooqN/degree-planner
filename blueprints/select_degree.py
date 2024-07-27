@@ -1,6 +1,6 @@
 from functions import get_db_connection
 from flask import jsonify, request, render_template, redirect, url_for, session, Blueprint
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 select_degree_bp = Blueprint('select_degree', __name__, template_folder='templates')
@@ -23,7 +23,7 @@ def select_major():
         courses_selected = []
 
         return redirect(url_for('courses.planner'))
-    return render_template('select_major.html')
+    return render_template('select_major.html', user=current_user)
 
 
 @select_degree_bp.route('/compare_degrees', methods=['GET','POST'])

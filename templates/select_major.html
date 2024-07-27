@@ -40,6 +40,18 @@
 
         <section id="middle-section">
 
+            {% if user.role == 'admin' or user.role == 'advisor' %}
+            <section id="advisor-portal">
+                <form method="GET" action="/advisor_portal">
+                    <h2>Advisor Portal: </h2>
+                    <button type="submit">
+                        <span>Go to Advisor Portal</span> 
+                    </button>
+                </form>
+            </section>
+            {% endif %}
+
+
             <section id="compare-degrees">
                 <form method="GET" action="{{ url_for('select_degree.compare_degrees')}}">
                     <h2>Compare Degrees: </h2>

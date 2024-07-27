@@ -135,7 +135,7 @@ def delete_schedule(schedule_id):
     connection.commit()
     
     connection.close()
-    return render_template('select_major.html')
+    return render_template('select_major.html', user=current_user)
 
 #Route for updating a schedule
 @schedule_bp.route('/api/update_schedule/<int:schedule_id>', methods=['POST'])

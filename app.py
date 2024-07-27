@@ -1,5 +1,5 @@
 from flask import Flask, render_template, session, request, redirect, url_for
-from flask_login import LoginManager, login_required, UserMixin, login_user
+from flask_login import LoginManager, login_required, UserMixin, login_user, current_user
 from functions import get_db_connection
 from werkzeug.security import check_password_hash
 from blueprints import courses, login_file, schedule, select_degree, advisor
@@ -19,10 +19,11 @@ app.register_blueprint(advisor.advisor_bp)
 
 #Class for User
 class User(UserMixin):
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, password, role):
         self.id = id
         self.username = username
         self.password = password
+        self.role = role
 
 #Loading in the user/creating user object from database
 @login_manager.user_loader
@@ -34,7 +35,7 @@ def load_user(user_id):
     cursor.close()
     connection.close()
     if user_data:
-        return User(id = user_data['userID'], username=user_data['username'], password=user_data['password'])
+        return User(id = user_data['userID'], username=user_data['username'], password=user_data['password'], role=user_data['role'])
     return None
 
 #Route for logging in user
@@ -51,7 +52,7 @@ def login():
         connection.close()
 
         if user_data and check_password_hash(user_data['password'], password):
-            user = User(id=user_data['userID'], username=user_data['username'], password=user_data['password'])
+            user = User(id=user_data['userID'], username=user_data['username'], password=user_data['password'], role=user_data['role'])
             login_user(user)
             return redirect(url_for('select_degree.select_major'))
         else:
@@ -63,7 +64,7 @@ def login():
 @app.route('/', methods=['POST', 'GET'])
 @login_required
 def index():
-    return render_template('select_major.html')
+    return render_template('select_major.html', user=current_user)
 
 
 
