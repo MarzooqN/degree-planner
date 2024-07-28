@@ -49,7 +49,7 @@
             <h2>Your Saved Degree Plans</h2>
             <div class="buttons-container">
                 <button class="resize-button" onclick="document.getElementById('importScheduleInput').click();"><span>Import Plan</span></button>
-                <button class="resize-button" onclick="openComparePlansModal()"><span>Compare Saved Plans</span></button>
+                <button class="resize-button" onclick="checkAndOpenComparePlansModal()"><span>Compare Saved Plans</span></button>
                 <input type="file" id="importScheduleInput" style="display:none" onchange="importSchedule(event)">
             </div>
             <div id="schedule-container">
@@ -68,7 +68,7 @@
             <button id="compare-button">Compare</button>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/compare_plans.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/select_degree.js') }}"></script>
 </body>
 </html>

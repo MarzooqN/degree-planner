@@ -572,8 +572,6 @@ function createPrerequisiteList(courseID) {
 }
 
 
-
-
 /* 
 function to create prerequisite list 
 */

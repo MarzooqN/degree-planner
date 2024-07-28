@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchSchedules();
+    document.getElementById('compare-button').addEventListener('click', comparePlans);
 });
 
 async function fetchSchedules() {
@@ -96,6 +97,8 @@ function displaySchedules(schedules) {
         scheduleDiv.appendChild(buttonDiv);
         scheduleContainer.appendChild(scheduleDiv);
     }
+
+    populatePlansSelection(schedules);
 }
 
 async function exportSchedule(scheduleId) {
@@ -144,11 +147,6 @@ async function importSchedule(event) {
     }
 }
 
-
-function loadSchedule(scheduleId) {
-    window.location.href = `/load_schedule/${scheduleId}`;
-}
-
 async function deleteSchedule(scheduleId){
     try {
         const response = await fetch(`/api/delete_schedule/${scheduleId}`);
@@ -159,6 +157,69 @@ async function deleteSchedule(scheduleId){
     }
 
 }
+
+function checkAndOpenComparePlansModal() {
+    const numberOfPlans = document.getElementById('schedule-container').children.length;
+    if (numberOfPlans < 2) {
+        alert('You need at least 2 degree plans to compare.');
+    } else {
+        openComparePlansModal();
+    }
+}
+
+function openComparePlansModal() {
+    document.getElementById('comparePlansModal').style.display = 'block';
+}
+
+function closeComparePlansModal() {
+    document.getElementById('comparePlansModal').style.display = 'none';
+}
+
+async function populatePlansSelection(schedules) {
+   
+    const plansSelection = document.getElementById('plans-selection');
+    plansSelection.innerHTML = '';
+
+    for (let i = 1; i < 3; i++) {
+        
+        const select = document.createElement('select');
+        select.id = `compare-schedule-${i}`
+        select.style.marginBlock = '5px';
+        for (const [scheduleId, schedule] of Object.entries(schedules)){
+            const option = document.createElement('option');
+            
+            option.value = scheduleId;
+            option.textContent = schedule.schedule_name;
+
+            select.appendChild(option);
+        };
+        
+        plansSelection.appendChild(select);
+    }
+}
+
+async function comparePlans() {
+    
+    const scheduleId1 = document.getElementById('compare-schedule-1').value;
+    const scheduleId2 = document.getElementById('compare-schedule-2').value;
+
+    const schedules = JSON.parse(sessionStorage.getItem('schedules'));
+    const schedule1 = schedules[scheduleId1];
+    const schedule2 = schedules[scheduleId2];
+
+    if (schedule1 && schedule2) {
+        sessionStorage.setItem('schedule1', JSON.stringify(schedule1));
+        sessionStorage.setItem('schedule2', JSON.stringify(schedule2));
+        window.location.href = '/compare_plans';
+    } else {
+        alert('One or both schedules not found.');
+    }
+}
+
+function loadSchedule(scheduleId) {
+    window.location.href = `/load_schedule/${scheduleId}`;
+}
+
 
 function logout() {
     window.location.href = '/logout';
