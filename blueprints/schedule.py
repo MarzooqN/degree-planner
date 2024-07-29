@@ -10,7 +10,10 @@ schedule_bp = Blueprint('schedule', __name__, template_folder='templates')
 def load_schedule(schedule_id):
     connection = get_db_connection('users')
     cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT degree, prof FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
+    if current_user.role not in ['advisor', 'admin']:
+        cursor.execute('SELECT degree, prof FROM schedules WHERE schedule_id = %s AND user_id = %s', (schedule_id, current_user.id))
+    else: 
+       cursor.execute('SELECT degree, prof FROM schedules WHERE schedule_id = %s', (schedule_id,)) 
     schedule = cursor.fetchone()
     cursor.close()
     connection.close()
